@@ -1053,11 +1053,22 @@
             const responseData = await response.clone().json();
             if (responseData._backupCookies) {
               localStorage.setItem('luogu_backup_cookies', responseData._backupCookies);
-              console.log('💾 Cookie备份已保存到localStorage');
+              console.log('💾 Cookie备份已保存到localStorage:', responseData._backupCookies.substring(0, 20) + '...');
+            } else {
+              console.log('ℹ️ 响应中没有Cookie备份信息');
             }
           } catch (e) {
             // 如果不是JSON响应，忽略Cookie备份处理
+            console.log('ℹ️ 非JSON响应，跳过Cookie备份处理');
           }
+        }
+        
+        // 🎯 额外检查：显示当前localStorage中的Cookie备份状态
+        const currentBackup = localStorage.getItem('luogu_backup_cookies');
+        if (currentBackup) {
+          console.log('📋 当前localStorage中的Cookie备份:', currentBackup.substring(0, 20) + '...');
+        } else {
+          console.log('❌ localStorage中没有Cookie备份');
         }
         
         return response;
