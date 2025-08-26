@@ -1335,22 +1335,69 @@
             try {
                 console.log(`🔑 获取题目 ${pid} 的CSRF令牌`);
                 
-                // 直接请求题目页面获取CSRF令牌
+                // 请求题目页面的HTML内容（不使用API格式）
                 const result = await proxyLuoguAPI(`/problem/${pid}`, {
-                    method: 'GET'
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                        // 移除API专用头部，请求HTML页面
+                        'x-lentille-request': undefined
+                    }
                 });
                 
-                // 从HTML中提取CSRF令牌
+                console.log('🔍 API返回的数据结构:', {
+                    hasData: !!result.data,
+                    dataType: typeof result.data,
+                    dataLength: result.data ? result.data.length : 0,
+                    keys: Object.keys(result)
+                });
+                
+                // 获取HTML内容
+                let htmlContent = '';
+                
                 if (result.data && typeof result.data === 'string') {
-                    const csrfMatch = result.data.match(/name="csrf-token"\s+content="([^"]+)"/);
-                    if (csrfMatch) {
-                        const csrfToken = csrfMatch[1];
-                        console.log('✅ 成功获取CSRF令牌:', csrfToken.substring(0, 20) + '...');
-                        return csrfToken;
-                    }
+                    htmlContent = result.data;
+                } else if (result.currentData && typeof result.currentData === 'string') {
+                    htmlContent = result.currentData;
+                } else if (typeof result === 'string') {
+                    htmlContent = result;
                 }
                 
-                throw new Error('无法从题目页面提取CSRF令牌');
+                if (!htmlContent) {
+                    console.log('❌ 未获取到HTML内容，尝试使用当前页面的CSRF令牌...');
+                    // 如果无法获取HTML，尝试使用当前页面已有的CSRF令牌
+                    const existingToken = document.querySelector('meta[name="csrf-token"]');
+                    if (existingToken) {
+                        const token = existingToken.getAttribute('content');
+                        console.log('✅ 使用当前页面CSRF令牌:', token.substring(0, 20) + '...');
+                        return token;
+                    }
+                    throw new Error('无法获取HTML内容且当前页面无CSRF令牌');
+                }
+                
+                console.log('📄 HTML内容长度:', htmlContent.length);
+                console.log('📄 HTML内容片段:', htmlContent.substring(0, 200));
+                
+                // 使用正确的CSRF令牌提取模式
+                const csrfMatch = htmlContent.match(/<meta[^>]*name=['"]csrf-token['"][^>]*content=['"]([^'"]+)['"][^>]*>/i);
+                if (csrfMatch && csrfMatch[1]) {
+                    const csrfToken = csrfMatch[1];
+                    console.log('✅ 成功从HTML提取CSRF令牌:', csrfToken.substring(0, 20) + '...');
+                    return csrfToken;
+                }
+                
+                // 备用模式
+                const altMatch = htmlContent.match(/name=['"]csrf-token['"][^>]*content=['"]([^'"]+)['"][^>]*/i);
+                if (altMatch && altMatch[1]) {
+                    const csrfToken = altMatch[1];
+                    console.log('✅ 使用备用模式提取CSRF令牌:', csrfToken.substring(0, 20) + '...');
+                    return csrfToken;
+                }
+                
+                console.log('❌ 无法从HTML中提取CSRF令牌');
+                console.log('🔍 HTML中是否包含csrf:', htmlContent.toLowerCase().includes('csrf'));
+                
+                throw new Error('无法从题目页面HTML提取CSRF令牌');
             } catch (error) {
                 console.error('❌ 获取CSRF令牌失败:', error);
                 throw error;
