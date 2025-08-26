@@ -93,10 +93,14 @@ exports.handler = async (event, context) => {
         // 添加客户端传递的头部
         Object.assign(requestHeaders, clientHeaders);
         
-        // 如果客户端明确请求HTML，移除API专用头部
-        if (clientHeaders && clientHeaders['Accept'] && clientHeaders['Accept'].includes('text/html')) {
+        // 检查是否为HTML请求
+        const isHtmlRequest = (clientHeaders && clientHeaders['Accept'] && clientHeaders['Accept'].includes('text/html')) || 
+                             (requestData.requestType === 'html');
+        
+        if (isHtmlRequest) {
             // 移除API专用头部，请求HTML页面
             delete requestHeaders['x-lentille-request'];
+            requestHeaders['Accept'] = 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8';
             console.log(`🌐 [${clientSessionId}] 请求HTML页面，移除API头部`);
         }
         
