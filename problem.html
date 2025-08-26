@@ -200,13 +200,74 @@
             background: var(--gray-50);
             border: 1px solid var(--gray-200);
             border-radius: 8px;
-            padding: 1rem;
-            overflow-x: auto;
+            padding: 0;
+            overflow: hidden;
             margin: 1rem 0;
             font-family: 'Courier New', monospace;
+            position: relative;
+        }
+
+        .code-block {
+            position: relative;
+            background: var(--gray-50);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: var(--gray-100);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 0.5rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        .code-language {
+            font-weight: 500;
+        }
+
+        .copy-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.25rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .copy-btn:hover {
+            background: var(--gray-700);
+        }
+
+        .copy-btn.copied {
+            background: var(--secondary-color);
+        }
+
+        .code-content {
+            padding: 1rem;
+            overflow-x: auto;
+            background: var(--gray-50);
         }
 
         .problem-description code {
+            background: var(--gray-100);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+
+        /* 行内代码不应用代码块样式 */
+        .problem-description p code,
+        .problem-description li code {
             background: var(--gray-100);
             padding: 0.2rem 0.4rem;
             border-radius: 4px;
@@ -339,6 +400,77 @@
             color: #dc2626;
         }
 
+        /* 用户信息样式 */
+        .user-info {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info.show {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-uid {
+            opacity: 0.8;
+            font-size: 0.875rem;
+        }
+
+        .login-prompt {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: none;
+        }
+
+        .login-prompt.show {
+            display: block;
+        }
+
+        .login-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background: var(--gray-700);
+            color: white;
+            text-decoration: none;
+        }
+
         @media (max-width: 768px) {
             .problem-title {
                 font-size: 1.5rem;
@@ -351,6 +483,15 @@
             .header-container {
                 flex-direction: column;
                 gap: 1rem;
+            }
+            
+            .user-info {
+                padding: 0.75rem;
+            }
+            
+            .user-avatar {
+                width: 40px;
+                height: 40px;
             }
         }
     </style>
@@ -373,7 +514,26 @@
     <!-- Main Content -->
     <main class="main">
         <div class="container">
+            <!-- 用户信息显示 -->
+            <div id="userInfo" class="user-info">
+                <img id="userAvatar" class="user-avatar" src="" alt="用户头像">
+                <div class="user-details">
+                    <div id="userName" class="user-name"></div>
+                    <div id="userUid" class="user-uid"></div>
+                </div>
+            </div>
 
+            <!-- 登录提示 -->
+            <div id="loginPrompt" class="login-prompt">
+                <div>
+                    <i class="fas fa-user-circle" style="font-size: 2rem; color: var(--gray-400); margin-bottom: 0.5rem;"></i>
+                    <p style="margin: 0.5rem 0; color: var(--gray-600);">登录后可以提交代码、查看提交记录等更多功能</p>
+                    <a href="/login.html" class="login-btn">
+                        <i class="fas fa-sign-in-alt"></i>
+                        立即登录
+                    </a>
+                </div>
+            </div>
             
             <div id="loadingStatus" class="loading">
                 <i class="fas fa-spinner"></i>
@@ -682,6 +842,27 @@
                 // 使用marked渲染Markdown
                 let html = marked.parse(content);
                 
+                // 处理代码块，添加复制功能
+                html = html.replace(/<pre><code(?:\s+class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g, function(match, lang, code) {
+                    const language = lang || 'text';
+                    const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                    
+                    return `
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">${language}</span>
+                                <button class="copy-btn" onclick="copyCode('${codeId}')">
+                                    <i class="fas fa-copy"></i>
+                                    复制
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre id="${codeId}"><code>${code}</code></pre>
+                            </div>
+                        </div>
+                    `;
+                });
+                
                 return html;
             } catch (error) {
                 console.warn('Markdown渲染失败，使用简单格式化:', error);
@@ -689,8 +870,28 @@
                 // 降级处理：简单的文本格式化
                 content = content.replace(/\n/g, '<br>');
                 content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
-                content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
-                content = content.replace(/```plain\n([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+                
+                // 处理代码块并添加复制功能
+                content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, function(match, lang, code) {
+                    const language = lang || 'text';
+                    const codeId = 'code-' + Math.random().toString(36).substr(2, 9);
+                    
+                    return `
+                        <div class="code-block">
+                            <div class="code-header">
+                                <span class="code-language">${language}</span>
+                                <button class="copy-btn" onclick="copyCode('${codeId}')">
+                                    <i class="fas fa-copy"></i>
+                                    复制
+                                </button>
+                            </div>
+                            <div class="code-content">
+                                <pre id="${codeId}"><code>${code}</code></pre>
+                            </div>
+                        </div>
+                    `;
+                });
+                
                 content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                 
                 return content;
@@ -717,8 +918,169 @@
             }
         }
 
+        // 复制代码功能
+        function copyCode(codeId) {
+            const codeElement = document.getElementById(codeId);
+            const button = codeElement.closest('.code-block').querySelector('.copy-btn');
+            
+            if (!codeElement) {
+                console.error('代码元素未找到:', codeId);
+                return;
+            }
+
+            const codeText = codeElement.textContent || codeElement.innerText;
+            
+            // 使用现代 Clipboard API
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(codeText).then(() => {
+                    showCopySuccess(button);
+                }).catch(err => {
+                    console.error('复制失败:', err);
+                    fallbackCopyTextToClipboard(codeText, button);
+                });
+            } else {
+                // 降级方案
+                fallbackCopyTextToClipboard(codeText, button);
+            }
+        }
+
+        // 降级复制方案
+        function fallbackCopyTextToClipboard(text, button) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            
+            // 避免滚动到底部
+            textArea.style.top = "0";
+            textArea.style.left = "0";
+            textArea.style.position = "fixed";
+            textArea.style.opacity = "0";
+            
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopySuccess(button);
+                } else {
+                    showCopyError(button);
+                }
+            } catch (err) {
+                console.error('降级复制失败:', err);
+                showCopyError(button);
+            }
+            
+            document.body.removeChild(textArea);
+        }
+
+        // 显示复制成功状态
+        function showCopySuccess(button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> 已复制';
+            button.classList.add('copied');
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.classList.remove('copied');
+            }, 2000);
+        }
+
+        // 显示复制错误状态
+        function showCopyError(button) {
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-times"></i> 复制失败';
+            button.style.background = '#ef4444';
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.style.background = '';
+            }, 2000);
+        }
+
+        // 检查登录状态并显示用户信息
+        function checkLoginStatus() {
+            const userInfo = localStorage.getItem('userInfo');
+            const userInfoDiv = document.getElementById('userInfo');
+            const loginPromptDiv = document.getElementById('loginPrompt');
+            
+            if (userInfo) {
+                try {
+                    const user = JSON.parse(userInfo);
+                    if (user && user.uid && user.name) {
+                        // 显示用户信息
+                        document.getElementById('userName').textContent = user.name;
+                        document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                        
+                        // 设置头像
+                        const avatarImg = document.getElementById('userAvatar');
+                        if (user.avatar) {
+                            avatarImg.src = user.avatar;
+                        } else {
+                            avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
+                        }
+                        
+                        userInfoDiv.classList.add('show');
+                        loginPromptDiv.classList.remove('show');
+                        return true;
+                    }
+                } catch (error) {
+                    console.warn('解析用户信息失败:', error);
+                }
+            }
+            
+            // 未登录状态
+            userInfoDiv.classList.remove('show');
+            loginPromptDiv.classList.add('show');
+            return false;
+        }
+
+        // 代理API调用函数（复用登录页面的逻辑）
+        async function proxyLuoguAPI(path, options = {}) {
+            try {
+                const requestData = {
+                    path: path,
+                    method: options.method || 'GET',
+                    headers: {
+                        'x-luogu-type': 'content-only',
+                        ...options.headers
+                    },
+                    sessionId: 'session_luogu_global_fixed_2025',
+                    ...options
+                };
+
+                // 从localStorage获取Cookie备份
+                const backupCookies = localStorage.getItem('_backupCookies');
+                if (backupCookies) {
+                    requestData.backupCookies = backupCookies;
+                }
+
+                const response = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const result = await response.json();
+                
+                if (result.error) {
+                    throw new Error(result.error);
+                }
+
+                return result;
+            } catch (error) {
+                console.error('API调用失败:', error);
+                throw error;
+            }
+        }
+
         // 页面加载时获取题目ID并加载详情
         document.addEventListener('DOMContentLoaded', function() {
+            // 检查登录状态
+            checkLoginStatus();
+            
             const urlParams = new URLSearchParams(window.location.search);
             const pid = urlParams.get('pid');
             
