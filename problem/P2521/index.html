@@ -633,7 +633,7 @@
       .submit-toggle-btn {
         position: fixed;
         bottom: 2rem;
-        right: 2rem;
+        left: 1rem;
         background: var(--primary-color);
         color: white;
         border: none;
@@ -644,7 +644,7 @@
         cursor: pointer;
         box-shadow: var(--shadow-lg);
         transition: var(--transition);
-        z-index: 1000;
+        z-index: 1001;
       }
       
       .submit-toggle-btn:hover {
@@ -688,7 +688,7 @@
         
         .submit-toggle-btn {
           bottom: 1rem;
-          right: 1rem;
+          left: 1rem;
           width: 50px;
           height: 50px;
           font-size: 1rem;
@@ -1175,17 +1175,17 @@ A国有一个不在 $(0,0)$ 和 $(n,0)$ 的首都。$(0,0),(n,0)$ 和首都这�
         resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       }
       
-      // 提交代码
+      // 提交代码（通过luogu-proxy统一处理）
       async function submitCode() {
         // 检查登录状态
         const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-        if (!userInfo.username) {
-          showSubmitResult('请先登录洛谷账号', 'error');
+        if (!userInfo.uid && !userInfo.username) {
+          showSubmitResult('请先登录洛谷账号才能提交代码！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
           return;
         }
         
         // 获取题目ID
-        problemId = getProblemId();
+        const problemId = getProblemId();
         if (!problemId) {
           showSubmitResult('无法获取题目ID', 'error');
           return;
@@ -1207,53 +1207,50 @@ A国有一个不在 $(0,0)$ 和 $(n,0)$ 的首都。$(0,0),(n,0)$ 和首都这�
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
         
         try {
-          // 确保题目ID为大写格式（洛谷要求）
-          const upperProblemId = problemId.toUpperCase();
-          console.log('🔄 提交时题目ID转换:', problemId, '->', upperProblemId);
-          
-          // 获取题目页面的CSRF令牌
-          showSubmitResult('正在获取题目页面令牌...', 'info');
-          problemCsrfToken = await getProblemCsrfToken(problemId);
-          
-          if (!problemCsrfToken) {
-            throw new Error('无法获取题目页面CSRF令牌');
-          }
-          
           console.log('🚀 开始提交代码...', {
-            problemId: upperProblemId,
+            problemId: problemId,
             language: language,
             codeLength: code.length,
-            csrfToken: problemCsrfToken.substring(0, 10) + '...'
+            user: userInfo.name || userInfo.username || userInfo.uid
           });
-          
-          // 构建提交请求
-          const submitData = {
-            code: code,
-            lang: language,
-            enableO2: false, // 可选：是否启用O2优化
-            verify: '' // 验证码（如果需要）
-          };
           
           showSubmitResult('正在提交代码到洛谷...', 'info');
           
-          // 发送提交请求
-          const response = await proxyLuoguAPI(`/fe/api/problem/submit/${upperProblemId}`, {
+          // 步骤1: 获取题目页面的CSRF令牌
+          console.log('🔍 步骤1: 获取题目页面CSRF令牌...');
+          const csrfToken = await getProblemCsrfToken(problemId);
+          
+          if (!csrfToken) {
+            showSubmitResult('获取CSRF令牌失败，请刷新页面重试', 'error');
+            return;
+          }
+          
+          // 步骤2: 提交代码
+          console.log('🚀 步骤2: 提交代码到洛谷...');
+          const contestId = null; // 可选：竞赛ID，当前设为null
+          const submitPath = `/fe/api/problem/submit/${problemId}${contestId ? `?contestId=${contestId}` : ''}`;
+          
+          const response = await proxyLuoguAPI(submitPath, {
             method: 'POST',
+            body: {
+              code: code,
+              lang: language
+            },
+            csrfToken: csrfToken,
             headers: {
               'Content-Type': 'application/json',
-              'x-csrf-token': problemCsrfToken,
-              'x-luogu-type': 'content-only'
-            },
-            body: submitData
+              'Referer': `https://www.luogu.com.cn/problem/${problemId}`,
+              'Accept': 'application/json, text/plain, */*'
+            }
           });
           
           console.log('📊 提交响应状态:', response.status);
           
           if (response.ok) {
             const result = await response.json();
-            console.log('✅ 提交成功:', result);
+            console.log('✅ 提交响应:', result);
             
-            if (result.rid) {
+            if (result && result.rid) {
               showSubmitResult(`
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                   <i class="fas fa-check-circle"></i>
@@ -1261,6 +1258,9 @@ A国有一个不在 $(0,0)$ 和 $(n,0)$ 的首都。$(0,0),(n,0)$ 和首都这�
                 </div>
                 <div style="margin-top: 0.5rem; font-size: 0.9rem;">
                   <strong>提交记录ID:</strong> ${result.rid}
+                </div>
+                <div style="margin-top: 0.5rem; font-size: 0.9rem;">
+                  <strong>题目:</strong> ${problemId} | <strong>语言:</strong> ${language}
                 </div>
                 <div style="margin-top: 0.5rem;">
                   <a href="https://www.luogu.com.cn/record/${result.rid}" target="_blank" style="color: var(--primary-color); text-decoration: none;">
@@ -1272,11 +1272,12 @@ A国有一个不在 $(0,0)$ 和 $(n,0)$ 的首都。$(0,0),(n,0)$ 和首都这�
               // 清空代码（可选）
               // clearCode();
             } else {
-              showSubmitResult('提交成功，但未返回记录ID', 'info');
+              const errorMsg = result.error || result.message || '提交失败，未知错误';
+              showSubmitResult(`提交失败: ${errorMsg}`, 'error');
             }
           } else {
             const errorData = await response.json().catch(() => ({}));
-            const errorMsg = errorData.errorMessage || errorData.message || `提交失败 (${response.status})`;
+            const errorMsg = errorData.error || errorData.message || `提交失败 (${response.status})`;
             console.error('❌ 提交失败:', response.status, errorData);
             showSubmitResult(`提交失败: ${errorMsg}`, 'error');
           }
