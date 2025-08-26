@@ -1637,7 +1637,19 @@
                 
                 // 第三步：用智能Cookie重新提交
                 console.log('🚀 第三步：智能Cookie重新提交');
-                const smartCookie = `_uid=${realUid}; __client_id=${newClientId}`;
+                
+                // 构造更完整的Cookie，包含洛谷可能需要的所有字段
+                const timestamp = Math.floor(Date.now() / 1000);
+                const smartCookie = [
+                    `_uid=${realUid}`,
+                    `__client_id=${newClientId}`,
+                    `login=${realUid}`,
+                    `C3VjY2Vzc2Z1bGx5IGNyYWNrZWQgdGhlIGNvb2tpZSE==${realUid}`,
+                    `_session=luogu_session_${timestamp}`,
+                    `Path=/`,
+                    `Domain=.luogu.com.cn`
+                ].join('; ');
+                
                 console.log('🧠 智能Cookie:', smartCookie);
                 
                 const retryResult = await fetch('/.netlify/functions/luogu-proxy', {
