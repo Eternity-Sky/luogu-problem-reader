@@ -15,8 +15,3 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
 
-# 重定向设置（可选）
-[[redirects]]
-  from = "/problem"
-  to = "/problem/list/"
-  status = 301
