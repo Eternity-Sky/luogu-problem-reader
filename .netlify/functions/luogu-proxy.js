@@ -96,22 +96,48 @@ exports.handler = async (event, context) => {
         // 调试：输出最终的请求头
         console.log(`🔍 [${clientSessionId}] 最终请求头:`, JSON.stringify(requestHeaders, null, 2));
 
-        // 添加保存的Cookie
-        if (globalCookies[clientSessionId]) {
-            requestHeaders['Cookie'] = globalCookies[clientSessionId];
-            console.log(`🍪 [${clientSessionId}] 使用保存的Cookie:`, globalCookies[clientSessionId]);
+        // 🎯 巧妙的Cookie回传机制：优先使用前端传递的备份Cookie
+        let cookieToUse = null;
+        let cookieSource = '';
+        
+        // 1. 优先使用前端传递的备份Cookie（解决Netlify Functions重启问题）
+        if (requestData.backupCookies) {
+            try {
+                const decryptedCookies = atob(requestData.backupCookies); // 解码base64
+                cookieToUse = decryptedCookies;
+                cookieSource = '前端备份';
+                console.log(`🔄 [${clientSessionId}] 使用前端备份Cookie恢复会话`);
+                
+                // 同时更新内存中的Cookie（为后续请求准备）
+                globalCookies[clientSessionId] = decryptedCookies;
+            } catch (error) {
+                console.log(`⚠️ [${clientSessionId}] 前端备份Cookie解码失败:`, error.message);
+            }
+        }
+        
+        // 2. 如果没有前端备份，尝试使用内存中的Cookie
+        if (!cookieToUse && globalCookies[clientSessionId]) {
+            cookieToUse = globalCookies[clientSessionId];
+            cookieSource = '内存缓存';
+        }
+        
+        // 3. 使用找到的Cookie
+        if (cookieToUse) {
+            requestHeaders['Cookie'] = cookieToUse;
+            console.log(`🍪 [${clientSessionId}] 使用${cookieSource}Cookie:`, cookieToUse);
             
             // 特别针对代码提交请求，添加详细的Cookie调试信息
             if (path.includes('/fe/api/problem/submit/')) {
                 console.log(`🔍 [${clientSessionId}] 代码提交请求Cookie详情:`);
-                console.log(`  - Cookie长度: ${globalCookies[clientSessionId].length}`);
-                console.log(`  - Cookie内容: ${globalCookies[clientSessionId]}`);
-                console.log(`  - 包含_uid: ${globalCookies[clientSessionId].includes('_uid')}`);
-                console.log(`  - 包含__client_id: ${globalCookies[clientSessionId].includes('__client_id')}`);
+                console.log(`  - Cookie来源: ${cookieSource}`);
+                console.log(`  - Cookie长度: ${cookieToUse.length}`);
+                console.log(`  - Cookie内容: ${cookieToUse}`);
+                console.log(`  - 包含_uid: ${cookieToUse.includes('_uid')}`);
+                console.log(`  - 包含__client_id: ${cookieToUse.includes('__client_id')}`);
                 console.log(`  - CSRF Token: ${csrfToken ? csrfToken.substring(0, 10) + '...' : 'null'}`);
             }
         } else {
-            console.log(`❌ [${clientSessionId}] 没有找到保存的Cookie，当前所有会话:`, Object.keys(globalCookies));
+            console.log(`❌ [${clientSessionId}] 没有找到任何可用Cookie，当前所有会话:`, Object.keys(globalCookies));
             console.log(`❌ [${clientSessionId}] 全部Cookie内容:`, JSON.stringify(globalCookies, null, 2));
             
             // 特别检查是否存在相似的sessionId
@@ -184,22 +210,20 @@ exports.handler = async (event, context) => {
             console.log('  - 响应体前500字符:', response.body ? response.body.substring(0, 500) : 'empty');
         }
 
-        // 保存Cookie（如果有Set-Cookie头部）
+        // 保存响应中的Cookie并实现Cookie回传机制
         if (response.headers['set-cookie']) {
-            const cookies = Array.isArray(response.headers['set-cookie']) 
-                ? response.headers['set-cookie'] 
-                : [response.headers['set-cookie']];
+            const cookies = response.headers['set-cookie'];
+            const cookieString = cookies.map(cookie => cookie.split(';')[0]).join('; ');
+            globalCookies[clientSessionId] = cookieString;
+            console.log(`🍪 [${clientSessionId}] 保存Cookie:`, cookieString);
             
-            // 解析并保存Cookie
-            const cookieStrings = cookies.map(cookie => {
-                // 只保留cookie的name=value部分，去掉Path、Domain等属性
-                return cookie.split(';')[0];
-            }).filter(Boolean);
+            // 🎯 巧妙机制：将Cookie编码后返回给前端备份
+            const encodedCookies = btoa(cookieString); // base64编码
+            console.log(`📦 [${clientSessionId}] Cookie已编码准备返回前端备份`);
             
-            if (cookieStrings.length > 0) {
-                globalCookies[clientSessionId] = cookieStrings.join('; ');
-                console.log(`🍪 [${clientSessionId}] 保存Cookie:`, globalCookies[clientSessionId]);
-                console.log(`📊 [${clientSessionId}] 当前所有会话Cookie:`, Object.keys(globalCookies));
+            // 在响应数据中添加编码后的Cookie供前端备份
+            if (responseData && typeof responseData === 'object') {
+                responseData._backupCookies = encodedCookies;
             }
         }
 

@@ -931,24 +931,47 @@ $$(2×3^2 ×4×2+3×2^2 ×4×2+2×4^2 ×3×2)×(1+2+1)=1728$$</p>
           sessionId: sessionId || ensureSessionId()
         };
         
+        // 🎯 巧妙的Cookie回传机制：添加前端备份的Cookie
+        const backupCookies = localStorage.getItem('luogu_backup_cookies');
+        if (backupCookies) {
+          requestData.backupCookies = backupCookies;
+          console.log('📦 使用前端备份Cookie:', backupCookies.substring(0, 50) + '...');
+        }
+        
+        // 添加CSRF令牌（如果提供）
+        if (options.csrfToken) {
+          requestData.csrfToken = options.csrfToken;
+        }
+        
+        // 添加请求体（如果提供）
         if (body) {
           requestData.body = body;
         }
         
-        try {
-          const response = await fetch('/.netlify/functions/luogu-proxy', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(requestData)
-          });
-          
-          return response;
-        } catch (error) {
-          console.error('代理请求失败:', error);
-          throw error;
+        console.log('🔍 API代理请求:', requestData);
+        
+        const response = await fetch('/.netlify/functions/luogu-proxy', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestData)
+        });
+        
+        // 🎯 处理响应中的Cookie备份
+        if (response.ok) {
+          try {
+            const responseData = await response.clone().json();
+            if (responseData._backupCookies) {
+              localStorage.setItem('luogu_backup_cookies', responseData._backupCookies);
+              console.log('💾 Cookie备份已保存到localStorage');
+            }
+          } catch (e) {
+            // 如果不是JSON响应，忽略Cookie备份处理
+          }
         }
+        
+        return response;
       }
       
       // 检查登录状态
