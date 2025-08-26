@@ -1030,38 +1030,54 @@
 
         // 检查登录状态并显示用户信息
         function checkLoginStatus() {
-            const userInfo = localStorage.getItem('userInfo');
+            // 使用正确的localStorage key
+            const userInfoStr = localStorage.getItem('luogu_user_info');
             const userInfoDiv = document.getElementById('userInfo');
             const loginPromptDiv = document.getElementById('loginPrompt');
             
-            if (userInfo) {
+            console.log('🔍 检查登录状态，localStorage中的用户信息:', userInfoStr);
+            
+            if (userInfoStr) {
                 try {
-                    const user = JSON.parse(userInfo);
-                    if (user && user.uid && user.name) {
+                    const user = JSON.parse(userInfoStr);
+                    console.log('📋 解析到的用户信息:', user);
+                    
+                    if (user && (user.uid || user.username)) {
                         // 显示用户信息
-                        document.getElementById('userName').textContent = user.name;
-                        document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                        const displayName = user.name || user.username || `用户${user.uid}`;
+                        document.getElementById('userName').textContent = displayName;
+                        
+                        if (user.uid) {
+                            document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                        } else {
+                            document.getElementById('userUid').textContent = `用户名: ${user.username}`;
+                        }
                         
                         // 设置头像
                         const avatarImg = document.getElementById('userAvatar');
                         if (user.avatar) {
                             avatarImg.src = user.avatar;
-                        } else {
+                        } else if (user.uid) {
                             avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
+                        } else {
+                            // 使用默认头像
+                            avatarImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K';
                         }
                         
                         userInfoDiv.classList.add('show');
                         loginPromptDiv.classList.remove('show');
+                        console.log('✅ 登录状态检查成功，显示用户信息');
                         return true;
                     }
                 } catch (error) {
-                    console.warn('解析用户信息失败:', error);
+                    console.warn('❌ 解析用户信息失败:', error);
                 }
             }
             
             // 未登录状态
             userInfoDiv.classList.remove('show');
             loginPromptDiv.classList.add('show');
+            console.log('❌ 未检测到登录状态，显示登录提示');
             return false;
         }
 
@@ -1079,10 +1095,11 @@
                     ...options
                 };
 
-                // 从localStorage获取Cookie备份
-                const backupCookies = localStorage.getItem('_backupCookies');
+                // 从localStorage获取Cookie备份（使用正确的key）
+                const backupCookies = localStorage.getItem('_backupCookies') || localStorage.getItem('luogu_backup_cookies');
                 if (backupCookies) {
                     requestData.backupCookies = backupCookies;
+                    console.log('🍪 使用Cookie备份进行API调用');
                 }
 
                 const response = await fetch('/.netlify/functions/luogu-proxy', {
