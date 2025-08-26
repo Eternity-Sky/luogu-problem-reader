@@ -727,6 +727,9 @@
                     <button onclick="saveManualCookie()" class="btn btn-warning btn-sm">
                         <i class="fas fa-save"></i> 保存并测试
                     </button>
+                    <button onclick="autoGetCookie()" class="btn btn-success btn-sm" style="margin-left: 10px;">
+                        <i class="fas fa-magic"></i> 自动获取
+                    </button>
                     <button onclick="directSubmit()" class="btn btn-danger btn-sm" style="margin-left: 10px;">
                         <i class="fas fa-rocket"></i> 直接提交
                     </button>
@@ -1466,11 +1469,11 @@
                         'referer': `https://www.luogu.com.cn/problem/${pid}`,
                         'origin': 'https://www.luogu.com.cn'
                     },
-                    body: JSON.stringify({
+                    body: {
                         lang: language,
                         code: code,
                         enableO2: 0
-                    })
+                    }
                 });
                 
                 console.log('📤 代码提交结果:', submitResult);
@@ -1556,6 +1559,117 @@
             return urlParams.get('pid');
         }
         
+        // 🪄 自动获取洛谷Cookie
+        async function autoGetCookie() {
+            showSubmitStatus('🪄 正在自动获取Cookie...', 'loading');
+            
+            try {
+                // 方法1：尝试通过iframe获取Cookie（同源策略允许的情况下）
+                const iframe = document.createElement('iframe');
+                iframe.src = 'https://www.luogu.com.cn/';
+                iframe.style.display = 'none';
+                document.body.appendChild(iframe);
+                
+                // 等待iframe加载
+                await new Promise((resolve, reject) => {
+                    iframe.onload = resolve;
+                    iframe.onerror = reject;
+                    setTimeout(reject, 10000); // 10秒超时
+                });
+                
+                // 尝试获取iframe中的Cookie
+                try {
+                    const iframeCookies = iframe.contentDocument.cookie;
+                    if (iframeCookies && iframeCookies.includes('_uid=')) {
+                        document.getElementById('manualCookie').value = iframeCookies;
+                        showSubmitStatus('✅ 自动获取Cookie成功！', 'success');
+                        document.body.removeChild(iframe);
+                        return;
+                    }
+                } catch (e) {
+                    console.log('iframe方法失败，尝试其他方法:', e.message);
+                }
+                
+                document.body.removeChild(iframe);
+                
+                // 方法2：打开新窗口并引导用户
+                const luoguWindow = window.open('https://www.luogu.com.cn/', '_blank', 'width=800,height=600');
+                
+                showSubmitStatus('🌐 已打开洛谷官网，请确保已登录，然后点击下方按钮获取Cookie', 'info');
+                
+                // 添加获取Cookie的按钮
+                const getCookieBtn = document.createElement('button');
+                getCookieBtn.innerHTML = '<i class="fas fa-download"></i> 从打开的窗口获取Cookie';
+                getCookieBtn.className = 'btn btn-primary btn-sm';
+                getCookieBtn.style.marginTop = '10px';
+                getCookieBtn.onclick = async () => {
+                    try {
+                        // 尝试从打开的窗口获取Cookie
+                        if (luoguWindow && !luoguWindow.closed) {
+                            const cookies = await getCookiesFromWindow(luoguWindow);
+                            if (cookies) {
+                                document.getElementById('manualCookie').value = cookies;
+                                showSubmitStatus('✅ 成功获取Cookie！', 'success');
+                                luoguWindow.close();
+                                getCookieBtn.remove();
+                                return;
+                            }
+                        }
+                        
+                        // 如果无法自动获取，提供手动指导
+                        showCookieInstructions();
+                        
+                    } catch (error) {
+                        console.error('获取Cookie失败:', error);
+                        showCookieInstructions();
+                    }
+                };
+                
+                document.getElementById('emergencyLogin').appendChild(getCookieBtn);
+                
+            } catch (error) {
+                console.error('自动获取Cookie失败:', error);
+                showSubmitStatus('❌ 自动获取失败，请手动操作', 'error');
+                showCookieInstructions();
+            }
+        }
+        
+        // 从窗口获取Cookie的辅助函数
+        async function getCookiesFromWindow(targetWindow) {
+            try {
+                // 检查窗口是否可访问
+                if (targetWindow.location.hostname === 'www.luogu.com.cn') {
+                    return targetWindow.document.cookie;
+                }
+            } catch (e) {
+                // 跨域限制，无法直接访问
+                console.log('跨域限制，无法直接获取Cookie');
+            }
+            return null;
+        }
+        
+        // 显示Cookie获取指导
+        function showCookieInstructions() {
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 5px; padding: 10px; margin-top: 10px;">
+                    <h5 style="color: #1976d2; margin: 0 0 10px 0;"><i class="fas fa-info-circle"></i> 获取Cookie指导</h5>
+                    <ol style="margin: 0; padding-left: 20px; color: #1976d2;">
+                        <li>确保在打开的洛谷窗口中已登录</li>
+                        <li>在洛谷窗口中按F12打开开发者工具</li>
+                        <li>切换到 Application 或 Storage 标签</li>
+                        <li>点击 Cookies → www.luogu.com.cn</li>
+                        <li>复制所有Cookie内容到上方文本框</li>
+                        <li>格式应类似：_uid=1234567; __client_id=abc123...</li>
+                    </ol>
+                    <button onclick="this.parentElement.remove()" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
+                        <i class="fas fa-times"></i> 关闭指导
+                    </button>
+                </div>
+            `;
+            document.getElementById('emergencyLogin').appendChild(instructions);
+        }
+        
         // 🚀 强硬措施：直接提交（绕过所有检查）
         async function directSubmit() {
             const pid = getProblemIdFromUrl();
@@ -1595,11 +1709,11 @@
                             'referer': `https://www.luogu.com.cn/problem/${pid}`,
                             'origin': 'https://www.luogu.com.cn'
                         },
-                        body: JSON.stringify({
+                        body: {
                             lang: language,
                             code: code,
                             enableO2: 0
-                        }),
+                        },
                         backupCookies: btoa(manualCookie), // 使用手动输入的Cookie
                         sessionId: 'manual_emergency_session'
                     })
