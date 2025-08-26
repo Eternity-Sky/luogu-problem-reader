@@ -818,7 +818,18 @@
             // 渲染数学公式
             setTimeout(() => {
                 renderMath(container);
-            }, 100);
+            }, 500);
+            
+            // 额外的数学公式渲染尝试（确保KaTeX库完全加载）
+            setTimeout(() => {
+                if (typeof renderMathInElement !== 'undefined') {
+                    renderMath(container);
+                } else {
+                    console.warn('⚠️ KaTeX库仍未加载，尝试重新渲染');
+                    // 再次尝试
+                    setTimeout(() => renderMath(container), 1000);
+                }
+            }, 1500);
             
             // 更新页面标题
             document.title = `${problem.pid} - ${problem.title} - LGOJ 题目浏览站`;
@@ -902,6 +913,7 @@
         function renderMath(element) {
             if (typeof renderMathInElement !== 'undefined') {
                 try {
+                    console.log('🔢 开始渲染KaTeX数学公式');
                     renderMathInElement(element, {
                         delimiters: [
                             {left: '$$', right: '$$', display: true},
@@ -910,11 +922,29 @@
                             {left: '\\[', right: '\\]', display: true}
                         ],
                         throwOnError: false,
-                        errorColor: '#cc0000'
+                        errorColor: '#cc0000',
+                        strict: false,
+                        trust: true,
+                        macros: {
+                            "\\def": "\\gdef",
+                            "\\arraystretch": "\\def\\arraystretch{#1}",
+                            "\\rm": "\\mathrm",
+                            "\\mathclap": "\\mathrlap{\\phantom{#1}}\\mathllap{#1}",
+                            "\\kern": "\\hspace"
+                        }
                     });
+                    console.log('✅ KaTeX数学公式渲染完成');
                 } catch (error) {
-                    console.warn('KaTeX渲染失败:', error);
+                    console.error('❌ KaTeX渲染失败:', error);
                 }
+            } else {
+                console.warn('⚠️ KaTeX库未加载');
+                // 尝试重新加载KaTeX
+                setTimeout(() => {
+                    if (typeof renderMathInElement !== 'undefined') {
+                        renderMath(element);
+                    }
+                }, 1000);
             }
         }
 
