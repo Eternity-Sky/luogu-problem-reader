@@ -290,6 +290,28 @@
     <!-- Main Content -->
     <main class="main">
         <div class="container">
+            <!-- API测试区域 -->
+            <div class="problem-container" style="margin-bottom: 2rem;">
+                <div class="problem-header">
+                    <div class="problem-title">API 测试</div>
+                </div>
+                <div class="problem-content">
+                    <div class="section">
+                        <div class="section-title">测试题目详情API</div>
+                        <div style="display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem;">
+                            <input type="text" id="testPid" placeholder="输入题目ID (如: P1001)" 
+                                   style="padding: 0.5rem; border: 1px solid #ccc; border-radius: 4px; flex: 1;">
+                            <button onclick="testProblemAPI()" 
+                                    style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                测试API
+                            </button>
+                        </div>
+                        <div id="apiTestStatus"></div>
+                        <pre id="apiTestResult" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; max-height: 400px; overflow-y: auto; display: none;"></pre>
+                    </div>
+                </div>
+            </div>
+            
             <div id="loadingStatus" class="loading">
                 <i class="fas fa-spinner"></i>
                 <div>正在加载题目详情...</div>
@@ -373,6 +395,36 @@
         function showStatus(message, type = 'info') {
             const loadingDiv = document.getElementById('loadingStatus');
             loadingDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // API测试函数
+        async function testProblemAPI() {
+            const pid = document.getElementById('testPid').value || 'P1001';
+            const statusDiv = document.getElementById('apiTestStatus');
+            const resultDiv = document.getElementById('apiTestResult');
+            
+            statusDiv.innerHTML = '<div class="status info">正在测试API...</div>';
+            resultDiv.style.display = 'none';
+            
+            console.log('🧪 测试题目详情API:', pid);
+            
+            try {
+                const result = await proxyLuoguAPI(`/problem/${pid}`, {
+                    headers: {
+                        'x-lentille-request': 'content-only'
+                    }
+                });
+                
+                statusDiv.innerHTML = '<div class="status success">API调用成功！查看下方原始数据</div>';
+                resultDiv.textContent = JSON.stringify(result, null, 2);
+                resultDiv.style.display = 'block';
+                
+                console.log('✅ API测试结果:', result);
+                
+            } catch (error) {
+                statusDiv.innerHTML = `<div class="status error">API调用失败: ${error.message}</div>`;
+                console.error('❌ API测试失败:', error);
+            }
         }
 
         // 加载题目详情
@@ -545,9 +597,11 @@
             const pid = urlParams.get('pid');
             
             if (pid) {
-                loadProblemDetail(pid);
+                // 如果有PID参数，填入测试框并可选择性加载
+                document.getElementById('testPid').value = pid;
+                showStatus(`检测到题目ID: ${pid}，可以点击"测试API"按钮查看数据结构`, 'info');
             } else {
-                showStatus('未指定题目ID', 'error');
+                showStatus('可以手动输入题目ID测试API返回数据', 'info');
             }
         });
     </script>
