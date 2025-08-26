@@ -1251,15 +1251,16 @@
           userInfo: userInfo
         });
         
-        // 检查登录时间与当前sessionId的关系
+        // 🎯 固定全局sessionId下的时间检查（简化版）
         if (userInfo.loginTime) {
           const loginTime = new Date(userInfo.loginTime).getTime();
-          const sessionTime = parseInt(sessionId.split('_')[1]);
-          console.log('🕐 时间对比:', {
+          const now = Date.now();
+          console.log('🕐 时间状态:', {
             loginTime: new Date(loginTime).toISOString(),
-            sessionTime: new Date(sessionTime).toISOString(),
-            isSessionAfterLogin: sessionTime > loginTime,
-            timeDiff: Math.abs(sessionTime - loginTime) / 1000 / 60 // 分钟差
+            currentTime: new Date(now).toISOString(),
+            sessionId: sessionId,
+            isFixedGlobalSession: sessionId === 'session_luogu_global_fixed_2025',
+            loginAgeMinutes: Math.abs(now - loginTime) / 1000 / 60 // 登录后经过的分钟数
           });
         }
         
