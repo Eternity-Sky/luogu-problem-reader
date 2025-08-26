@@ -1450,7 +1450,9 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'x-csrf-token': csrfToken
+                        'x-csrf-token': csrfToken,
+                        'referer': `https://www.luogu.com.cn/problem/${pid}`,
+                        'origin': 'https://www.luogu.com.cn'
                     },
                     body: JSON.stringify({
                         lang: language,
