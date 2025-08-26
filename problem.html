@@ -361,6 +361,120 @@
             font-weight: 600;
         }
 
+        /* 代码提交区域样式 */
+        .submit-section {
+            background: white;
+            padding: 2rem 0;
+            margin-top: 2rem;
+            border-top: 1px solid var(--gray-200);
+        }
+
+        .submit-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .submit-form {
+            max-width: 800px;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--gray-700);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .code-editor {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid var(--gray-300);
+            border-radius: 6px;
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .code-editor:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .submit-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .btn-submit {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .btn-submit:hover {
+            background: var(--gray-700);
+        }
+
+        .btn-submit:disabled {
+            background: var(--gray-400);
+            cursor: not-allowed;
+        }
+
+        .submit-status {
+            font-size: 0.875rem;
+            padding: 0.5rem 0;
+        }
+
+        .submit-status.success {
+            color: var(--success-color);
+        }
+
+        .submit-status.error {
+            color: var(--error-color);
+        }
+
+        .submit-status.loading {
+            color: var(--primary-color);
+        }
+
         /* 评论区域样式 */
         .comments-section {
             background: white;
@@ -598,6 +712,43 @@
             
             <div id="problemContainer" class="problem-container" style="display: none;">
                 <!-- 题目内容将在这里动态加载 -->
+            </div>
+            
+            <!-- 代码提交区域 -->
+            <div id="submitSection" class="submit-section" style="display: none;">
+                <div class="submit-title">
+                    <i class="fas fa-code"></i>
+                    提交代码
+                </div>
+                
+                <div class="submit-form">
+                    <div class="form-group">
+                        <label for="languageSelect">编程语言:</label>
+                        <select id="languageSelect" class="form-control">
+                            <option value="0">C++14 (GCC 9)</option>
+                            <option value="1">C++17 (GCC 9)</option>
+                            <option value="2">C++20 (GCC 13)</option>
+                            <option value="3">C (GCC 9)</option>
+                            <option value="7">Python3</option>
+                            <option value="8">Java8</option>
+                            <option value="11">Node.js LTS</option>
+                            <option value="12">PyPy3</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="codeEditor">代码:</label>
+                        <textarea id="codeEditor" class="code-editor" placeholder="请输入您的代码..."></textarea>
+                    </div>
+                    
+                    <div class="submit-actions">
+                        <button id="submitBtn" class="btn-submit">
+                            <i class="fas fa-paper-plane"></i>
+                            提交代码
+                        </button>
+                        <div id="submitStatus" class="submit-status"></div>
+                    </div>
+                </div>
             </div>
             
             <!-- 评论区域 -->
@@ -1179,18 +1330,159 @@
             }
         }
 
+        // 获取题目页面的CSRF令牌
+        async function getProblemCSRFToken(pid) {
+            try {
+                console.log(`🔑 获取题目 ${pid} 的CSRF令牌`);
+                
+                // 直接请求题目页面获取CSRF令牌
+                const result = await proxyLuoguAPI(`/problem/${pid}`, {
+                    method: 'GET'
+                });
+                
+                // 从HTML中提取CSRF令牌
+                if (result.data && typeof result.data === 'string') {
+                    const csrfMatch = result.data.match(/name="csrf-token"\s+content="([^"]+)"/);
+                    if (csrfMatch) {
+                        const csrfToken = csrfMatch[1];
+                        console.log('✅ 成功获取CSRF令牌:', csrfToken.substring(0, 20) + '...');
+                        return csrfToken;
+                    }
+                }
+                
+                throw new Error('无法从题目页面提取CSRF令牌');
+            } catch (error) {
+                console.error('❌ 获取CSRF令牌失败:', error);
+                throw error;
+            }
+        }
+
+        // 提交代码
+        async function submitCode() {
+            const submitBtn = document.getElementById('submitBtn');
+            const submitStatus = document.getElementById('submitStatus');
+            const languageSelect = document.getElementById('languageSelect');
+            const codeEditor = document.getElementById('codeEditor');
+            
+            // 获取当前题目ID
+            const urlParams = new URLSearchParams(window.location.search);
+            const pid = urlParams.get('pid');
+            
+            if (!pid) {
+                showSubmitStatus('错误：未找到题目ID', 'error');
+                return;
+            }
+            
+            // 检查登录状态
+            const userInfoStr = localStorage.getItem('luogu_user_info');
+            if (!userInfoStr) {
+                showSubmitStatus('请先登录后再提交代码', 'error');
+                return;
+            }
+            
+            // 获取表单数据
+            const language = parseInt(languageSelect.value);
+            const code = codeEditor.value.trim();
+            
+            if (!code) {
+                showSubmitStatus('请输入代码', 'error');
+                return;
+            }
+            
+            // 禁用提交按钮
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 提交中...';
+            showSubmitStatus('正在获取CSRF令牌...', 'loading');
+            
+            try {
+                // 获取题目页面的CSRF令牌
+                const csrfToken = await getProblemCSRFToken(pid);
+                
+                showSubmitStatus('正在提交代码...', 'loading');
+                
+                // 提交代码
+                const submitResult = await proxyLuoguAPI(`/fe/api/problem/submit/${pid}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'x-csrf-token': csrfToken
+                    },
+                    body: JSON.stringify({
+                        lang: language,
+                        code: code,
+                        enableO2: 0
+                    })
+                });
+                
+                console.log('📤 代码提交结果:', submitResult);
+                
+                if (submitResult.data && submitResult.data.rid) {
+                    showSubmitStatus(`提交成功！记录ID: ${submitResult.data.rid}`, 'success');
+                    
+                    // 清空代码编辑器
+                    codeEditor.value = '';
+                    
+                    // 可以在这里添加跳转到提交记录页面的逻辑
+                    setTimeout(() => {
+                        if (confirm('提交成功！是否查看提交记录？')) {
+                            window.open(`https://www.luogu.com.cn/record/${submitResult.data.rid}`, '_blank');
+                        }
+                    }, 1000);
+                } else {
+                    throw new Error(submitResult.error || '提交失败，未返回记录ID');
+                }
+                
+            } catch (error) {
+                console.error('❌ 代码提交失败:', error);
+                showSubmitStatus(`提交失败: ${error.message}`, 'error');
+            } finally {
+                // 恢复提交按钮
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 提交代码';
+            }
+        }
+
+        // 显示提交状态
+        function showSubmitStatus(message, type) {
+            const submitStatus = document.getElementById('submitStatus');
+            submitStatus.textContent = message;
+            submitStatus.className = `submit-status ${type}`;
+        }
+
+        // 显示/隐藏提交区域
+        function toggleSubmitSection(show) {
+            const submitSection = document.getElementById('submitSection');
+            const userInfoStr = localStorage.getItem('luogu_user_info');
+            
+            // 只有登录用户才显示提交区域
+            if (show && userInfoStr) {
+                submitSection.style.display = 'block';
+            } else {
+                submitSection.style.display = 'none';
+            }
+        }
+
         // 页面加载时获取题目ID并加载详情
         document.addEventListener('DOMContentLoaded', function() {
             // 检查登录状态
-            checkLoginStatus();
+            const isLoggedIn = checkLoginStatus();
             
             const urlParams = new URLSearchParams(window.location.search);
             const pid = urlParams.get('pid');
             
             if (pid) {
                 loadProblemDetail(pid);
+                
+                // 根据登录状态显示提交区域
+                toggleSubmitSection(isLoggedIn);
             } else {
                 showStatus('未指定题目ID', 'error');
+            }
+            
+            // 绑定提交按钮事件
+            const submitBtn = document.getElementById('submitBtn');
+            if (submitBtn) {
+                submitBtn.addEventListener('click', submitCode);
             }
         });
     </script>
