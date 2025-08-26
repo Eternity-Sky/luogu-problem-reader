@@ -535,7 +535,7 @@
             problems.forEach(problem => {
                 const row = document.createElement('div');
                 row.className = 'problem-row';
-                row.onclick = () => window.open(`https://www.luogu.com.cn/problem/${problem.pid}`, '_blank');
+                row.onclick = () => window.location.href = `/problem.html?pid=${problem.pid}`;
                 
                 const difficultyText = getDifficultyText(problem.difficulty);
                 const difficultyClass = `difficulty-${problem.difficulty || 0}`;
