@@ -1638,16 +1638,12 @@
                 // 第三步：用智能Cookie重新提交
                 console.log('🚀 第三步：智能Cookie重新提交');
                 
-                // 构造更完整的Cookie，包含洛谷可能需要的所有字段
-                const timestamp = Math.floor(Date.now() / 1000);
+                // 优化策略：第一次请求故意不发送__client_id，让洛谷下发真实的
                 const smartCookie = [
                     `_uid=${realUid}`,
-                    `__client_id=${newClientId}`,
+                    // 故意不发送 __client_id，让洛谷服务器下发真实的
                     `login=${realUid}`,
-                    `C3VK=130aa2`,
-                    `_session=luogu_session_${timestamp}`,
-                    `Path=/`,
-                    `Domain=.luogu.com.cn`
+                    `C3VK=130aa2`
                 ].join('; ');
                 
                 console.log('🧠 智能Cookie:', smartCookie);
@@ -1701,15 +1697,68 @@
                 
                 if (smartResult.rid) {
                     console.log('🎉 智能重试成功！记录ID:', smartResult.rid);
-                    showSubmitStatus(`🎉 智能重试成功！记录ID: ${smartResult.rid}`, 'success');
-                    setTimeout(() => {
-                        if (confirm('提交成功！是否查看提交记录？')) {
-                            window.open(`https://www.luogu.com.cn/record/${smartResult.rid}`, '_blank');
+                    showSubmitStatus('🎉 提交成功！记录ID: ' + smartResult.rid, 'success');
+                } else if (smartResult._backupCookies && smartResult.status === 403) {
+                    // 检查洛谷是否返回了新的client_id
+                    const responseCookies = atob(smartResult._backupCookies);
+                    console.log('🔍 洛谷返回的Cookie:', responseCookies);
+                    
+                    const realClientIdMatch = responseCookies.match(/__client_id=([^;]+)/);
+                    if (realClientIdMatch && realClientIdMatch[1] !== newClientId) {
+                        const realClientId = realClientIdMatch[1];
+                        console.log('🔄 洛谷返回了新的client_id:', realClientId);
+                        console.log('🚀 第四步：使用真实client_id二次提交');
+                        
+                        // 构造使用真实client_id的Cookie
+                        const realCookie = `_uid=${realUid}; __client_id=${realClientId}; login=${realUid}; C3VK=130aa2`;
+                        console.log('🧠 真实Cookie:', realCookie);
+                        
+                        const finalResult = await fetch('/.netlify/functions/luogu-proxy', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                path: `/fe/api/problem/submit/${pid}`,
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'x-csrf-token': csrfToken,
+                                    'referer': `https://www.luogu.com.cn/problem/${pid}`,
+                                    'origin': 'https://www.luogu.com.cn'
+                                },
+                                body: {
+                                    lang: language,
+                                    code: code,
+                                    enableO2: 0
+                                },
+                                backupCookies: btoa(realCookie),
+                                sessionId: 'final_submit_session'
+                            })
+                        });
+                        
+                        if (finalResult.ok) {
+                            const finalResponseText = await finalResult.text();
+                            console.log('🔍 最终提交响应:', finalResponseText);
+                            
+                            try {
+                                const finalData = JSON.parse(finalResponseText);
+                                if (finalData.rid) {
+                                    console.log('🎉 二次提交成功！记录ID:', finalData.rid);
+                                    showSubmitStatus('🎉 提交成功！记录ID: ' + finalData.rid, 'success');
+                                    return;
+                                }
+                            } catch (e) {
+                                console.error('❌ 最终响应解析失败:', e);
+                            }
                         }
-                    }, 1000);
+                    }
+                    
+                    console.error('❌ 智能重试失败:', smartResult);
+                    showSubmitStatus('❌ 智能重试失败: ' + (smartResult.errorMessage || '未知错误'), 'error');
                 } else {
-                    console.error('❌ 智能重试仍然失败:', smartResult);
-                    showSubmitStatus(`❌ 智能重试失败: ${smartResult.errorMessage || smartResult.data || '未知错误'}`, 'error');
+                    console.error('❌ 智能重试失败:', smartResult);
+                    showSubmitStatus('❌ 智能重试失败', 'error');
                 }
                 
             } catch (error) {
