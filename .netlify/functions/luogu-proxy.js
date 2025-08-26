@@ -100,6 +100,16 @@ exports.handler = async (event, context) => {
         if (globalCookies[clientSessionId]) {
             requestHeaders['Cookie'] = globalCookies[clientSessionId];
             console.log(`🍪 [${clientSessionId}] 使用保存的Cookie:`, globalCookies[clientSessionId]);
+            
+            // 特别针对代码提交请求，添加详细的Cookie调试信息
+            if (path.includes('/fe/api/problem/submit/')) {
+                console.log(`🔍 [${clientSessionId}] 代码提交请求Cookie详情:`);
+                console.log(`  - Cookie长度: ${globalCookies[clientSessionId].length}`);
+                console.log(`  - Cookie内容: ${globalCookies[clientSessionId]}`);
+                console.log(`  - 包含_uid: ${globalCookies[clientSessionId].includes('_uid')}`);
+                console.log(`  - 包含__client_id: ${globalCookies[clientSessionId].includes('__client_id')}`);
+                console.log(`  - CSRF Token: ${csrfToken ? csrfToken.substring(0, 10) + '...' : 'null'}`);
+            }
         } else {
             console.log(`❌ [${clientSessionId}] 没有找到保存的Cookie，当前所有会话:`, Object.keys(globalCookies));
             console.log(`❌ [${clientSessionId}] 全部Cookie内容:`, JSON.stringify(globalCookies, null, 2));
