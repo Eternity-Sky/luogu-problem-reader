@@ -111,6 +111,15 @@ exports.handler = async (event, context) => {
         let cookieToUse = null;
         let cookieSource = '';
         
+        // 特别处理智能重试会话
+        if (clientSessionId === 'smart_submit_session') {
+            console.log(`🧠 [${clientSessionId}] 检测到智能重试会话`);
+            console.log(`🔍 [${clientSessionId}] requestData.backupCookies存在:`, !!requestData.backupCookies);
+            if (requestData.backupCookies) {
+                console.log(`🔍 [${clientSessionId}] backupCookies长度:`, requestData.backupCookies.length);
+            }
+        }
+        
         // 1. 优先使用前端传递的备份Cookie（解决Netlify Functions重启问题）
         if (requestData.backupCookies) {
             try {
@@ -118,6 +127,7 @@ exports.handler = async (event, context) => {
                 cookieToUse = decryptedCookies;
                 cookieSource = '前端备份';
                 console.log(`🔄 [${clientSessionId}] 使用前端备份Cookie恢复会话`);
+                console.log(`🔍 [${clientSessionId}] 解码后Cookie:`, decryptedCookies);
                 
                 // 同时更新内存中的Cookie（为后续请求准备）
                 globalCookies[clientSessionId] = decryptedCookies;
