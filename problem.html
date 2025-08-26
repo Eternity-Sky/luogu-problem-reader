@@ -1559,10 +1559,69 @@
             return urlParams.get('pid');
         }
         
-        // 🪄 自动获取洛谷Cookie
+        // 🪄 智能获取有效Cookie
         async function autoGetCookie() {
-            showSubmitStatus('🪄 正在自动获取Cookie...', 'loading');
+            showSubmitStatus('🪄 正在智能获取Cookie...', 'loading');
             
+            try {
+                // 获取用户的真实uid
+                const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
+                const realUid = userInfo.uid;
+                
+                if (!realUid) {
+                    showSubmitStatus('❌ 未找到用户ID，请先登录', 'error');
+                    return;
+                }
+                
+                console.log('🔍 发现用户ID:', realUid);
+                
+                // 第一步：向洛谷发送请求获取有效的client_id
+                const response = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        path: '/',
+                        method: 'GET',
+                        sessionId: 'cookie_acquisition_session'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('🍪 服务器响应:', result);
+                
+                // 从响应中提取新的client_id
+                if (result._backupCookies) {
+                    const cookieStr = atob(result._backupCookies);
+                    console.log('🔍 解码Cookie:', cookieStr);
+                    
+                    // 提取client_id
+                    const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
+                    if (clientIdMatch) {
+                        const newClientId = clientIdMatch[1];
+                        console.log('✅ 获取到新的client_id:', newClientId);
+                        
+                        // 构造完整的有效Cookie
+                        const validCookie = `_uid=${realUid}; __client_id=${newClientId}`;
+                        document.getElementById('manualCookie').value = validCookie;
+                        
+                        showSubmitStatus('✅ 智能获取Cookie成功！已自动填入', 'success');
+                        return;
+                    }
+                }
+                
+                showSubmitStatus('❌ 无法提取client_id，请手动操作', 'error');
+                showCookieInstructions();
+                
+            } catch (error) {
+                console.error('智能获取Cookie失败:', error);
+                showSubmitStatus('❌ 智能获取失败，尝试其他方法...', 'error');
+            }
+        }
+        
+        // 🪄 传统方法获取Cookie（备用方案）
+        async function fallbackGetCookie() {
             try {
                 // 方法1：尝试通过iframe获取Cookie（同源策略允许的情况下）
                 const iframe = document.createElement('iframe');
