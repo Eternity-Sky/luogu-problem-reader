@@ -221,9 +221,17 @@ exports.handler = async (event, context) => {
             const encodedCookies = btoa(cookieString); // base64编码
             console.log(`📦 [${clientSessionId}] Cookie已编码准备返回前端备份`);
             
-            // 在响应数据中添加编码后的Cookie供前端备份
-            if (responseData && typeof responseData === 'object') {
-                responseData._backupCookies = encodedCookies;
+            // 尝试解析响应体并添加Cookie备份（仅对JSON响应）
+            try {
+                if (response.headers['content-type'] && response.headers['content-type'].includes('application/json')) {
+                    const responseData = JSON.parse(response.body);
+                    responseData._backupCookies = encodedCookies;
+                    response.body = JSON.stringify(responseData);
+                    console.log(`✅ [${clientSessionId}] Cookie备份已添加到JSON响应`);
+                }
+            } catch (e) {
+                // 如果不是JSON响应或解析失败，跳过Cookie备份添加
+                console.log(`ℹ️ [${clientSessionId}] 非JSON响应，跳过Cookie备份添加`);
             }
         }
 
