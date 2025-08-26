@@ -718,22 +718,7 @@
             <div id="submitSection" class="submit-section" style="display: none;">
                 <h3><i class="fas fa-code"></i> 代码提交</h3>
                 
-                <!-- 强硬措施：手动Cookie输入 -->
-                <div class="emergency-login" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-bottom: 15px; display: none;" id="emergencyLogin">
-                    <h4 style="color: #856404; margin: 0 0 10px 0;"><i class="fas fa-exclamation-triangle"></i> 强硬措施：手动Cookie</h4>
-                    <p style="margin: 0 0 10px 0; color: #856404; font-size: 14px;">请从浏览器开发者工具中复制完整的Cookie：</p>
-                    <textarea id="manualCookie" placeholder="_uid=1234567; __client_id=abc123def456..." 
-                              style="width: 100%; height: 60px; font-family: monospace; font-size: 12px; margin-bottom: 10px;"></textarea>
-                    <button onclick="saveManualCookie()" class="btn btn-warning btn-sm">
-                        <i class="fas fa-save"></i> 保存并测试
-                    </button>
-                    <button onclick="autoGetCookie()" class="btn btn-success btn-sm" style="margin-left: 10px;">
-                        <i class="fas fa-magic"></i> 自动获取
-                    </button>
-                    <button onclick="directSubmit()" class="btn btn-danger btn-sm" style="margin-left: 10px;">
-                        <i class="fas fa-rocket"></i> 直接提交
-                    </button>
-                </div>
+
                 
                 <div class="form-group">
                     <label for="languageSelect">编程语言:</label>
@@ -759,9 +744,7 @@
                         <i class="fas fa-paper-plane"></i>
                         提交代码
                     </button>
-                    <button onclick="showEmergencyLogin()" class="btn btn-warning" style="margin-left: 10px;">
-                        <i class="fas fa-tools"></i> 强硬措施
-                    </button>
+
                     <div id="submitStatus" class="submit-status"></div>
                 </div>
             </div>
@@ -1480,11 +1463,11 @@
                 
                 // 检查是否登录失败
                 if (submitResult.status === 403 || submitResult.errorCode === 403) {
-                    console.log('❌ 登录状态失效，Cookie信息:', submitResult._backupCookies);
-                    showSubmitStatus('登录失败！点击"强硬措施"手动输入Cookie', 'error');
+                    console.log('❌ 登录状态失效，尝试智能获取Cookie');
+                    showSubmitStatus('登录失败，正在智能重试...', 'loading');
                     
-                    // 显示强硬措施
-                    document.getElementById('emergencyLogin').style.display = 'block';
+                    // 自动智能重试
+                    await smartRetrySubmit(pid, language, code);
                     return;
                 }
                 
@@ -1557,6 +1540,116 @@
         function getProblemIdFromUrl() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.get('pid');
+        }
+        
+        // 🧠 智能重试提交（自动获取Cookie并重试）
+        async function smartRetrySubmit(pid, language, code) {
+            try {
+                console.log('🧠 开始智能重试提交流程');
+                
+                // 获取用户的真实uid
+                const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
+                const realUid = userInfo.uid;
+                
+                if (!realUid) {
+                    console.error('❌ 未找到用户ID');
+                    showSubmitStatus('❌ 未找到用户ID，请先登录', 'error');
+                    return;
+                }
+                
+                console.log('🔍 用户ID:', realUid);
+                
+                // 第一步：获取有效的client_id
+                console.log('🍪 第一步：获取有效的client_id');
+                const response = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        path: '/',
+                        method: 'GET',
+                        sessionId: 'smart_cookie_session'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('🔍 代理响应:', result);
+                
+                if (!result._backupCookies) {
+                    console.error('❌ 无法获取Cookie');
+                    showSubmitStatus('❌ 智能重试失败', 'error');
+                    return;
+                }
+                
+                // 提取client_id
+                const cookieStr = atob(result._backupCookies);
+                console.log('🔍 解码Cookie:', cookieStr);
+                
+                const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
+                if (!clientIdMatch) {
+                    console.error('❌ 无法提取client_id');
+                    showSubmitStatus('❌ 智能重试失败', 'error');
+                    return;
+                }
+                
+                const newClientId = clientIdMatch[1];
+                console.log('✅ 获取到client_id:', newClientId);
+                
+                // 第二步：获取CSRF令牌
+                console.log('🔑 第二步：获取CSRF令牌');
+                const csrfToken = await getCSRFToken(pid);
+                console.log('✅ CSRF令牌:', csrfToken.substring(0, 30) + '...');
+                
+                // 第三步：用智能Cookie重新提交
+                console.log('🚀 第三步：智能Cookie重新提交');
+                const smartCookie = `_uid=${realUid}; __client_id=${newClientId}`;
+                console.log('🧠 智能Cookie:', smartCookie);
+                
+                const retryResult = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        path: `/fe/api/problem/submit/${pid}`,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-csrf-token': csrfToken,
+                            'referer': `https://www.luogu.com.cn/problem/${pid}`,
+                            'origin': 'https://www.luogu.com.cn'
+                        },
+                        body: {
+                            lang: language,
+                            code: code,
+                            enableO2: 0
+                        },
+                        backupCookies: btoa(smartCookie),
+                        sessionId: 'smart_submit_session'
+                    })
+                });
+                
+                const smartResult = await retryResult.json();
+                console.log('🎯 智能重试结果:', smartResult);
+                
+                if (smartResult.rid) {
+                    console.log('🎉 智能重试成功！记录ID:', smartResult.rid);
+                    showSubmitStatus(`🎉 智能重试成功！记录ID: ${smartResult.rid}`, 'success');
+                    setTimeout(() => {
+                        if (confirm('提交成功！是否查看提交记录？')) {
+                            window.open(`https://www.luogu.com.cn/record/${smartResult.rid}`, '_blank');
+                        }
+                    }, 1000);
+                } else {
+                    console.error('❌ 智能重试仍然失败:', smartResult);
+                    showSubmitStatus(`❌ 智能重试失败: ${smartResult.errorMessage || smartResult.data || '未知错误'}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ 智能重试异常:', error);
+                showSubmitStatus('❌ 智能重试异常: ' + error.message, 'error');
+            }
         }
         
         // 🪄 智能获取有效Cookie
