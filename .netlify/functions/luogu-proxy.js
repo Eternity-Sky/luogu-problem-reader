@@ -278,7 +278,8 @@ exports.handler = async (event, context) => {
         }
 
         // 🎯 特殊处理：如果是题目详情或题解API，也尝试提取JSON数据
-        if ((path.includes('/problem/') && !path.includes('/problem/list')) && response.statusCode === 200) {
+        // 但如果明确请求HTML，则返回原始HTML
+        if ((path.includes('/problem/') && !path.includes('/problem/list')) && response.statusCode === 200 && !isHtmlRequest) {
             try {
                 console.log(`🔍 [${clientSessionId}] 检测到题目详情/题解API，尝试提取JSON数据`);
                 
@@ -301,6 +302,21 @@ exports.handler = async (event, context) => {
             } catch (error) {
                 console.log(`❌ [${clientSessionId}] JSON提取失败:`, error.message);
             }
+        }
+        
+        // 如果是HTML请求，直接返回原始HTML内容
+        if (isHtmlRequest && response.statusCode === 200) {
+            console.log(`🌐 [${clientSessionId}] 返回原始HTML内容，长度: ${response.body ? response.body.length : 0}`);
+            return {
+                statusCode: 200,
+                headers: {
+                    'Access-Control-Allow-Origin': '*',
+                    'Access-Control-Allow-Headers': 'Content-Type',
+                    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ data: response.body })
+            };
         }
 
         // 返回原始响应
