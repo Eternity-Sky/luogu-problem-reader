@@ -396,36 +396,81 @@
             const container = document.getElementById('problemListDisplay');
             container.innerHTML = '';
             
+            console.log('🎨 开始解析题目数据:', apiResult);
+            
             // 尝试从不同的数据结构中提取题目列表
             let problems = [];
             
-            if (apiResult.currentData && apiResult.currentData.problems) {
+            // 新的数据结构：从lentille-context提取的数据
+            if (apiResult.data && apiResult.data.problems && apiResult.data.problems.result) {
+                problems = apiResult.data.problems.result;
+                console.log('✅ 使用lentille-context数据结构，题目数量:', problems.length);
+            }
+            // 备用数据结构
+            else if (apiResult.currentData && apiResult.currentData.problems) {
                 problems = apiResult.currentData.problems;
+                console.log('✅ 使用currentData数据结构');
             } else if (apiResult.problems) {
                 problems = apiResult.problems;
+                console.log('✅ 使用直接problems数据结构');
             } else if (apiResult.data && apiResult.data.problems) {
                 problems = apiResult.data.problems;
+                console.log('✅ 使用data.problems数据结构');
             }
             
-            if (problems.length === 0) {
+            if (!problems || problems.length === 0) {
                 container.innerHTML = '<p>未找到题目数据，请查看原始响应</p>';
+                console.log('❌ 未找到题目数据');
                 return;
             }
             
-            problems.slice(0, 20).forEach(problem => {
+            console.log(`🎯 准备显示 ${Math.min(problems.length, 20)} 个题目`);
+            
+            problems.slice(0, 20).forEach((problem, index) => {
                 const card = document.createElement('div');
                 card.className = 'problem-card';
+                
+                // 获取难度颜色
+                const difficultyColors = ['', '#fe4c61', '#f39c11', '#e74c3c', '#9d3dcf', '#0e1d69', '#0e1d69', '#000000'];
+                const difficultyColor = difficultyColors[problem.difficulty] || '#666';
+                
                 card.innerHTML = `
-                    <div class="problem-id">${problem.pid || problem.id || 'Unknown'}</div>
+                    <div class="problem-id" style="color: ${difficultyColor}; font-weight: bold;">
+                        ${problem.pid || problem.id || 'Unknown'}
+                    </div>
                     <div class="problem-title">${problem.title || problem.name || '无标题'}</div>
                     <div class="problem-meta">
-                        难度: ${problem.difficulty || '未知'} | 
-                        通过: ${problem.acceptedCount || 0} | 
-                        提交: ${problem.submittedCount || 0}
+                        <span style="color: ${difficultyColor};">难度: ${problem.difficulty || '未知'}</span> | 
+                        通过: ${problem.totalAccepted || problem.acceptedCount || 0} | 
+                        提交: ${problem.totalSubmit || problem.submittedCount || 0}
                     </div>
                 `;
+                
+                // 点击跳转到题目详情
+                card.style.cursor = 'pointer';
+                card.onclick = () => {
+                    window.open(`https://www.luogu.com.cn/problem/${problem.pid}`, '_blank');
+                };
+                
                 container.appendChild(card);
             });
+            
+            // 显示统计信息
+            if (apiResult.data && apiResult.data.problems) {
+                const stats = apiResult.data.problems;
+                const statsDiv = document.createElement('div');
+                statsDiv.style.marginTop = '1rem';
+                statsDiv.style.padding = '1rem';
+                statsDiv.style.background = '#f0f9ff';
+                statsDiv.style.borderRadius = '8px';
+                statsDiv.innerHTML = `
+                    <strong>📊 统计信息:</strong><br>
+                    总题目数: ${stats.count || 0} | 
+                    每页显示: ${stats.perPage || 0} | 
+                    当前显示: ${Math.min(problems.length, 20)} 个
+                `;
+                container.appendChild(statsDiv);
+            }
         }
 
         // 测试题目详情API

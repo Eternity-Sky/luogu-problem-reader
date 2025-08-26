@@ -235,7 +235,64 @@ exports.handler = async (event, context) => {
             }
         }
 
-        // 返回响应
+        // 🎯 特殊处理：如果是题目列表API，尝试从HTML中提取JSON数据
+        if (path.includes('/problem/list') && response.statusCode === 200) {
+            try {
+                console.log(`🔍 [${clientSessionId}] 检测到题目列表API，尝试提取JSON数据`);
+                
+                // 查找 lentille-context script 标签中的JSON数据
+                const scriptMatch = response.body.match(/<script id="lentille-context" type="application\/json">(.*?)<\/script>/s);
+                if (scriptMatch) {
+                    const jsonData = JSON.parse(scriptMatch[1]);
+                    console.log(`✅ [${clientSessionId}] 成功从HTML中提取JSON数据`);
+                    console.log(`📊 [${clientSessionId}] 题目数量:`, jsonData.data?.problems?.result?.length || 0);
+                    
+                    // 返回提取的JSON数据
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Headers': 'Content-Type',
+                            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    };
+                } else {
+                    console.log(`❌ [${clientSessionId}] 未找到lentille-context数据`);
+                }
+            } catch (error) {
+                console.log(`❌ [${clientSessionId}] JSON提取失败:`, error.message);
+            }
+        }
+
+        // 🎯 特殊处理：如果是题目详情或题解API，也尝试提取JSON数据
+        if ((path.includes('/problem/') && !path.includes('/problem/list')) && response.statusCode === 200) {
+            try {
+                console.log(`🔍 [${clientSessionId}] 检测到题目详情/题解API，尝试提取JSON数据`);
+                
+                const scriptMatch = response.body.match(/<script id="lentille-context" type="application\/json">(.*?)<\/script>/s);
+                if (scriptMatch) {
+                    const jsonData = JSON.parse(scriptMatch[1]);
+                    console.log(`✅ [${clientSessionId}] 成功从HTML中提取JSON数据`);
+                    
+                    return {
+                        statusCode: 200,
+                        headers: {
+                            'Access-Control-Allow-Origin': '*',
+                            'Access-Control-Allow-Headers': 'Content-Type',
+                            'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(jsonData)
+                    };
+                }
+            } catch (error) {
+                console.log(`❌ [${clientSessionId}] JSON提取失败:`, error.message);
+            }
+        }
+
+        // 返回原始响应
         return {
             statusCode: response.statusCode,
             headers: {
