@@ -584,11 +584,11 @@
                         console.log('✅ 登录成功判断通过');
                         showStatus('登录成功！', 'success');
                         
-                        // 🎯 关键修复：登录成功后立即生成新的sessionId并同步Cookie
-                        const newSessionId = `session_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-                        localStorage.setItem('luogu_session_id', newSessionId);
-                        console.log('🔄 登录成功后更新sessionId:', newSessionId);
-                        console.log('🕐 新sessionId生成时间:', new Date().toISOString());
+                        // 🎯 强制措施：使用固定全局sessionId，彻底解决时间差问题
+                        const FIXED_GLOBAL_SESSION_ID = 'session_luogu_global_fixed_2025';
+                        localStorage.setItem('luogu_session_id', FIXED_GLOBAL_SESSION_ID);
+                        console.log('🔒 强制使用固定全局sessionId:', FIXED_GLOBAL_SESSION_ID);
+                        console.log('🎯 强制措施：sessionId永不改变，Cookie与sessionId完美同步');
                         
                         // 登录成功后，尝试获取完整的用户信息（包括UID）
                         console.log('🔍 登录成功，尝试获取完整用户信息...');

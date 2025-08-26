@@ -921,17 +921,17 @@
     <script src="https://unpkg.com/katex@0/dist/katex.min.js"></script>
     <script src="https://unpkg.com/katex@0/dist/contrib/auto-render.min.js"></script>
     <script>
-      // 确保sessionId的一致性
+      // 🎯 强制措施：使用固定的全局sessionId，彻底解决时间差问题
       function ensureSessionId() {
-        let sessionId = localStorage.getItem('luogu_session_id');
-        if (!sessionId) {
-          sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-          localStorage.setItem('luogu_session_id', sessionId);
-          console.log('🆔 生成新的sessionId:', sessionId);
-        } else {
-          console.log('🆔 使用现有sessionId:', sessionId);
-        }
-        return sessionId;
+        // 使用固定的全局sessionId，永不改变
+        const FIXED_GLOBAL_SESSION_ID = 'session_luogu_global_fixed_2025';
+        
+        // 强制设置并持久化固定sessionId
+        localStorage.setItem('luogu_session_id', FIXED_GLOBAL_SESSION_ID);
+        console.log('🔒 使用固定全局sessionId:', FIXED_GLOBAL_SESSION_ID);
+        console.log('🎯 强制措施已启用：sessionId永不改变，彻底解决时间差问题');
+        
+        return FIXED_GLOBAL_SESSION_ID;
       }
 
       // 洛谷API代理函数
