@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>题目列表 - LGOJ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #10b981;
+            --danger-color: #ef4444;
+            --warning-color: #f59e0b;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-900: #111827;
+            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        .test-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .test-section h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-right: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            background: var(--gray-200);
+            color: var(--gray-600);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+        }
+
+        .result-box {
+            background: var(--gray-100);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            max-height: 400px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .status {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            margin: 0.5rem 0;
+            font-weight: 500;
+        }
+
+        .status.success {
+            background: #dcfce7;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .status.error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+
+        .status.info {
+            background: #dbeafe;
+            color: #1d4ed8;
+            border: 1px solid #bfdbfe;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .input-group input {
+            width: 100%;
+            max-width: 300px;
+            padding: 0.5rem;
+            border: 2px solid var(--gray-200);
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .problem-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .problem-card {
+            background: white;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: all 0.2s;
+        }
+
+        .problem-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .problem-id {
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .problem-title {
+            font-weight: 500;
+            color: var(--gray-900);
+            margin-bottom: 0.5rem;
+        }
+
+        .problem-meta {
+            font-size: 0.9rem;
+            color: var(--gray-600);
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 2rem 0; margin-bottom: 2rem;">
+        <div class="container" style="text-align: center;">
+            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
+                <i class="fas fa-list"></i> 题目列表
+            </h1>
+            <p style="font-size: 1.1rem; opacity: 0.9;">实时获取洛谷题目数据</p>
+            <div style="margin-top: 1rem;">
+                <a href="/" style="color: white; text-decoration: none; margin-right: 1rem;">
+                    <i class="fas fa-home"></i> 首页
+                </a>
+                <a href="/login.html" style="color: white; text-decoration: none; margin-right: 1rem;">
+                    <i class="fas fa-sign-in-alt"></i> 登录
+                </a>
+                <a href="/profile.html" style="color: white; text-decoration: none;">
+                    <i class="fas fa-user"></i> 个人中心
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 控制面板 -->
+        <div class="test-section">
+            <h2><i class="fas fa-cog"></i> 题目筛选</h2>
+            
+            <div style="display: flex; gap: 1rem; align-items: end; flex-wrap: wrap; margin-bottom: 1rem;">
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="pageInput">页码:</label>
+                    <input type="number" id="pageInput" value="1" min="1" style="max-width: 100px;">
+                </div>
+                
+                <div class="input-group" style="margin-bottom: 0;">
+                    <label for="difficultyFilter">难度:</label>
+                    <select id="difficultyFilter" style="padding: 0.5rem; border: 2px solid var(--gray-200); border-radius: 6px;">
+                        <option value="">全部</option>
+                        <option value="1">入门 (1)</option>
+                        <option value="2">普及- (2)</option>
+                        <option value="3">普及/提高- (3)</option>
+                        <option value="4">普及+/提高 (4)</option>
+                        <option value="5">提高+/省选- (5)</option>
+                        <option value="6">省选/NOI- (6)</option>
+                        <option value="7">NOI/NOI+/CTSC (7)</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="loadProblems()">
+                    <i class="fas fa-search"></i> 加载题目
+                </button>
+                
+                <button class="btn btn-secondary" onclick="loadProblems(true)">
+                    <i class="fas fa-sync"></i> 刷新
+                </button>
+            </div>
+            
+            <div id="problemListStatus"></div>
+        </div>
+
+        <!-- 题目列表展示 -->
+        <div class="test-section">
+            <h2><i class="fas fa-list"></i> 题目列表</h2>
+            <div id="problemListDisplay" class="problem-list">
+                <div style="text-align: center; padding: 2rem; color: var(--gray-600);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 2rem; margin-bottom: 1rem;"></i>
+                    <p>正在加载题目列表...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 代理函数 - 通过Netlify Functions调用洛谷API
+        async function proxyLuoguAPI(path, options = {}) {
+            const requestData = {
+                path: path,
+                method: options.method || 'GET',
+                headers: {
+                    'x-luogu-type': 'content-only',
+                    ...options.headers
+                },
+                sessionId: 'session_luogu_global_fixed_2025',
+                ...options
+            };
+
+            console.log('🔍 API请求:', requestData);
+
+            try {
+                const response = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                console.log('📡 HTTP响应状态:', response.status, response.statusText);
+                console.log('📡 HTTP响应头:', Object.fromEntries(response.headers.entries()));
+
+                // 获取响应文本
+                const responseText = await response.text();
+                console.log('📄 响应原始文本 (前500字符):', responseText.substring(0, 500));
+
+                // 尝试解析JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('✅ JSON解析成功:', result);
+                } catch (parseError) {
+                    console.error('❌ JSON解析失败:', parseError);
+                    console.log('📄 完整响应文本:', responseText);
+                    
+                    // 返回包含原始响应的错误对象
+                    return {
+                        error: `JSON解析失败: ${parseError.message}`,
+                        rawResponse: responseText,
+                        httpStatus: response.status
+                    };
+                }
+
+                return result;
+            } catch (error) {
+                console.error('❌ 网络请求失败:', error);
+                return {
+                    error: `网络请求失败: ${error.message}`,
+                    networkError: true
+                };
+            }
+        }
+
+        // 显示状态消息
+        function showStatus(elementId, message, type = 'info') {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="status ${type}">${message}</div>`;
+        }
+
+        // 显示结果
+        function showResult(elementId, data) {
+            const element = document.getElementById(elementId);
+            element.style.display = 'block';
+            element.textContent = JSON.stringify(data, null, 2);
+        }
+
+        // 加载题目列表
+        async function loadProblems(forceRefresh = false) {
+            const page = document.getElementById('pageInput').value || 1;
+            const difficulty = document.getElementById('difficultyFilter').value;
+            
+            showStatus('problemListStatus', '正在获取题目列表...', 'info');
+            
+            // 构建API路径
+            let apiPath = `/problem/list?page=${page}`;
+            if (difficulty) {
+                apiPath += `&difficulty=${difficulty}`;
+            }
+            
+            console.log('📋 加载题目列表:', apiPath);
+            
+            try {
+                const result = await proxyLuoguAPI(apiPath, {
+                    headers: {
+                        'x-luogu-type': 'content-only'
+                    }
+                });
+                
+                if (result.error) {
+                    showStatus('problemListStatus', `加载失败: ${result.error}`, 'error');
+                    return;
+                }
+
+                showStatus('problemListStatus', `第 ${page} 页题目加载成功!`, 'success');
+                
+                // 显示题目卡片
+                displayProblemCards(result);
+                
+            } catch (error) {
+                showStatus('problemListStatus', `请求失败: ${error.message}`, 'error');
+                console.error('题目列表加载错误:', error);
+            }
+        }
+
+        // 显示题目卡片
+        function displayProblemCards(apiResult) {
+            const container = document.getElementById('problemListDisplay');
+            container.innerHTML = '';
+            
+            console.log('🎨 开始解析题目数据:', apiResult);
+            
+            // 尝试从不同的数据结构中提取题目列表
+            let problems = [];
+            
+            // 新的数据结构：从lentille-context提取的数据
+            if (apiResult.data && apiResult.data.problems && apiResult.data.problems.result) {
+                problems = apiResult.data.problems.result;
+                console.log('✅ 使用lentille-context数据结构，题目数量:', problems.length);
+            }
+            // 备用数据结构
+            else if (apiResult.currentData && apiResult.currentData.problems) {
+                problems = apiResult.currentData.problems;
+                console.log('✅ 使用currentData数据结构');
+            } else if (apiResult.problems) {
+                problems = apiResult.problems;
+                console.log('✅ 使用直接problems数据结构');
+            } else if (apiResult.data && apiResult.data.problems) {
+                problems = apiResult.data.problems;
+                console.log('✅ 使用data.problems数据结构');
+            }
+            
+            if (!problems || problems.length === 0) {
+                container.innerHTML = '<p>未找到题目数据，请查看原始响应</p>';
+                console.log('❌ 未找到题目数据');
+                return;
+            }
+            
+            console.log(`🎯 准备显示 ${Math.min(problems.length, 20)} 个题目`);
+            
+            problems.slice(0, 20).forEach((problem, index) => {
+                const card = document.createElement('div');
+                card.className = 'problem-card';
+                
+                // 获取难度颜色
+                const difficultyColors = ['', '#fe4c61', '#f39c11', '#e74c3c', '#9d3dcf', '#0e1d69', '#0e1d69', '#000000'];
+                const difficultyColor = difficultyColors[problem.difficulty] || '#666';
+                
+                card.innerHTML = `
+                    <div class="problem-id" style="color: ${difficultyColor}; font-weight: bold;">
+                        ${problem.pid || problem.id || 'Unknown'}
+                    </div>
+                    <div class="problem-title">${problem.title || problem.name || '无标题'}</div>
+                    <div class="problem-meta">
+                        <span style="color: ${difficultyColor};">难度: ${problem.difficulty || '未知'}</span> | 
+                        通过: ${problem.totalAccepted || problem.acceptedCount || 0} | 
+                        提交: ${problem.totalSubmit || problem.submittedCount || 0}
+                    </div>
+                `;
+                
+                // 点击跳转到题目详情
+                card.style.cursor = 'pointer';
+                card.onclick = () => {
+                    window.open(`https://www.luogu.com.cn/problem/${problem.pid}`, '_blank');
+                };
+                
+                container.appendChild(card);
+            });
+            
+            // 显示统计信息和分页控制
+            if (apiResult.data && apiResult.data.problems) {
+                const stats = apiResult.data.problems;
+                const currentPage = parseInt(document.getElementById('pageInput').value) || 1;
+                
+                const statsDiv = document.createElement('div');
+                statsDiv.style.marginTop = '1rem';
+                statsDiv.style.padding = '1rem';
+                statsDiv.style.background = '#f0f9ff';
+                statsDiv.style.borderRadius = '8px';
+                statsDiv.innerHTML = `
+                    <strong>📊 统计信息:</strong><br>
+                    总题目数: ${stats.count || 0} | 
+                    每页显示: ${stats.perPage || 0} | 
+                    当前显示: ${Math.min(problems.length, 20)} 个
+                `;
+                container.appendChild(statsDiv);
+                
+                // 添加分页控制
+                addPaginationControls(currentPage, stats.count || 0, stats.perPage || 50);
+            }
+        }
+
+        // 分页导航
+        function goToPage(page) {
+            document.getElementById('pageInput').value = page;
+            loadProblems();
+        }
+
+        // 添加分页导航UI
+        function addPaginationControls(currentPage, totalCount, perPage) {
+            const container = document.getElementById('problemListDisplay');
+            const totalPages = Math.ceil(totalCount / perPage);
+            
+            if (totalPages <= 1) return;
+            
+            const paginationDiv = document.createElement('div');
+            paginationDiv.style.cssText = `
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                gap: 0.5rem;
+                margin-top: 2rem;
+                padding: 1rem;
+                background: var(--gray-50);
+                border-radius: 8px;
+            `;
+            
+            // 上一页按钮
+            if (currentPage > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'btn';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> 上一页';
+                prevBtn.onclick = () => goToPage(currentPage - 1);
+                paginationDiv.appendChild(prevBtn);
+            }
+            
+            // 页码显示
+            const pageInfo = document.createElement('span');
+            pageInfo.style.cssText = 'margin: 0 1rem; font-weight: 500;';
+            pageInfo.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+            paginationDiv.appendChild(pageInfo);
+            
+            // 下一页按钮
+            if (currentPage < totalPages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'btn';
+                nextBtn.innerHTML = '下一页 <i class="fas fa-chevron-right"></i>';
+                nextBtn.onclick = () => goToPage(currentPage + 1);
+                paginationDiv.appendChild(nextBtn);
+            }
+            
+            container.appendChild(paginationDiv);
+        }
+
+        // 页面加载时自动加载题目列表
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('题目列表页面已加载，开始自动加载题目');
+            loadProblems();
+        });
+    </script>
+</body>
+</html>
