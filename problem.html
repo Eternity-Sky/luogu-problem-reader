@@ -1573,12 +1573,32 @@
                     })
                 });
                 
-                const result = await response.json();
-                console.log('🔍 代理响应:', result);
+                // 检查响应状态
+                if (!response.ok) {
+                    console.error('❌ 代理请求失败:', response.status, response.statusText);
+                    showSubmitStatus('❌ 智能重试失败: 网络错误', 'error');
+                    return;
+                }
+                
+                // 获取响应文本并尝试解析
+                const responseText = await response.text();
+                console.log('🔍 代理原始响应:', responseText);
+                
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                } catch (parseError) {
+                    console.error('❌ JSON解析失败:', parseError);
+                    console.error('❌ 响应内容:', responseText);
+                    showSubmitStatus('❌ 智能重试失败: 响应格式错误', 'error');
+                    return;
+                }
+                
+                console.log('🔍 代理解析结果:', result);
                 
                 if (!result._backupCookies) {
-                    console.error('❌ 无法获取Cookie');
-                    showSubmitStatus('❌ 智能重试失败', 'error');
+                    console.error('❌ 无法获取Cookie，响应:', result);
+                    showSubmitStatus('❌ 智能重试失败: 无Cookie', 'error');
                     return;
                 }
                 
@@ -1630,7 +1650,27 @@
                     })
                 });
                 
-                const smartResult = await retryResult.json();
+                // 检查重试响应状态
+                if (!retryResult.ok) {
+                    console.error('❌ 重试请求失败:', retryResult.status, retryResult.statusText);
+                    showSubmitStatus('❌ 智能重试失败: 提交请求错误', 'error');
+                    return;
+                }
+                
+                // 获取重试响应文本并解析
+                const retryResponseText = await retryResult.text();
+                console.log('🔍 重试原始响应:', retryResponseText);
+                
+                let smartResult;
+                try {
+                    smartResult = JSON.parse(retryResponseText);
+                } catch (parseError) {
+                    console.error('❌ 重试JSON解析失败:', parseError);
+                    console.error('❌ 重试响应内容:', retryResponseText);
+                    showSubmitStatus('❌ 智能重试失败: 提交响应格式错误', 'error');
+                    return;
+                }
+                
                 console.log('🎯 智能重试结果:', smartResult);
                 
                 if (smartResult.rid) {
