@@ -1580,41 +1580,66 @@
                     return;
                 }
                 
-                // 获取响应文本并尝试解析
+                // 获取响应文本
                 const responseText = await response.text();
-                console.log('🔍 代理原始响应:', responseText);
+                console.log('🔍 代理原始响应长度:', responseText.length);
                 
-                let result;
-                try {
-                    result = JSON.parse(responseText);
-                } catch (parseError) {
-                    console.error('❌ JSON解析失败:', parseError);
-                    console.error('❌ 响应内容:', responseText);
-                    showSubmitStatus('❌ 智能重试失败: 响应格式错误', 'error');
-                    return;
+                let newClientId;
+                
+                // 检查是否是HTML响应（包含洛谷页面）
+                if (responseText.includes('<!DOCTYPE html>') && responseText.includes('luogu.com')) {
+                    console.log('🌐 检测到HTML响应，直接请求洛谷获取Cookie');
+                    
+                    // 直接请求洛谷主页获取Cookie
+                    const directResponse = await fetch('https://www.luogu.com.cn/', {
+                        method: 'GET',
+                        credentials: 'omit' // 不发送任何Cookie
+                    });
+                    
+                    // 从响应头中提取Set-Cookie
+                    const setCookieHeader = directResponse.headers.get('set-cookie');
+                    if (setCookieHeader) {
+                        const clientIdMatch = setCookieHeader.match(/__client_id=([^;]+)/);
+                        if (clientIdMatch) {
+                            newClientId = clientIdMatch[1];
+                            console.log('✅ 直接获取到client_id:', newClientId);
+                        }
+                    }
+                    
+                    if (!newClientId) {
+                        console.error('❌ 无法从直接请求获取client_id');
+                        showSubmitStatus('❌ 智能重试失败: 无法获取client_id', 'error');
+                        return;
+                    }
+                    
+                } else {
+                    // 尝试JSON解析（备用方案）
+                    try {
+                        const result = JSON.parse(responseText);
+                        console.log('🔍 代理解析结果:', result);
+                        
+                        if (result._backupCookies) {
+                            const cookieStr = atob(result._backupCookies);
+                            console.log('🔍 解码Cookie:', cookieStr);
+                            
+                            const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
+                            if (clientIdMatch) {
+                                newClientId = clientIdMatch[1];
+                                console.log('✅ 从JSON获取到client_id:', newClientId);
+                            }
+                        }
+                    } catch (parseError) {
+                        console.error('❌ JSON解析失败:', parseError);
+                        showSubmitStatus('❌ 智能重试失败: 响应格式错误', 'error');
+                        return;
+                    }
                 }
                 
-                console.log('🔍 代理解析结果:', result);
-                
-                if (!result._backupCookies) {
-                    console.error('❌ 无法获取Cookie，响应:', result);
-                    showSubmitStatus('❌ 智能重试失败: 无Cookie', 'error');
+                if (!newClientId) {
+                    console.error('❌ 无法获取client_id');
+                    showSubmitStatus('❌ 智能重试失败: 无法获取client_id', 'error');
                     return;
                 }
-                
-                // 提取client_id
-                const cookieStr = atob(result._backupCookies);
-                console.log('🔍 解码Cookie:', cookieStr);
-                
-                const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
-                if (!clientIdMatch) {
-                    console.error('❌ 无法提取client_id');
-                    showSubmitStatus('❌ 智能重试失败', 'error');
-                    return;
-                }
-                
-                const newClientId = clientIdMatch[1];
-                console.log('✅ 获取到client_id:', newClientId);
                 
                 // 第二步：获取CSRF令牌
                 console.log('🔑 第二步：获取CSRF令牌');
