@@ -907,6 +907,19 @@ $$(2×3^2 ×4×2+3×2^2 ×4×2+2×4^2 ×3×2)×(1+2+1)=1728$$</p>
     <script src="https://unpkg.com/katex@0/dist/katex.min.js"></script>
     <script src="https://unpkg.com/katex@0/dist/contrib/auto-render.min.js"></script>
     <script>
+      // 确保sessionId的一致性
+      function ensureSessionId() {
+        let sessionId = localStorage.getItem('luogu_session_id');
+        if (!sessionId) {
+          sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+          localStorage.setItem('luogu_session_id', sessionId);
+          console.log('🆔 生成新的sessionId:', sessionId);
+        } else {
+          console.log('🆔 使用现有sessionId:', sessionId);
+        }
+        return sessionId;
+      }
+
       // 洛谷API代理函数
       async function proxyLuoguAPI(path, options = {}) {
         const { method = 'GET', body, headers = {}, sessionId } = options;
@@ -915,7 +928,7 @@ $$(2×3^2 ×4×2+3×2^2 ×4×2+2×4^2 ×3×2)×(1+2+1)=1728$$</p>
           path,
           method,
           headers,
-          sessionId: sessionId || localStorage.getItem('luogu_session_id')
+          sessionId: sessionId || ensureSessionId()
         };
         
         if (body) {
