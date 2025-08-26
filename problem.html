@@ -305,6 +305,10 @@
                                     style="padding: 0.5rem 1rem; background: var(--primary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
                                 测试API
                             </button>
+                            <button onclick="loadAndDisplayProblem()" 
+                                    style="padding: 0.5rem 1rem; background: var(--secondary-color); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                                加载题目详情
+                            </button>
                         </div>
                         <div id="apiTestStatus"></div>
                         <pre id="apiTestResult" style="background: #f5f5f5; padding: 1rem; border-radius: 4px; max-height: 400px; overflow-y: auto; display: none;"></pre>
@@ -427,6 +431,33 @@
             }
         }
 
+        // 加载并显示题目详情
+        async function loadAndDisplayProblem() {
+            const pid = document.getElementById('testPid').value || 'P1001';
+            
+            console.log('🎯 加载并显示题目详情:', pid);
+            
+            try {
+                const result = await proxyLuoguAPI(`/problem/${pid}`, {
+                    headers: {
+                        'x-lentille-request': 'content-only'
+                    }
+                });
+                
+                if (result.error) {
+                    showStatus(`加载失败: ${result.error}`, 'error');
+                    return;
+                }
+
+                console.log('✅ 题目详情加载成功，开始显示:', result);
+                displayProblemDetail(result);
+                
+            } catch (error) {
+                showStatus(`请求失败: ${error.message}`, 'error');
+                console.error('题目详情加载错误:', error);
+            }
+        }
+
         // 加载题目详情
         async function loadProblemDetail(pid) {
             console.log('📋 加载题目详情:', pid);
@@ -461,21 +492,13 @@
             
             console.log('🎨 开始解析题目详情数据:', apiResult);
             
-            // 尝试从不同的数据结构中提取题目数据
+            // 根据实际API数据结构提取题目数据
             let problem = null;
             
             if (apiResult.data && apiResult.data.problem) {
                 problem = apiResult.data.problem;
                 console.log('✅ 使用data.problem数据结构');
-            } else if (apiResult.currentData && apiResult.currentData.problem) {
-                problem = apiResult.currentData.problem;
-                console.log('✅ 使用currentData.problem数据结构');
-            } else if (apiResult.problem) {
-                problem = apiResult.problem;
-                console.log('✅ 使用直接problem数据结构');
-            }
-
-            if (!problem) {
+            } else {
                 showStatus('未找到题目数据', 'error');
                 console.log('❌ 未找到题目数据，原始响应:', apiResult);
                 return;
@@ -483,6 +506,9 @@
 
             const difficultyText = getDifficultyText(problem.difficulty);
             const difficultyClass = `difficulty-${problem.difficulty || 0}`;
+            
+            // 获取题目内容（优先使用content，fallback到contenu）
+            const content = problem.content || problem.contenu || {};
             
             container.innerHTML = `
                 <div class="problem-header">
@@ -511,36 +537,48 @@
                     </div>
                 </div>
                 <div class="problem-content">
+                    ${content.background ? `
+                    <div class="section">
+                        <div class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            题目背景
+                        </div>
+                        <div class="problem-description">
+                            ${formatContent(content.background)}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
                     <div class="section">
                         <div class="section-title">
                             <i class="fas fa-file-alt"></i>
                             题目描述
                         </div>
                         <div class="problem-description">
-                            ${problem.description || '暂无题目描述'}
+                            ${formatContent(content.description || '暂无题目描述')}
                         </div>
                     </div>
                     
-                    ${problem.inputFormat ? `
+                    ${content.formatI ? `
                     <div class="section">
                         <div class="section-title">
                             <i class="fas fa-sign-in-alt"></i>
                             输入格式
                         </div>
                         <div class="problem-description">
-                            ${problem.inputFormat}
+                            ${formatContent(content.formatI)}
                         </div>
                     </div>
                     ` : ''}
                     
-                    ${problem.outputFormat ? `
+                    ${content.formatO ? `
                     <div class="section">
                         <div class="section-title">
                             <i class="fas fa-sign-out-alt"></i>
                             输出格式
                         </div>
                         <div class="problem-description">
-                            ${problem.outputFormat}
+                            ${formatContent(content.formatO)}
                         </div>
                     </div>
                     ` : ''}
@@ -557,11 +595,11 @@
                                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                                     <div>
                                         <strong>输入:</strong>
-                                        <pre>${sample.input || ''}</pre>
+                                        <pre>${sample[0] || ''}</pre>
                                     </div>
                                     <div>
                                         <strong>输出:</strong>
-                                        <pre>${sample.output || ''}</pre>
+                                        <pre>${sample[1] || ''}</pre>
                                     </div>
                                 </div>
                             </div>
@@ -569,14 +607,14 @@
                     </div>
                     ` : ''}
                     
-                    ${problem.hint ? `
+                    ${content.hint ? `
                     <div class="section">
                         <div class="section-title">
                             <i class="fas fa-lightbulb"></i>
                             提示
                         </div>
                         <div class="problem-description">
-                            ${problem.hint}
+                            ${formatContent(content.hint)}
                         </div>
                     </div>
                     ` : ''}
@@ -589,6 +627,26 @@
             
             // 更新页面标题
             document.title = `${problem.pid} - ${problem.title} - LGOJ 题目浏览站`;
+        }
+
+        // 格式化内容，处理Markdown和换行
+        function formatContent(content) {
+            if (!content) return '';
+            
+            // 处理换行符
+            content = content.replace(/\n/g, '<br>');
+            
+            // 处理Markdown链接 [text](url)
+            content = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+            
+            // 处理代码块 ```
+            content = content.replace(/```(\w+)?\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+            content = content.replace(/```plain\n([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
+            
+            // 处理粗体 **text**
+            content = content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            return content;
         }
 
         // 页面加载时获取题目ID并加载详情
