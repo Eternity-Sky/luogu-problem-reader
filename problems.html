@@ -173,41 +173,107 @@
         }
 
         .problem-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1rem;
             margin-top: 1rem;
         }
 
-        .problem-card {
+        .problem-table {
+            width: 100%;
             background: white;
-            border: 1px solid var(--gray-200);
-            border-radius: 8px;
-            padding: 1rem;
-            transition: all 0.2s;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
         }
 
-        .problem-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
+        .problem-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 120px 1fr 100px 120px 120px;
+            gap: 1rem;
+            font-weight: 600;
+            align-items: center;
+        }
+
+        .problem-row {
+            padding: 1rem;
+            display: grid;
+            grid-template-columns: 120px 1fr 100px 120px 120px;
+            gap: 1rem;
+            align-items: center;
+            border-bottom: 1px solid var(--gray-100);
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .problem-row:hover {
+            background: var(--gray-50);
+            transform: translateX(4px);
+        }
+
+        .problem-row:last-child {
+            border-bottom: none;
         }
 
         .problem-id {
             font-weight: 600;
             color: var(--primary-color);
-            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
         }
 
         .problem-title {
             font-weight: 500;
             color: var(--gray-900);
-            margin-bottom: 0.5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        .problem-meta {
+        .difficulty-tag {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+            color: white;
+            min-width: 80px;
+        }
+
+        .difficulty-1 { background: linear-gradient(135deg, #10b981, #059669); }
+        .difficulty-2 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+        .difficulty-3 { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+        .difficulty-4 { background: linear-gradient(135deg, #8b5cf6, #7c3aed); }
+        .difficulty-5 { background: linear-gradient(135deg, #ef4444, #dc2626); }
+        .difficulty-6 { background: linear-gradient(135deg, #991b1b, #7f1d1d); }
+        .difficulty-7 { background: linear-gradient(135deg, #000000, #374151); }
+
+        .problem-stats {
             font-size: 0.9rem;
             color: var(--gray-600);
+            text-align: center;
+        }
+
+        .problem-stats .accepted {
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        .problem-stats .total {
+            color: var(--gray-500);
+        }
+
+        @media (max-width: 768px) {
+            .problem-header,
+            .problem-row {
+                grid-template-columns: 80px 1fr 80px;
+                gap: 0.5rem;
+            }
+            
+            .problem-header .stats-header,
+            .problem-row .problem-stats:last-child {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -283,6 +349,35 @@
     </div>
 
     <script>
+        // 获取难度文本
+        function getDifficultyText(difficulty) {
+            const texts = {
+                0: '暂无评定',
+                1: '入门',
+                2: '普及-',
+                3: '普及/提高-',
+                4: '普及+/提高',
+                5: '提高+/省选-',
+                6: '省选/NOI-',
+                7: 'NOI/NOI+/CTSC'
+            };
+            return texts[difficulty] || '未知';
+        }
+
+        // 获取难度颜色
+        function getDifficultyColor(difficulty) {
+            const colors = {
+                1: '#fe4c61',  // 入门
+                2: '#f39c11',  // 普及-
+                3: '#e74c3c',  // 普及/提高-
+                4: '#9d3dcf',  // 普及+/提高
+                5: '#0e1d69',  // 提高+/省选-
+                6: '#0e1d69',  // 省选/NOI-
+                7: '#000000'   // NOI/NOI+/CTSC
+            };
+            return colors[difficulty] || '#666';
+        }
+
         // 代理函数 - 通过Netlify Functions调用洛谷API
         async function proxyLuoguAPI(path, options = {}) {
             const requestData = {
@@ -392,7 +487,7 @@
             }
         }
 
-        // 显示题目卡片
+        // 显示题目列表
         function displayProblemCards(apiResult) {
             const container = document.getElementById('problemListDisplay');
             container.innerHTML = '';
@@ -414,47 +509,56 @@
             } else if (apiResult.problems) {
                 problems = apiResult.problems;
                 console.log('✅ 使用直接problems数据结构');
-            } else if (apiResult.data && apiResult.data.problems) {
-                problems = apiResult.data.problems;
-                console.log('✅ 使用data.problems数据结构');
             }
-            
+
             if (!problems || problems.length === 0) {
-                container.innerHTML = '<p>未找到题目数据，请查看原始响应</p>';
-                console.log('❌ 未找到题目数据');
+                container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">暂无题目数据</div>';
                 return;
             }
+
+            // 创建表格结构
+            const table = document.createElement('div');
+            table.className = 'problem-table';
             
-            console.log(`🎯 准备显示 ${Math.min(problems.length, 20)} 个题目`);
-            
-            problems.slice(0, 20).forEach((problem, index) => {
-                const card = document.createElement('div');
-                card.className = 'problem-card';
+            // 表头
+            const header = document.createElement('div');
+            header.className = 'problem-header';
+            header.innerHTML = `
+                <div>题目编号</div>
+                <div>题目标题</div>
+                <div>难度</div>
+                <div>通过率</div>
+                <div class="stats-header">提交统计</div>
+            `;
+            table.appendChild(header);
+
+            problems.forEach(problem => {
+                const row = document.createElement('div');
+                row.className = 'problem-row';
+                row.onclick = () => window.open(`https://www.luogu.com.cn/problem/${problem.pid}`, '_blank');
                 
-                // 获取难度颜色
-                const difficultyColors = ['', '#fe4c61', '#f39c11', '#e74c3c', '#9d3dcf', '#0e1d69', '#0e1d69', '#000000'];
-                const difficultyColor = difficultyColors[problem.difficulty] || '#666';
+                const difficultyText = getDifficultyText(problem.difficulty);
+                const difficultyClass = `difficulty-${problem.difficulty || 0}`;
                 
-                card.innerHTML = `
-                    <div class="problem-id" style="color: ${difficultyColor}; font-weight: bold;">
-                        ${problem.pid || problem.id || 'Unknown'}
-                    </div>
-                    <div class="problem-title">${problem.title || problem.name || '无标题'}</div>
-                    <div class="problem-meta">
-                        <span style="color: ${difficultyColor};">难度: ${problem.difficulty || '未知'}</span> | 
-                        通过: ${problem.totalAccepted || problem.acceptedCount || 0} | 
-                        提交: ${problem.totalSubmit || problem.submittedCount || 0}
+                const acceptedRate = problem.totalSubmit > 0 
+                    ? ((problem.totalAccepted || 0) / problem.totalSubmit * 100).toFixed(1) + '%'
+                    : 'N/A';
+                
+                row.innerHTML = `
+                    <div class="problem-id">${problem.pid}</div>
+                    <div class="problem-title" title="${problem.title}">${problem.title}</div>
+                    <div><span class="difficulty-tag ${difficultyClass}">${difficultyText}</span></div>
+                    <div class="problem-stats">${acceptedRate}</div>
+                    <div class="problem-stats">
+                        <span class="accepted">${problem.totalAccepted || 0}</span> / 
+                        <span class="total">${problem.totalSubmit || 0}</span>
                     </div>
                 `;
                 
-                // 点击跳转到题目详情
-                card.style.cursor = 'pointer';
-                card.onclick = () => {
-                    window.open(`https://www.luogu.com.cn/problem/${problem.pid}`, '_blank');
-                };
-                
-                container.appendChild(card);
+                table.appendChild(row);
             });
+            
+            container.appendChild(table);
             
             // 显示统计信息和分页控制
             if (apiResult.data && apiResult.data.problems) {
@@ -470,7 +574,7 @@
                     <strong>📊 统计信息:</strong><br>
                     总题目数: ${stats.count || 0} | 
                     每页显示: ${stats.perPage || 0} | 
-                    当前显示: ${Math.min(problems.length, 20)} 个
+                    当前显示: ${problems.length} 个
                 `;
                 container.appendChild(statsDiv);
                 
@@ -504,7 +608,8 @@
                 border-radius: 8px;
             `;
             
-            // 上一页按钮
+
+            
             if (currentPage > 1) {
                 const prevBtn = document.createElement('button');
                 prevBtn.className = 'btn';
