@@ -103,6 +103,33 @@ exports.handler = async (event, context) => {
         } else {
             console.log(`❌ [${clientSessionId}] 没有找到保存的Cookie，当前所有会话:`, Object.keys(globalCookies));
             console.log(`❌ [${clientSessionId}] 全部Cookie内容:`, JSON.stringify(globalCookies, null, 2));
+            
+            // 如果是代码提交请求且没有Cookie，直接返回错误
+            if (path.includes('/fe/api/problem/submit/')) {
+                console.log(`🚫 [${clientSessionId}] 代码提交请求但无有效Cookie，直接返回403错误`);
+                return {
+                    statusCode: 403,
+                    headers: {
+                        'Access-Control-Allow-Origin': '*',
+                        'Access-Control-Allow-Headers': 'Content-Type',
+                        'Access-Control-Allow-Methods': 'POST, OPTIONS',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        errorType: "SessionExpired",
+                        errorCode: 403,
+                        status: 403,
+                        data: "会话已过期，请重新登录",
+                        errorMessage: "会话已过期，请重新登录。可能的原因：1) 登录会话已过期 2) Netlify Functions重启导致Cookie丢失 3) sessionId不匹配",
+                        trace: "",
+                        customData: {
+                            sessionId: clientSessionId,
+                            availableSessions: Object.keys(globalCookies),
+                            suggestion: "请访问登录页面重新登录"
+                        }
+                    })
+                };
+            }
         }
 
         // 如果是POST请求，添加必要的头部
