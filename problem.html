@@ -716,38 +716,50 @@
             
             <!-- 代码提交区域 -->
             <div id="submitSection" class="submit-section" style="display: none;">
-                <div class="submit-title">
-                    <i class="fas fa-code"></i>
-                    提交代码
+                <h3><i class="fas fa-code"></i> 代码提交</h3>
+                
+                <!-- 强硬措施：手动Cookie输入 -->
+                <div class="emergency-login" style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-bottom: 15px; display: none;" id="emergencyLogin">
+                    <h4 style="color: #856404; margin: 0 0 10px 0;"><i class="fas fa-exclamation-triangle"></i> 强硬措施：手动Cookie</h4>
+                    <p style="margin: 0 0 10px 0; color: #856404; font-size: 14px;">请从浏览器开发者工具中复制完整的Cookie：</p>
+                    <textarea id="manualCookie" placeholder="_uid=1234567; __client_id=abc123def456..." 
+                              style="width: 100%; height: 60px; font-family: monospace; font-size: 12px; margin-bottom: 10px;"></textarea>
+                    <button onclick="saveManualCookie()" class="btn btn-warning btn-sm">
+                        <i class="fas fa-save"></i> 保存并测试
+                    </button>
+                    <button onclick="directSubmit()" class="btn btn-danger btn-sm" style="margin-left: 10px;">
+                        <i class="fas fa-rocket"></i> 直接提交
+                    </button>
                 </div>
                 
-                <div class="submit-form">
-                    <div class="form-group">
-                        <label for="languageSelect">编程语言:</label>
-                        <select id="languageSelect" class="form-control">
-                            <option value="0">C++14 (GCC 9)</option>
-                            <option value="1">C++17 (GCC 9)</option>
-                            <option value="2">C++20 (GCC 13)</option>
-                            <option value="3">C (GCC 9)</option>
-                            <option value="7">Python3</option>
-                            <option value="8">Java8</option>
-                            <option value="11">Node.js LTS</option>
-                            <option value="12">PyPy3</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="codeEditor">代码:</label>
-                        <textarea id="codeEditor" class="code-editor" placeholder="请输入您的代码..."></textarea>
-                    </div>
-                    
-                    <div class="submit-actions">
-                        <button id="submitBtn" class="btn-submit">
-                            <i class="fas fa-paper-plane"></i>
-                            提交代码
-                        </button>
-                        <div id="submitStatus" class="submit-status"></div>
-                    </div>
+                <div class="form-group">
+                    <label for="languageSelect">编程语言:</label>
+                    <select id="languageSelect" class="form-control">
+                        <option value="0">C++14 (GCC 9)</option>
+                        <option value="1">C++17 (GCC 9)</option>
+                        <option value="2">C++20 (GCC 13)</option>
+                        <option value="3">C (GCC 9)</option>
+                        <option value="7">Python 3</option>
+                        <option value="8">Java 8</option>
+                        <option value="16">Node.js 12.18.4</option>
+                        <option value="11">PyPy 3</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="codeEditor">代码:</label>
+                    <textarea id="codeEditor" class="code-editor" placeholder="请输入您的代码..."></textarea>
+                </div>
+                
+                <div class="submit-actions">
+                    <button id="submitBtn" class="btn-submit" onclick="submitCode()">
+                        <i class="fas fa-paper-plane"></i>
+                        提交代码
+                    </button>
+                    <button onclick="showEmergencyLogin()" class="btn btn-warning" style="margin-left: 10px;">
+                        <i class="fas fa-tools"></i> 强硬措施
+                    </button>
+                    <div id="submitStatus" class="submit-status"></div>
                 </div>
             </div>
             
@@ -1466,14 +1478,10 @@
                 // 检查是否登录失败
                 if (submitResult.status === 403 || submitResult.errorCode === 403) {
                     console.log('❌ 登录状态失效，Cookie信息:', submitResult._backupCookies);
-                    showSubmitStatus('登录状态已失效，请重新登录后再试', 'error');
+                    showSubmitStatus('登录失败！点击"强硬措施"手动输入Cookie', 'error');
                     
-                    // 建议用户重新登录
-                    setTimeout(() => {
-                        if (confirm('登录状态已失效，是否前往登录页面重新登录？')) {
-                            window.location.href = '/login.html';
-                        }
-                    }, 2000);
+                    // 显示强硬措施
+                    document.getElementById('emergencyLogin').style.display = 'block';
                     return;
                 }
                 
@@ -1506,9 +1514,109 @@
 
         // 显示提交状态
         function showSubmitStatus(message, type) {
-            const submitStatus = document.getElementById('submitStatus');
-            submitStatus.textContent = message;
-            submitStatus.className = `submit-status ${type}`;
+            const statusDiv = document.getElementById('submitStatus');
+            statusDiv.textContent = message;
+            statusDiv.className = `submit-status ${type}`;
+        }
+        
+        // 🚀 强硬措施：显示紧急登录模式
+        function showEmergencyLogin() {
+            const emergencyDiv = document.getElementById('emergencyLogin');
+            emergencyDiv.style.display = 'block';
+            
+            // 提供详细说明
+            showSubmitStatus('💡 请按F12打开开发者工具，在Application/Storage > Cookies中找到洛谷的Cookie', 'info');
+        }
+        
+        // 🚀 强硬措施：保存手动输入的Cookie
+        function saveManualCookie() {
+            const manualCookie = document.getElementById('manualCookie').value.trim();
+            if (!manualCookie) {
+                alert('请输入Cookie！');
+                return;
+            }
+            
+            // 验证Cookie格式
+            if (!manualCookie.includes('_uid=') || !manualCookie.includes('__client_id=')) {
+                alert('Cookie格式不正确！请确保包含_uid和__client_id字段。');
+                return;
+            }
+            
+            // 保存到localStorage作为备份
+            const encodedCookie = btoa(manualCookie);
+            localStorage.setItem('manual_backup_cookies', encodedCookie);
+            
+            console.log('🔧 手动保存Cookie:', manualCookie);
+            showSubmitStatus('✅ Cookie已保存，现在可以尝试提交代码', 'success');
+        }
+        
+        // 🚀 强硬措施：直接提交（绕过所有检查）
+        async function directSubmit() {
+            const pid = getProblemIdFromUrl();
+            const language = parseInt(document.getElementById('languageSelect').value);
+            const code = document.getElementById('codeEditor').value.trim();
+            const manualCookie = document.getElementById('manualCookie').value.trim();
+            
+            if (!code) {
+                alert('请输入代码！');
+                return;
+            }
+            
+            if (!manualCookie) {
+                alert('请先输入Cookie！');
+                return;
+            }
+            
+            try {
+                showSubmitStatus('🚀 强硬提交中...', 'loading');
+                
+                // 获取CSRF令牌
+                const csrfToken = await getCSRFToken(pid);
+                console.log('🔧 强硬模式 - CSRF令牌:', csrfToken);
+                
+                // 直接调用Netlify函数，使用手动Cookie
+                const response = await fetch('/.netlify/functions/luogu-proxy', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        path: `/fe/api/problem/submit/${pid}`,
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-csrf-token': csrfToken,
+                            'referer': `https://www.luogu.com.cn/problem/${pid}`,
+                            'origin': 'https://www.luogu.com.cn'
+                        },
+                        body: JSON.stringify({
+                            lang: language,
+                            code: code,
+                            enableO2: 0
+                        }),
+                        backupCookies: btoa(manualCookie), // 使用手动输入的Cookie
+                        sessionId: 'manual_emergency_session'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('🚀 强硬提交结果:', result);
+                
+                if (result.rid) {
+                    showSubmitStatus(`🎉 提交成功！记录ID: ${result.rid}`, 'success');
+                    setTimeout(() => {
+                        if (confirm('提交成功！是否查看提交记录？')) {
+                            window.open(`https://www.luogu.com.cn/record/${result.rid}`, '_blank');
+                        }
+                    }, 1000);
+                } else {
+                    showSubmitStatus(`❌提交失败: ${result.errorMessage || result.data || '未知错误'}`, 'error');
+                }
+                
+            } catch (error) {
+                console.error('🚀 强硬提交错误:', error);
+                showSubmitStatus('❌ 强硬提交失败: ' + error.message, 'error');
+            }
         }
 
         // 显示/隐藏提交区域
