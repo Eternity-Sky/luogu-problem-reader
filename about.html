@@ -46,22 +46,25 @@
 
         /* Header */
         .header {
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow);
+            background-color: #fff;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 0;
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 1000;
+            box-shadow: var(--shadow);
         }
 
         .header-container {
             display: flex;
-            justify-content: space-between;
+            justify-content: center;
             align-items: center;
-            padding: 1rem 0;
+            position: relative;
         }
 
         .logo {
+            position: absolute;
+            left: 0;
             font-size: 1.5rem;
             font-weight: 700;
             color: var(--primary-color);
@@ -73,23 +76,30 @@
 
         .nav {
             display: flex;
-            gap: 2rem;
+            justify-content: center;
         }
 
-        .nav a {
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav ul li a {
             color: var(--gray-700);
             text-decoration: none;
             font-weight: 500;
             transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
         }
 
-        .nav a:hover {
+        .nav ul li a:hover,
+        .nav ul li a.active {
             color: var(--primary-color);
-        }
-
-        .nav a.active {
-            color: var(--primary-color);
-            font-weight: 600;
+            background-color: var(--gray-50);
         }
 
         /* Main Content */
@@ -443,10 +453,9 @@
                 LGOJ
             </a>
             <nav class="nav">
-                <a href="/">首页</a>
-                <a href="/problems.html">题库</a>
-                <a href="/login.html">登录</a>
-                <a href="/about.html" class="active">关于</a>
+                <ul>
+                    <li><a href="/">首页</a></li>
+                </ul>
             </nav>
         </div>
     </header>

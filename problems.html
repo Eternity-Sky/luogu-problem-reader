@@ -36,12 +36,143 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 2rem;
+            padding: 0 1.5rem;
         }
 
+        /* Header */
         .header {
+            background-color: #fff;
+            border-bottom: 1px solid var(--gray-200);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .logo {
+            position: absolute;
+            left: 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: center;
+        }
+
+        .nav ul {
+            list-style: none;
+            display: flex;
+            gap: 2rem;
+            margin: 0;
+            padding: 0;
+        }
+
+        .nav ul li a {
+            color: var(--gray-700);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+        }
+
+        .nav ul li a:hover,
+        .nav ul li a.active {
+            color: var(--primary-color);
+            background-color: var(--gray-50);
+        }
+
+        /* 用户信息样式 */
+        .user-info {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            display: none;
+            color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .user-info.show {
+            display: flex;
+            align-items: center;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            margin-right: 1rem;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .user-details {
+            flex: 1;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .user-uid {
+            opacity: 0.8;
+            font-size: 0.875rem;
+        }
+
+        .login-prompt {
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            display: none;
+        }
+
+        .login-prompt.show {
+            display: block;
+        }
+
+        .login-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 0.5rem;
+            transition: background-color 0.2s;
+        }
+
+        .login-btn:hover {
+            background: var(--gray-700);
+            color: white;
+            text-decoration: none;
+        }
+
+        /* 页面标题 */
+        .page-header {
             text-align: center;
             margin-bottom: 3rem;
+            padding: 2rem 0;
         }
 
         .header h1 {
@@ -278,25 +409,49 @@
 </head>
 <body>
     <!-- Header -->
-    <header style="background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; padding: 2rem 0; margin-bottom: 2rem;">
-        <div class="container" style="text-align: center;">
-            <h1 style="font-size: 2.5rem; font-weight: 700; margin-bottom: 0.5rem;">
-                <i class="fas fa-list"></i> 题目列表
-            </h1>
-            <p style="font-size: 1.1rem; opacity: 0.9;">实时获取洛谷题目数据</p>
-            <div style="margin-top: 1rem;">
-                <a href="/" style="color: white; text-decoration: none; margin-right: 1rem;">
-                    <i class="fas fa-home"></i> 首页
-                </a>
-                <a href="/login.html" style="color: white; text-decoration: none; margin-right: 1rem;">
-                    <i class="fas fa-sign-in-alt"></i> 登录
-                </a>
-                <a href="/profile.html" style="color: white; text-decoration: none;">
-                    <i class="fas fa-user"></i> 个人中心
+    <header class="header">
+        <div class="container header-container">
+            <a href="/" class="logo">
+                <i class="fas fa-code"></i>
+                LGOJ
+            </a>
+            <nav class="nav">
+                <ul>
+                    <li><a href="/">首页</a></li>
+                    <li><a href="/problems.html" class="active">题库</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 用户信息显示 -->
+    <div class="container">
+        <div id="userInfo" class="user-info">
+            <img id="userAvatar" class="user-avatar" src="" alt="用户头像">
+            <div class="user-details">
+                <div id="userName" class="user-name"></div>
+                <div id="userUid" class="user-uid"></div>
+            </div>
+        </div>
+
+        <!-- 登录提示 -->
+        <div id="loginPrompt" class="login-prompt">
+            <div>
+                <i class="fas fa-user-circle" style="font-size: 2rem; color: var(--gray-400); margin-bottom: 0.5rem;"></i>
+                <p style="margin: 0.5rem 0; color: var(--gray-600);">登录后可以查看更多题目信息和提交记录</p>
+                <a href="/login.html" class="login-btn">
+                    <i class="fas fa-sign-in-alt"></i>
+                    立即登录
                 </a>
             </div>
         </div>
-    </header>
+
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1><i class="fas fa-list"></i> 题目列表</h1>
+            <p>实时获取洛谷题目数据</p>
+        </div>
+    </div>
 
     <div class="container">
         <!-- 控制面板 -->
@@ -635,11 +790,218 @@
             container.appendChild(paginationDiv);
         }
 
-        // 页面加载时自动加载题目列表
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('题目列表页面已加载，开始自动加载题目');
-            loadProblems();
-        });
-    </script>
+// 显示题目列表
+function displayProblemCards(apiResult) {
+    const container = document.getElementById('problemListDisplay');
+    container.innerHTML = '';
+    
+    console.log('🎨 开始解析题目数据:', apiResult);
+    
+    // 尝试从不同的数据结构中提取题目列表
+    let problems = [];
+    
+    // 新的数据结构：从lentille-context提取的数据
+    if (apiResult.data && apiResult.data.problems && apiResult.data.problems.result) {
+        problems = apiResult.data.problems.result;
+        console.log('✅ 使用lentille-context数据结构，题目数量:', problems.length);
+    }
+    // 备用数据结构
+    else if (apiResult.currentData && apiResult.currentData.problems) {
+        problems = apiResult.currentData.problems;
+        console.log('✅ 使用currentData数据结构');
+    } else if (apiResult.problems) {
+        problems = apiResult.problems;
+        console.log('✅ 使用直接problems数据结构');
+    }
+
+    if (!problems || problems.length === 0) {
+        container.innerHTML = '<div style="text-align: center; padding: 2rem; color: #666;">暂无题目数据</div>';
+        return;
+    }
+
+    // 创建表格结构
+    const table = document.createElement('div');
+    table.className = 'problem-table';
+    
+    // 表头
+    const header = document.createElement('div');
+    header.className = 'problem-header';
+    header.innerHTML = `
+        <div>题目编号</div>
+        <div>题目标题</div>
+        <div>难度</div>
+        <div>通过率</div>
+        <div class="stats-header">提交统计</div>
+    `;
+    table.appendChild(header);
+
+    problems.forEach(problem => {
+        const row = document.createElement('div');
+        row.className = 'problem-row';
+        row.onclick = () => window.location.href = `/problem.html?pid=${problem.pid}`;
+        
+        const difficultyText = getDifficultyText(problem.difficulty);
+        const difficultyClass = `difficulty-${problem.difficulty || 0}`;
+        
+        const acceptedRate = problem.totalSubmit > 0 
+            ? ((problem.totalAccepted || 0) / problem.totalSubmit * 100).toFixed(1) + '%'
+            : 'N/A';
+        
+        row.innerHTML = `
+            <div class="problem-id">${problem.pid}</div>
+            <div class="problem-title" title="${problem.title}">${problem.title}</div>
+            <div><span class="difficulty-tag ${difficultyClass}">${difficultyText}</span></div>
+            <div class="problem-stats">${acceptedRate}</div>
+            <div class="problem-stats">
+                <span class="accepted">${problem.totalAccepted || 0}</span> / 
+                <span class="total">${problem.totalSubmit || 0}</span>
+            </div>
+        `;
+        
+        table.appendChild(row);
+    });
+    
+    container.appendChild(table);
+    
+    // 显示统计信息和分页控制
+    if (apiResult.data && apiResult.data.problems) {
+        const stats = apiResult.data.problems;
+        const currentPage = parseInt(document.getElementById('pageInput').value) || 1;
+        
+        const statsDiv = document.createElement('div');
+        statsDiv.style.marginTop = '1rem';
+        statsDiv.style.padding = '1rem';
+        statsDiv.style.background = '#f0f9ff';
+        statsDiv.style.borderRadius = '8px';
+        statsDiv.innerHTML = `
+            <strong>📊 统计信息:</strong><br>
+            总题目数: ${stats.count || 0} | 
+            每页显示: ${stats.perPage || 0} | 
+            当前显示: ${problems.length} 个
+        `;
+        container.appendChild(statsDiv);
+        
+        // 添加分页控制
+        addPaginationControls(currentPage, stats.count || 0, stats.perPage || 50);
+    }
+}
+
+// 分页导航
+function goToPage(page) {
+    document.getElementById('pageInput').value = page;
+    loadProblems();
+}
+
+// 添加分页导航UI
+function addPaginationControls(currentPage, totalCount, perPage) {
+    const container = document.getElementById('problemListDisplay');
+    const totalPages = Math.ceil(totalCount / perPage);
+    
+    if (totalPages <= 1) return;
+    
+    const paginationDiv = document.createElement('div');
+    paginationDiv.style.cssText = `
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 2rem;
+        padding: 1rem;
+        background: var(--gray-50);
+        border-radius: 8px;
+    `;
+    
+
+    
+    if (currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.className = 'btn';
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i> 上一页';
+        prevBtn.onclick = () => goToPage(currentPage - 1);
+        paginationDiv.appendChild(prevBtn);
+    }
+    
+    // 页码显示
+    const pageInfo = document.createElement('span');
+    pageInfo.style.cssText = 'margin: 0 1rem; font-weight: 500;';
+    pageInfo.textContent = `第 ${currentPage} 页 / 共 ${totalPages} 页`;
+    paginationDiv.appendChild(pageInfo);
+    
+    // 下一页按钮
+    if (currentPage < totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.className = 'btn';
+        nextBtn.innerHTML = '下一页 <i class="fas fa-chevron-right"></i>';
+        nextBtn.onclick = () => goToPage(currentPage + 1);
+        paginationDiv.appendChild(nextBtn);
+    }
+    
+    container.appendChild(paginationDiv);
+}
+
+// 检查登录状态并显示用户信息
+function checkLoginStatus() {
+    // 使用正确的localStorage key
+    const userInfoStr = localStorage.getItem('luogu_user_info');
+    const userInfoDiv = document.getElementById('userInfo');
+    const loginPromptDiv = document.getElementById('loginPrompt');
+    
+    console.log('🔍 检查登录状态，localStorage中的用户信息:', userInfoStr);
+    
+    if (userInfoStr) {
+        try {
+            const user = JSON.parse(userInfoStr);
+            console.log('📋 解析到的用户信息:', user);
+            
+            if (user && (user.uid || user.username)) {
+                // 显示用户信息
+                const displayName = user.name || user.username || `用户${user.uid}`;
+                document.getElementById('userName').textContent = displayName;
+                
+                if (user.uid) {
+                    document.getElementById('userUid').textContent = `UID: ${user.uid}`;
+                } else {
+                    document.getElementById('userUid').textContent = `用户名: ${user.username}`;
+                }
+                
+                // 设置头像
+                const avatarImg = document.getElementById('userAvatar');
+                if (user.avatar) {
+                    avatarImg.src = user.avatar;
+                } else if (user.uid) {
+                    avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
+                } else {
+                    // 使用默认头像
+                    avatarImg.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K';
+                }
+                
+                userInfoDiv.classList.add('show');
+                loginPromptDiv.classList.remove('show');
+                console.log('✅ 登录状态检查成功，显示用户信息');
+                return true;
+            }
+        } catch (error) {
+            console.warn('❌ 解析用户信息失败:', error);
+        }
+    }
+    
+    // 未登录状态
+    userInfoDiv.classList.remove('show');
+    loginPromptDiv.classList.add('show');
+    console.log('❌ 未检测到登录状态，显示登录提示');
+    return false;
+}
+
+// 页面加载时初始化
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('📋 题目列表页面加载完成');
+    
+    // 检查登录状态
+    checkLoginStatus();
+    
+    // 加载默认题目列表
+    loadProblems();
+});
+</script>
 </body>
 </html>
