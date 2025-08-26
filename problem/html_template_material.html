@@ -1131,8 +1131,21 @@
       async function submitCode() {
         // 检查登录状态
         const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
+        const sessionId = localStorage.getItem('luogu_session_id');
+        
+        console.log('🔍 登录状态检查:', {
+          hasUserInfo: !!(userInfo.uid || userInfo.username),
+          sessionId: sessionId,
+          userInfo: userInfo
+        });
+        
         if (!userInfo.uid && !userInfo.username) {
           showSubmitResult('请先登录洛谷账号才能提交代码！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
+          return;
+        }
+        
+        if (!sessionId) {
+          showSubmitResult('会话已过期，请重新登录！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
           return;
         }
         

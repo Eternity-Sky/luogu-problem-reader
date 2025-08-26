@@ -1028,15 +1028,15 @@ $L_3:y=0$;
         try {
           console.log('🔍 获取题目页面CSRF令牌...', pid);
           
-          // 确保题目ID为大写格式（洛谷要求）
-          const upperPid = pid.toUpperCase();
-          console.log('🔄 题目ID转换:', pid, '->', upperPid);
+          // 确保传递正确的sessionId
+          const sessionId = localStorage.getItem('luogu_session_id');
           
-          // 请求题目页面HTML以获取CSRF令牌
-          const response = await proxyLuoguAPI(`/problem/${upperPid}`, {
+          const response = await proxyLuoguAPI(`/problem/${pid.toUpperCase()}`, {
             method: 'GET',
+            sessionId: sessionId,
             headers: {
-              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8'
+              'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+              'Accept-Language': 'zh-CN,zh;q=0.8,en-US;q=0.5,en;q=0.3'
             }
           });
           
@@ -1153,8 +1153,21 @@ $L_3:y=0$;
       async function submitCode() {
         // 检查登录状态
         const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
+        const sessionId = localStorage.getItem('luogu_session_id');
+        
+        console.log('🔍 登录状态检查:', {
+          hasUserInfo: !!(userInfo.uid || userInfo.username),
+          sessionId: sessionId,
+          userInfo: userInfo
+        });
+        
         if (!userInfo.uid && !userInfo.username) {
           showSubmitResult('请先登录洛谷账号才能提交代码！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
+          return;
+        }
+        
+        if (!sessionId) {
+          showSubmitResult('会话已过期，请重新登录！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
           return;
         }
         
@@ -1204,6 +1217,10 @@ $L_3:y=0$;
           const contestId = null; // 可选：竞赛ID，当前设为null
           const submitPath = `/fe/api/problem/submit/${problemId}${contestId ? `?contestId=${contestId}` : ''}`;
           
+          // 确保传递正确的sessionId
+          const sessionId = localStorage.getItem('luogu_session_id');
+          console.log('🔑 使用sessionId:', sessionId);
+          
           const response = await proxyLuoguAPI(submitPath, {
             method: 'POST',
             body: {
@@ -1211,6 +1228,7 @@ $L_3:y=0$;
               lang: language
             },
             csrfToken: csrfToken,
+            sessionId: sessionId,
             headers: {
               'Content-Type': 'application/json',
               'Referer': `https://www.luogu.com.cn/problem/${problemId}`,
