@@ -104,6 +104,15 @@ exports.handler = async (event, context) => {
             console.log(`❌ [${clientSessionId}] 没有找到保存的Cookie，当前所有会话:`, Object.keys(globalCookies));
             console.log(`❌ [${clientSessionId}] 全部Cookie内容:`, JSON.stringify(globalCookies, null, 2));
             
+            // 特别检查是否存在相似的sessionId
+            const similarSessions = Object.keys(globalCookies).filter(key => 
+                key.startsWith('session_') && key !== clientSessionId
+            );
+            if (similarSessions.length > 0) {
+                console.log(`🔍 [${clientSessionId}] 发现其他会话:`, similarSessions);
+                console.log(`🔍 [${clientSessionId}] 最近的会话Cookie:`, globalCookies[similarSessions[0]]);
+            }
+            
             // 如果是代码提交请求且没有Cookie，直接返回错误
             if (path.includes('/fe/api/problem/submit/')) {
                 console.log(`🚫 [${clientSessionId}] 代码提交请求但无有效Cookie，直接返回403错误`);

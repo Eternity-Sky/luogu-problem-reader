@@ -1183,6 +1183,18 @@ ku
           userInfo: userInfo
         });
         
+        // 检查登录时间与当前sessionId的关系
+        if (userInfo.loginTime) {
+          const loginTime = new Date(userInfo.loginTime).getTime();
+          const sessionTime = parseInt(sessionId.split('_')[1]);
+          console.log('🕐 时间对比:', {
+            loginTime: new Date(loginTime).toISOString(),
+            sessionTime: new Date(sessionTime).toISOString(),
+            isSessionAfterLogin: sessionTime > loginTime,
+            timeDiff: Math.abs(sessionTime - loginTime) / 1000 / 60 // 分钟差
+          });
+        }
+        
         if (!userInfo.uid && !userInfo.username) {
           showSubmitResult('请先登录洛谷账号才能提交代码！<br><a href="../login.html" style="color: var(--primary-color);">点击这里登录</a>', 'error');
           return;
