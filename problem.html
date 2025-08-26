@@ -1461,6 +1461,20 @@
                 
                 console.log('📤 代码提交结果:', submitResult);
                 
+                // 检查是否登录失败
+                if (submitResult.status === 403 || submitResult.errorCode === 403) {
+                    console.log('❌ 登录状态失效，Cookie信息:', submitResult._backupCookies);
+                    showSubmitStatus('登录状态已失效，请重新登录后再试', 'error');
+                    
+                    // 建议用户重新登录
+                    setTimeout(() => {
+                        if (confirm('登录状态已失效，是否前往登录页面重新登录？')) {
+                            window.location.href = '/login.html';
+                        }
+                    }, 2000);
+                    return;
+                }
+                
                 if (submitResult.data && submitResult.data.rid) {
                     showSubmitStatus(`提交成功！记录ID: ${submitResult.data.rid}`, 'success');
                     
@@ -1474,7 +1488,8 @@
                         }
                     }, 1000);
                 } else {
-                    throw new Error(submitResult.error || '提交失败，未返回记录ID');
+                    const errorMsg = submitResult.errorMessage || submitResult.data || submitResult.error || '提交失败，未返回记录ID';
+                    throw new Error(errorMsg);
                 }
                 
             } catch (error) {
