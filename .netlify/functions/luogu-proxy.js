@@ -93,6 +93,13 @@ exports.handler = async (event, context) => {
         // 添加客户端传递的头部
         Object.assign(requestHeaders, clientHeaders);
         
+        // 如果客户端明确请求HTML，移除API专用头部
+        if (clientHeaders && clientHeaders['Accept'] && clientHeaders['Accept'].includes('text/html')) {
+            // 移除API专用头部，请求HTML页面
+            delete requestHeaders['x-lentille-request'];
+            console.log(`🌐 [${clientSessionId}] 请求HTML页面，移除API头部`);
+        }
+        
         // 调试：输出最终的请求头
         console.log(`🔍 [${clientSessionId}] 最终请求头:`, JSON.stringify(requestHeaders, null, 2));
 
