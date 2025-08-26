@@ -1638,10 +1638,11 @@
                 // 第三步：用智能Cookie重新提交
                 console.log('🚀 第三步：智能Cookie重新提交');
                 
-                // 优化策略：第一次请求故意不发送__client_id，让洛谷下发真实的
+                // 使用真实的client_id进行提交
+                const realClientId = 'a9e1b3757101a53168ad86276774d1ac6fee7fe9';
                 const smartCookie = [
                     `_uid=${realUid}`,
-                    // 故意不发送 __client_id，让洛谷服务器下发真实的
+                    `__client_id=${realClientId}`,
                     `login=${realUid}`,
                     `C3VK=130aa2`
                 ].join('; ');
