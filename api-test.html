@@ -311,12 +311,37 @@
                     body: JSON.stringify(requestData)
                 });
 
-                const result = await response.json();
-                console.log('📦 API响应:', result);
+                console.log('📡 HTTP响应状态:', response.status, response.statusText);
+                console.log('📡 HTTP响应头:', Object.fromEntries(response.headers.entries()));
+
+                // 获取响应文本
+                const responseText = await response.text();
+                console.log('📄 响应原始文本 (前500字符):', responseText.substring(0, 500));
+
+                // 尝试解析JSON
+                let result;
+                try {
+                    result = JSON.parse(responseText);
+                    console.log('✅ JSON解析成功:', result);
+                } catch (parseError) {
+                    console.error('❌ JSON解析失败:', parseError);
+                    console.log('📄 完整响应文本:', responseText);
+                    
+                    // 返回包含原始响应的错误对象
+                    return {
+                        error: `JSON解析失败: ${parseError.message}`,
+                        rawResponse: responseText,
+                        httpStatus: response.status
+                    };
+                }
+
                 return result;
             } catch (error) {
-                console.error('❌ API调用失败:', error);
-                throw error;
+                console.error('❌ 网络请求失败:', error);
+                return {
+                    error: `网络请求失败: ${error.message}`,
+                    networkError: true
+                };
             }
         }
 
@@ -338,8 +363,15 @@
             const page = document.getElementById('pageInput').value || 1;
             showStatus('problemListStatus', '正在获取题目列表...', 'info');
             
+            console.log('📋 根据API文档调用题目列表API');
+            
             try {
-                const result = await proxyLuoguAPI(`/problem/list?page=${page}&_contentOnly=1`);
+                // 根据文档：DataResponse类型需要 x-luogu-type: content-only 头
+                const result = await proxyLuoguAPI(`/problem/list?page=${page}`, {
+                    headers: {
+                        'x-luogu-type': 'content-only'
+                    }
+                });
                 
                 if (result.error) {
                     showStatus('problemListStatus', `API调用失败: ${result.error}`, 'error');
@@ -405,9 +437,15 @@
             }
             
             showStatus('problemDetailStatus', `正在获取题目 ${pid} 的详情...`, 'info');
+            console.log('📋 根据API文档调用题目详情API (LentilleDataResponse类型)');
             
             try {
-                const result = await proxyLuoguAPI(`/problem/${pid}?_contentOnly=1`);
+                // 根据文档：LentilleDataResponse类型需要 x-lentille-request: content-only 头
+                const result = await proxyLuoguAPI(`/problem/${pid}`, {
+                    headers: {
+                        'x-lentille-request': 'content-only'
+                    }
+                });
                 
                 if (result.error) {
                     showStatus('problemDetailStatus', `API调用失败: ${result.error}`, 'error');
@@ -433,9 +471,15 @@
             }
             
             showStatus('solutionStatus', `正在获取题目 ${pid} 的题解...`, 'info');
+            console.log('📋 根据API文档调用题解API (LentilleDataResponse类型)');
             
             try {
-                const result = await proxyLuoguAPI(`/problem/solution/${pid}?_contentOnly=1`);
+                // 根据文档：LentilleDataResponse类型需要 x-lentille-request: content-only 头
+                const result = await proxyLuoguAPI(`/problem/solution/${pid}`, {
+                    headers: {
+                        'x-lentille-request': 'content-only'
+                    }
+                });
                 
                 if (result.error) {
                     showStatus('solutionStatus', `API调用失败: ${result.error}`, 'error');
@@ -457,17 +501,32 @@
             const statusElement = document.getElementById('apiStatusResult');
             statusElement.innerHTML = '<div class="status info">正在检查API状态...</div>';
             
+            console.log('📋 根据API文档检查各类API状态');
+            
             const tests = [
-                { name: '题目列表API', path: '/problem/list?page=1&_contentOnly=1' },
-                { name: '题目详情API', path: '/problem/P1000?_contentOnly=1' },
-                { name: '题解API', path: '/problem/solution/P1000?_contentOnly=1' }
+                { 
+                    name: '题目列表API (DataResponse)', 
+                    path: '/problem/list?page=1',
+                    headers: { 'x-luogu-type': 'content-only' }
+                },
+                { 
+                    name: '题目详情API (LentilleDataResponse)', 
+                    path: '/problem/P1000',
+                    headers: { 'x-lentille-request': 'content-only' }
+                },
+                { 
+                    name: '题解API (LentilleDataResponse)', 
+                    path: '/problem/solution/P1000',
+                    headers: { 'x-lentille-request': 'content-only' }
+                }
             ];
             
             let results = [];
             
             for (const test of tests) {
                 try {
-                    const result = await proxyLuoguAPI(test.path);
+                    console.log(`🔍 测试 ${test.name}:`, test.path);
+                    const result = await proxyLuoguAPI(test.path, { headers: test.headers });
                     const status = result.error ? 'error' : 'success';
                     const message = result.error ? result.error : '正常';
                     results.push(`<div class="status ${status}">${test.name}: ${message}</div>`);
