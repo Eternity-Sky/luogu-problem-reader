@@ -1550,6 +1550,12 @@
             showSubmitStatus('✅ Cookie已保存，现在可以尝试提交代码', 'success');
         }
         
+        // 获取题目ID
+        function getProblemIdFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get('pid');
+        }
+        
         // 🚀 强硬措施：直接提交（绕过所有检查）
         async function directSubmit() {
             const pid = getProblemIdFromUrl();
