@@ -102,6 +102,7 @@ exports.handler = async (event, context) => {
             console.log(`🍪 [${clientSessionId}] 使用保存的Cookie:`, globalCookies[clientSessionId]);
         } else {
             console.log(`❌ [${clientSessionId}] 没有找到保存的Cookie，当前所有会话:`, Object.keys(globalCookies));
+            console.log(`❌ [${clientSessionId}] 全部Cookie内容:`, JSON.stringify(globalCookies, null, 2));
         }
 
         // 如果是POST请求，添加必要的头部
