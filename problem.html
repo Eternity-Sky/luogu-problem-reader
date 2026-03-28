@@ -549,6 +549,33 @@
               ></textarea>
             </div>
 
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+                margin-bottom: 1.5rem;
+              "
+            >
+              <label
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 0.5rem;
+                  font-size: 0.875rem;
+                  cursor: pointer;
+                "
+              >
+                <input
+                  type="checkbox"
+                  id="enableO2"
+                  checked
+                  style="accent-color: var(--accent-color)"
+                />
+                开启 O2 优化
+              </label>
+            </div>
+
             <div style="display: flex; align-items: center; gap: 1rem">
               <button
                 id="submitBtn"
@@ -907,11 +934,25 @@
             body: JSON.stringify(requestData),
           });
 
-          if (!response.ok) {
-            throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+          // 尝试解析响应体，即使状态码不是 200
+          let result;
+          try {
+            result = await response.json();
+          } catch (e) {
+            if (!response.ok) {
+              throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+            }
+            throw new Error("无法解析代理响应");
           }
 
-          const result = await response.json();
+          if (!response.ok) {
+            // 如果洛谷返回了具体的错误信息，则提取出来
+            const errorMsg =
+              result.errorMessage ||
+              result.error ||
+              `HTTP 错误 ${response.status}`;
+            throw new Error(errorMsg);
+          }
 
           if (result && result._backupCookies) {
             localStorage.setItem("luogu_backup_cookies", result._backupCookies);
@@ -990,38 +1031,61 @@
         const lang = document.getElementById("languageSelect").value;
         const urlParams = new URLSearchParams(window.location.search);
         const pid = urlParams.get("pid");
+        const contestId = urlParams.get("contestId") || urlParams.get("cid");
+
+        const enableO2 = document.getElementById("enableO2").checked;
+
         if (!code) {
           status.innerHTML = '<span style="color: #ef4444">请输入代码</span>';
           return;
         }
+
         btn.disabled = true;
         status.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> 正在获取 CSRF Token...';
+          '<i class="fas fa-spinner fa-spin"></i> 正在获取该题目的独立 CSRF Token...';
+
+        // 核心：必须使用题目详情页返回的 CSRF 令牌
         const csrfToken = await getCSRFToken();
         if (!csrfToken) {
           status.innerHTML =
-            '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态</span>';
+            '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态或刷新页面</span>';
           btn.disabled = false;
           return;
         }
+
         status.innerHTML =
           '<i class="fas fa-spinner fa-spin"></i> 正在提交评测...';
+
         try {
+          const submitData = {
+            lang: parseInt(lang),
+            code: code,
+            enableO2: enableO2 ? 1 : 0,
+          };
+
+          // 如果 URL 中包含比赛 ID，则带上参数
+          if (contestId) {
+            submitData.contestId = parseInt(contestId);
+          }
+
           const result = await proxyLuoguAPI(`/fe/api/problem/submit/${pid}`, {
             method: "POST",
-            headers: { "x-csrf-token": csrfToken },
-            body: JSON.stringify({ lang, code, enableO2: true }),
+            headers: {
+              "x-csrf-token": csrfToken,
+            },
+            body: submitData,
           });
+
           if (result.error || result.errorMessage) {
             status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.errorMessage || result.error}</span>`;
           } else if (result.rid) {
             status.innerHTML =
-              '<span style="color: #10b981">提交成功！正在跳转...</span>';
+              '<span style="color: #10b981">提交成功！正在跳转到评测记录...</span>';
             setTimeout(() => {
               window.location.href = `https://www.luogu.com.cn/record/${result.rid}`;
             }, 1500);
           } else {
-            status.innerHTML = `<span style="color: #ef4444">提交失败，未返回记录ID</span>`;
+            status.innerHTML = `<span style="color: #ef4444">提交失败，服务器未返回记录 ID</span>`;
           }
         } catch (error) {
           status.innerHTML = `<span style="color: #ef4444">提交出错: ${error.message}</span>`;

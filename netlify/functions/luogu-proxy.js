@@ -87,13 +87,14 @@ exports.handler = async (event, context) => {
     // 设置请求头
     const requestHeaders = {
       "User-Agent":
-        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       Accept: "*/*",
       "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
       "Accept-Encoding": "identity", // 禁用压缩
       Connection: "keep-alive",
-      Referer: "https://www.luogu.com.cn/auth/login",
+      Referer: "https://www.luogu.com.cn/",
       Origin: "https://www.luogu.com.cn",
+      "X-Requested-With": "XMLHttpRequest",
     };
 
     // 对于验证码请求，设置特定的Accept头
@@ -115,6 +116,7 @@ exports.handler = async (event, context) => {
     if (isHtmlRequest) {
       // 移除API专用头部，请求HTML页面
       delete requestHeaders["x-lentille-request"];
+      delete requestHeaders["X-Requested-With"];
       requestHeaders["Accept"] =
         "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
       console.log(`🌐 [${clientSessionId}] 请求HTML页面，移除API头部`);
