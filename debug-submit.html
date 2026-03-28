@@ -162,7 +162,10 @@ int main() {
           method: options.method || "GET",
           sessionId: `session_uid_${uid}`,
           backupCookies: backupCookies,
-          headers: options.headers || {},
+          headers: {
+            "User-Agent": navigator.userAgent,
+            ...options.headers,
+          },
           body: options.body,
           requestType: options.requestType || "api",
         };
@@ -225,10 +228,16 @@ int main() {
         });
         const html = probHtmlResp.data || "";
 
-        const metaMatch = html.match(
-          /<meta name="csrf-token" content="([^"]+)">/i,
-        );
-        const csrfToken = metaMatch ? metaMatch[1] : null;
+        // 使用更健壮的 CSRF 提取正则，支持多种属性顺序
+        const csrfMatch =
+          html.match(
+            /<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i,
+          ) ||
+          html.match(
+            /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i,
+          );
+
+        const csrfToken = csrfMatch ? csrfMatch[1] : null;
 
         if (csrfToken) {
           log(

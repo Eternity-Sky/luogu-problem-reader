@@ -87,6 +87,7 @@ exports.handler = async (event, context) => {
     // 设置请求头
     const requestHeaders = {
       "User-Agent":
+        clientHeaders["User-Agent"] ||
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36",
       Accept: "*/*",
       "Accept-Language": "zh-CN,zh;q=0.9,en;q=0.8",
@@ -198,12 +199,17 @@ exports.handler = async (event, context) => {
 
     // 3. 使用找到的Cookie
     if (cookieToUse) {
-      // 🎯 规范化 Cookie：去重并确保格式正确
+      // 🎯 规范化 Cookie：映射 uid/client_id 并去重
       const cookieMap = cookieToUse.split("; ").reduce((acc, c) => {
         const parts = c.split("=");
         if (parts.length >= 2) {
-          const key = parts[0].trim();
+          let key = parts[0].trim();
           const value = parts.slice(1).join("=").trim();
+
+          // 自动映射不带下划线的 key
+          if (key === "uid") key = "_uid";
+          if (key === "client_id") key = "__client_id";
+
           if (key) acc[key] = value;
         }
         return acc;
