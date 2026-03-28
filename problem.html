@@ -222,10 +222,69 @@
         margin-bottom: 1.25rem;
       }
 
-      .problem-description h3 {
-        font-size: 1.25rem;
+      .problem-description h1,
+      .problem-description h2,
+      .problem-description h3,
+      .problem-description h4 {
         margin: 2rem 0 1rem;
         color: var(--text-primary);
+        font-weight: 700;
+      }
+
+      .problem-description h1 {
+        font-size: 1.75rem;
+      }
+      .problem-description h2 {
+        font-size: 1.5rem;
+      }
+      .problem-description h3 {
+        font-size: 1.25rem;
+      }
+
+      .problem-description ul,
+      .problem-description ol {
+        margin-bottom: 1.25rem;
+        padding-left: 1.5rem;
+      }
+
+      .problem-description li {
+        margin-bottom: 0.5rem;
+      }
+
+      .problem-description blockquote {
+        border-left: 4px solid var(--accent-color);
+        padding: 0.5rem 1rem;
+        background: rgba(59, 130, 246, 0.1);
+        margin-bottom: 1.25rem;
+        color: var(--text-secondary);
+      }
+
+      .problem-description table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 1.5rem;
+        font-size: 0.875rem;
+      }
+
+      .problem-description th,
+      .problem-description td {
+        border: 1px solid var(--border-color);
+        padding: 0.75rem;
+        text-align: left;
+      }
+
+      .problem-description th {
+        background: var(--bg-secondary);
+        font-weight: 600;
+      }
+
+      .problem-description img {
+        max-width: 100%;
+        height: auto;
+        display: block;
+        margin: 1.5rem auto;
+        border-radius: var(--radius);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
       }
 
       /* 代码块优化 */
@@ -619,11 +678,25 @@
 
       function renderSection(title, content) {
         if (!content) return "";
-        // 确保 content 是字符串，如果是对象则 stringify
-        const safeContent =
-          typeof content === "string"
-            ? content
-            : JSON.stringify(content, null, 2);
+        // 洛谷的 content 可能是字符串也可能是对象。如果为对象，尝试取其 description
+        let safeContent = "";
+        if (typeof content === "string") {
+          safeContent = content;
+        } else if (typeof content === "object") {
+          // 有些情况下可能嵌套在特定的 key 下，根据反馈，如果直接 stringify 就会显示为 JSON
+          // 优先取常用的内容字段，如果没有则回退到 stringify
+          safeContent =
+            content.description ||
+            content.content ||
+            content.background ||
+            content.formatI ||
+            content.formatO ||
+            content.hint ||
+            JSON.stringify(content, null, 2);
+        } else {
+          safeContent = String(content);
+        }
+
         return `
           <div class="section">
             <div class="section-title">${title}</div>
