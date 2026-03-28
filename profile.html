@@ -1,1559 +1,1214 @@
 <!doctype html>
 <html lang="zh">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <meta name="description" content="LGOJ 题目浏览站 - 个人中心">
-    <meta name="author" content="LGOJ Team">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1336/1336494.png" type="image/png">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content="LGOJ 题目浏览站 - 个人中心" />
+    <meta name="author" content="LGOJ Team" />
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/512/1336/1336494.png"
+      type="image/png"
+    />
     <title>个人中心 - LGOJ 题目浏览站</title>
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary-color: #10b981;
-            --accent-color: #8b5cf6;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f9fafb;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --transition: all 0.2s ease-in-out;
-        }
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-color: #3b82f6;
+        --accent-hover: #2563eb;
+        --border-color: #334155;
+        --card-bg: #1e293b;
+        --radius: 6px;
+        --transition: all 0.2s ease;
+      }
 
-        body {
-            font-family: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            margin: 0;
-            padding: 0;
-            color: var(--gray-900);
-        }
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-primary);
+        min-height: 100vh;
+        margin: 0;
+        padding: 0;
+        color: var(--text-primary);
+        line-height: 1.5;
+      }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 2rem 1.5rem;
+      }
 
-        /* 页面头部 */
-        .page-header {
-            text-align: center;
-            margin-bottom: 3rem;
-            color: white;
-        }
+      /* 页面头部 */
+      .page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+      }
 
-        .page-title {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin: 0 0 0.5rem 0;
-        }
+      .page-title {
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        margin-bottom: 0.5rem;
+      }
 
-        .page-subtitle {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            margin: 0;
-        }
+      .page-subtitle {
+        font-size: 1rem;
+        color: var(--text-secondary);
+      }
 
-        /* 主要内容区域 */
+      /* 主要内容区域 */
+      .profile-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+      }
+
+      /* 用户信息卡片 */
+      .user-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 2rem;
+        height: fit-content;
+      }
+
+      .user-avatar-section {
+        text-align: center;
+        margin-bottom: 2rem;
+      }
+
+      .user-avatar-large {
+        width: 100px;
+        height: 100px;
+        border-radius: 4px;
+        object-fit: cover;
+        border: 1px solid var(--border-color);
+        margin-bottom: 1.25rem;
+      }
+
+      .user-name {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+      }
+
+      .user-uid {
+        color: var(--text-secondary);
+        font-size: 0.8125rem;
+      }
+
+      .user-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+        margin-top: 2rem;
+      }
+
+      .stat-item {
+        text-align: center;
+        padding: 0.75rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+      }
+
+      .stat-value {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--accent-color);
+        margin-bottom: 0.125rem;
+      }
+
+      .stat-label {
+        font-size: 0.6875rem;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* 标签页区域 */
+      .tab-container {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+      }
+
+      .tab-nav {
+        display: flex;
+        background: rgba(15, 23, 42, 0.3);
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .tab-btn {
+        flex: 1;
+        padding: 1rem;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        border-bottom: 2px solid transparent;
+      }
+
+      .tab-btn.active {
+        color: var(--accent-color);
+        border-bottom-color: var(--accent-color);
+        background: rgba(59, 130, 246, 0.05);
+      }
+
+      .tab-btn:hover:not(.active) {
+        color: var(--text-primary);
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      .tab-content {
+        padding: 2rem;
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+
+      .section-title {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-grid {
+        display: grid;
+        gap: 1rem;
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+      }
+
+      .info-label {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .info-value {
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+
+      /* 未登录状态 */
+      .not-logged-in {
+        text-align: center;
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 4rem 2rem;
+        max-width: 400px;
+        margin: 0 auto;
+      }
+
+      .not-logged-icon {
+        font-size: 3rem;
+        color: var(--text-secondary);
+        margin-bottom: 1.5rem;
+      }
+
+      .login-btn {
+        background: var(--accent-color);
+        color: white;
+        padding: 0.6rem 1.5rem;
+        border-radius: var(--radius);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: var(--transition);
+        border: none;
+        cursor: pointer;
+      }
+
+      .login-btn:hover {
+        background: var(--accent-hover);
+      }
+
+      /* 返回按钮 */
+      .back-btn {
+        position: fixed;
+        top: 1.5rem;
+        left: 1.5rem;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-decoration: none;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+        z-index: 100;
+      }
+
+      .back-btn:hover {
+        border-color: var(--text-secondary);
+        background: var(--bg-primary);
+      }
+
+      /* 响应式设计 */
+      @media (max-width: 768px) {
         .profile-container {
-            display: grid;
-            grid-template-columns: 1fr 2fr;
-            gap: 2rem;
-            max-width: 1000px;
-            margin: 0 auto;
+          grid-template-columns: 1fr;
         }
-
-        /* 用户信息卡片 */
-        .user-card {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow-lg);
-            height: fit-content;
-        }
-
-        .user-avatar-section {
-            text-align: center;
-            margin-bottom: 2rem;
-        }
-
-        .user-avatar-large {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 4px solid var(--gray-200);
-            margin-bottom: 1rem;
-        }
-
-        .user-name {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0 0 0.5rem 0;
-        }
-
-        .user-uid {
-            color: var(--gray-500);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .user-stats {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-            margin-top: 2rem;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--primary-color);
-            margin: 0 0 0.25rem 0;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: var(--gray-600);
-            margin: 0;
-        }
-
-        /* 详细信息区域 */
-        .details-section {
-            background: white;
-            border-radius: 16px;
-            padding: 2rem;
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* 标签页样式 */
-        .tab-container {
-            background: white;
-            border-radius: 16px;
-            box-shadow: var(--shadow-lg);
-            overflow: hidden;
-        }
-
-        .tab-nav {
-            display: flex;
-            background: var(--gray-50);
-            border-bottom: 1px solid var(--gray-200);
-        }
-
-        .tab-btn {
-            flex: 1;
-            padding: 1rem;
-            background: none;
-            border: none;
-            cursor: pointer;
-            font-weight: 500;
-            color: var(--gray-600);
-            transition: var(--transition);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 0.5rem;
-        }
-
-        .tab-btn.active {
-            background: white;
-            color: var(--primary-color);
-            border-bottom: 2px solid var(--primary-color);
-        }
-
-        .tab-btn:hover {
-            background: rgba(37, 99, 235, 0.1);
-            color: var(--primary-color);
-        }
-
-        .tab-content {
-            padding: 2rem;
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        /* 数据列表样式 */
-        .data-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .data-item {
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .data-item-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 0.5rem;
-        }
-
-        .data-item-title {
-            font-weight: 600;
-            color: var(--gray-900);
-        }
-
-        .data-item-value {
-            color: var(--primary-color);
-            font-weight: 500;
-        }
-
-        .data-item-desc {
-            color: var(--gray-600);
-            font-size: 0.9rem;
-        }
-
-        /* 用户卡片样式 */
-        .user-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            transition: var(--transition);
-        }
-
-        .user-item:hover {
-            background: var(--gray-100);
-        }
-
-        .user-item-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .user-item-info {
-            flex: 1;
-        }
-
-        .user-item-name {
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0 0 0.25rem 0;
-        }
-
-        .user-item-uid {
-            color: var(--gray-500);
-            font-size: 0.9rem;
-            margin: 0;
-        }
-
-        .user-item-followers {
-            color: var(--gray-600);
-            font-size: 0.8rem;
-        }
-
-        /* 分页控制样式 */
-        .pagination-controls {
-            margin-top: 1.5rem;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            border-top: 1px solid var(--gray-200);
-        }
-
-        .pagination-info {
-            text-align: center;
-            color: var(--gray-600);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .pagination-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-pagination {
-            padding: 0.5rem 1rem;
-            border: 1px solid var(--gray-300);
-            background: white;
-            color: var(--gray-700);
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.2s ease;
-        }
-
-        .btn-pagination:hover {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .btn-pagination:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-load-more {
-            background: var(--secondary-color);
-            color: white;
-            border-color: var(--secondary-color);
-        }
-
-        .btn-load-more:hover {
-            background: #059669;
-            border-color: #059669;
-        }
-
-        .loading-more {
-            text-align: center;
-            padding: 1rem;
-            color: var(--gray-600);
-            font-style: italic;
-        }
-
-        .no-more-data {
-            text-align: center;
-            padding: 1rem;
-            color: var(--gray-500);
-            font-style: italic;
-        }
-
-        /* 表单样式 */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            font-weight: 500;
-            color: var(--gray-700);
-            margin-bottom: 0.5rem;
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--gray-300);
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 100px;
-            resize: vertical;
-        }
-
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            margin-top: 1rem;
-        }
-
-        .btn-secondary {
-            background: var(--gray-500);
-            color: white;
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-600);
-        }
-
-        /* 加载状态 */
-        .loading-inline {
-            text-align: center;
-            padding: 2rem;
-            color: var(--gray-500);
-        }
-
-        .loading-spinner-small {
-            width: 20px;
-            height: 20px;
-            border: 2px solid var(--gray-300);
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 0.5rem auto;
-        }
-
-        .section-title {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--gray-900);
-            margin: 0 0 1.5rem 0;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .info-grid {
-            display: grid;
-            gap: 1.5rem;
-        }
-
-        .info-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--gray-50);
-            border-radius: 8px;
-            border-left: 4px solid var(--primary-color);
-        }
-
-        .info-label {
-            font-weight: 500;
-            color: var(--gray-700);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .info-value {
-            color: var(--gray-900);
-            font-weight: 500;
-        }
-
-        /* 未登录状态 */
-        .not-logged-in {
-            text-align: center;
-            background: white;
-            border-radius: 16px;
-            padding: 3rem;
-            box-shadow: var(--shadow-lg);
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .not-logged-icon {
-            font-size: 4rem;
-            color: var(--gray-400);
-            margin-bottom: 1rem;
-        }
-
-        .login-btn {
-            background: var(--primary-color);
-            color: white;
-            padding: 0.75rem 2rem;
-            border-radius: 8px;
-            text-decoration: none;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            transition: var(--transition);
-        }
-
-        .login-btn:hover {
-            background: var(--primary-dark);
-            transform: translateY(-2px);
-            box-shadow: var(--shadow);
-        }
-
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 3rem;
-            color: white;
-        }
-
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid rgba(255,255,255,0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 1rem auto;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* 响应式设计 */
-        @media (max-width: 768px) {
-            .container {
-                padding: 1rem;
-            }
-
-            .profile-container {
-                grid-template-columns: 1fr;
-                gap: 1.5rem;
-            }
-
-            .page-title {
-                font-size: 2rem;
-            }
-
-            .user-card, .details-section {
-                padding: 1.5rem;
-            }
-
-            .user-stats {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        /* 返回按钮 */
         .back-btn {
-            position: fixed;
-            top: 2rem;
-            left: 2rem;
-            background: rgba(255,255,255,0.9);
-            color: var(--gray-700);
-            padding: 0.75rem;
-            border-radius: 50%;
-            text-decoration: none;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            z-index: 100;
+          position: absolute;
         }
-
-        .back-btn:hover {
-            background: white;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* 等级分历史样式 */
-        .rating-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--card-bg);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            border: 1px solid var(--border-color);
-        }
-
-        .rating-info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-        }
-
-        .rating-contest {
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .rating-date {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-        }
-
-        .rating-change {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: 500;
-        }
-
-        .rating-old, .rating-new {
-            color: var(--text-color);
-        }
-
-        .rating-delta {
-            padding: 0.25rem 0.5rem;
-            border-radius: 4px;
-            font-size: 0.875rem;
-            font-weight: 600;
-        }
-
-        .rating-up {
-            background: rgba(34, 197, 94, 0.1);
-            color: #22c55e;
-        }
-
-        .rating-down {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-        }
-
-        .rating-same {
-            background: rgba(156, 163, 175, 0.1);
-            color: #9ca3af;
-        }
-
-        /* 用户列表样式 */
-        .user-item {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            padding: 1rem;
-            background: var(--card-bg);
-            border-radius: 8px;
-            margin-bottom: 0.5rem;
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-        }
-
-        .user-item:hover {
-            transform: translateY(-1px);
-            box-shadow: var(--shadow);
-        }
-
-        .user-item-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-
-        .user-item-info {
-            flex: 1;
-        }
-
-        .user-item-name {
-            font-weight: 500;
-            color: var(--text-color);
-            margin-bottom: 0.25rem;
-        }
-
-        .user-item-uid {
-            font-size: 0.875rem;
-            color: var(--gray-600);
-        }
-
-        .user-item-rating {
-            font-weight: 600;
-            color: var(--primary-color);
-            padding: 0.25rem 0.75rem;
-            background: rgba(37, 99, 235, 0.1);
-            border-radius: 20px;
-            font-size: 0.875rem;
-        }
-
-        /* 状态样式 */
-        .loading-text {
-            text-align: center;
-            padding: 2rem;
-            color: var(--gray-600);
-            font-style: italic;
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 3rem 2rem;
-            color: var(--gray-600);
-            background: var(--card-bg);
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .error-state {
-            text-align: center;
-            padding: 2rem;
-            color: var(--danger-color);
-            background: rgba(239, 68, 68, 0.1);
-            border-radius: 8px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        /* 社交标签页样式 */
-        .social-tabs {
-            display: flex;
-            gap: 0.5rem;
-            margin-bottom: 1.5rem;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .social-tab {
-            padding: 0.75rem 1.5rem;
-            background: none;
-            border: none;
-            color: var(--gray-600);
-            font-weight: 500;
-            cursor: pointer;
-            border-bottom: 2px solid transparent;
-            transition: var(--transition);
-        }
-
-        .social-tab:hover {
-            color: var(--primary-color);
-        }
-
-        .social-tab.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-
-        .social-content {
-            display: none;
-        }
-
-        .social-content.active {
-            display: block;
-        }
-
-        /* 按钮组样式 */
-        .btn-group {
-            display: flex;
-            gap: 1rem;
-            flex-wrap: wrap;
-        }
-
-        .btn-secondary {
-            background: var(--gray-200);
-            color: var(--gray-700);
-            padding: 0.75rem 2rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-
-        .btn-secondary:hover {
-            background: var(--gray-300);
-            transform: translateY(-1px);
-        }
-
-        /* 表单样式增强 */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
-            color: var(--text-color);
-        }
-
-        .form-input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--card-bg);
-            color: var(--text-color);
-            font-size: 1rem;
-            transition: var(--transition);
-        }
-
-        .form-input:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
-
-        .form-textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- 返回按钮 -->
     <a href="/" class="back-btn" title="返回首页">
-        <i class="fas fa-arrow-left"></i>
+      <i class="fas fa-arrow-left"></i>
     </a>
 
     <div class="container">
-        <!-- 页面头部 -->
-        <div class="page-header">
-            <h1 class="page-title">
-                <i class="fas fa-user-circle"></i>
-                个人中心
-            </h1>
-            <p class="page-subtitle">查看和管理您的洛谷账户信息</p>
+      <!-- 页面头部 -->
+      <div class="page-header">
+        <h1 class="page-title">
+          <i class="fas fa-user-circle"></i>
+          个人中心
+        </h1>
+        <p class="page-subtitle">查看和管理您的洛谷账户信息</p>
+      </div>
+
+      <!-- 加载状态 -->
+      <div id="loadingSection" class="loading">
+        <div class="loading-spinner"></div>
+        <p>正在加载用户信息...</p>
+      </div>
+
+      <!-- 未登录状态 -->
+      <div id="notLoggedIn" class="not-logged-in" style="display: none">
+        <div class="not-logged-icon">
+          <i class="fas fa-user-slash"></i>
+        </div>
+        <h2>您还未登录</h2>
+        <p>请先登录洛谷账户以查看个人信息</p>
+        <a href="/login.html" class="login-btn">
+          <i class="fas fa-sign-in-alt"></i>
+          立即登录
+        </a>
+      </div>
+
+      <!-- 用户信息内容 -->
+      <div id="profileContent" class="profile-container" style="display: none">
+        <!-- 用户信息卡片 -->
+        <div class="user-card">
+          <div class="user-avatar-section">
+            <img
+              id="userAvatarLarge"
+              class="user-avatar-large"
+              alt="用户头像"
+            />
+            <h2 id="userNameLarge" class="user-name">用户名</h2>
+            <p id="userUidLarge" class="user-uid">UID: 加载中...</p>
+          </div>
+
+          <div class="user-stats">
+            <div class="stat-item">
+              <p class="stat-value" id="userRating">--</p>
+              <p class="stat-label">当前等级分</p>
+            </div>
+            <div class="stat-item">
+              <p class="stat-value" id="userProblemCount">--</p>
+              <p class="stat-label">通过题目</p>
+            </div>
+            <div class="stat-item">
+              <p class="stat-value" id="userFollowingCount">--</p>
+              <p class="stat-label">关注数</p>
+            </div>
+            <div class="stat-item">
+              <p class="stat-value" id="userFollowerCount">--</p>
+              <p class="stat-label">粉丝数</p>
+            </div>
+          </div>
+
+          <!-- 操作按钮 -->
+          <div
+            style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap"
+          >
+            <button onclick="refreshUserInfo()" class="login-btn">
+              <i class="fas fa-sync-alt"></i>
+              刷新信息
+            </button>
+            <button
+              onclick="logout()"
+              class="login-btn"
+              style="background: var(--danger-color)"
+            >
+              <i class="fas fa-sign-out-alt"></i>
+              退出登录
+            </button>
+          </div>
         </div>
 
-        <!-- 加载状态 -->
-        <div id="loadingSection" class="loading">
-            <div class="loading-spinner"></div>
-            <p>正在加载用户信息...</p>
-        </div>
+        <!-- 标签页区域 -->
+        <div class="tab-container">
+          <div class="tab-nav">
+            <button class="tab-btn active" onclick="switchTab('basic')">
+              <i class="fas fa-info-circle"></i>
+              基本信息
+            </button>
+            <button class="tab-btn" onclick="switchTab('rating')">
+              <i class="fas fa-chart-line"></i>
+              等级分历史
+            </button>
+            <button class="tab-btn" onclick="switchTab('social')">
+              <i class="fas fa-users"></i>
+              社交关系
+            </button>
+            <button class="tab-btn" onclick="switchTab('settings')">
+              <i class="fas fa-cog"></i>
+              个人设置
+            </button>
+          </div>
 
-        <!-- 未登录状态 -->
-        <div id="notLoggedIn" class="not-logged-in" style="display: none;">
-            <div class="not-logged-icon">
+          <!-- 基本信息标签页 -->
+          <div id="tab-basic" class="tab-content active">
+            <h3 class="section-title">
+              <i class="fas fa-info-circle"></i>
+              账户详情
+            </h3>
+
+            <div class="info-grid">
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-user"></i>
+                  用户名
+                </span>
+                <span id="detailUsername" class="info-value">加载中...</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-id-card"></i>
+                  用户ID
+                </span>
+                <span id="detailUid" class="info-value">加载中...</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-calendar-alt"></i>
+                  登录时间
+                </span>
+                <span id="detailLoginTime" class="info-value">加载中...</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-shield-alt"></i>
+                  账户状态
+                </span>
+                <span id="detailAccountStatus" class="info-value">正常</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-quote-right"></i>
+                  个人签名
+                </span>
+                <span id="detailSlogan" class="info-value">暂无</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-file-alt"></i>
+                  个人介绍
+                </span>
+                <span id="detailIntroduction" class="info-value">暂无</span>
+              </div>
+
+              <div class="info-item">
+                <span class="info-label">
+                  <i class="fas fa-sync-alt"></i>
+                  最后更新
+                </span>
+                <span id="lastUpdate" class="info-value">刚刚</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 等级分历史标签页 -->
+          <div id="tab-rating" class="tab-content">
+            <h3 class="section-title">
+              <i class="fas fa-chart-line"></i>
+              历史等级分
+            </h3>
+            <div id="ratingHistoryList" class="data-list">
+              <div class="loading-inline">
+                <div class="loading-spinner-small"></div>
+                <p>加载等级分历史中...</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 社交关系标签页 -->
+          <div id="tab-social" class="tab-content">
+            <h3 class="section-title">
+              <i class="fas fa-users"></i>
+              社交关系
+            </h3>
+
+            <div class="social-tabs">
+              <button
+                class="social-tab active"
+                onclick="switchSocialTab('following')"
+              >
+                <i class="fas fa-user-plus"></i>
+                关注列表
+              </button>
+              <button class="social-tab" onclick="switchSocialTab('followers')">
+                <i class="fas fa-user-friends"></i>
+                粉丝列表
+              </button>
+              <button class="social-tab" onclick="switchSocialTab('blacklist')">
                 <i class="fas fa-user-slash"></i>
+                黑名单
+              </button>
             </div>
-            <h2>您还未登录</h2>
-            <p>请先登录洛谷账户以查看个人信息</p>
-            <a href="/login.html" class="login-btn">
-                <i class="fas fa-sign-in-alt"></i>
-                立即登录
-            </a>
+
+            <div
+              id="social-following"
+              class="social-content"
+              style="display: block"
+            >
+              <div class="loading-text">加载关注列表中...</div>
+            </div>
+
+            <div
+              id="social-followers"
+              class="social-content"
+              style="display: none"
+            >
+              <div class="loading-text">加载粉丝列表中...</div>
+            </div>
+
+            <div
+              id="social-blacklist"
+              class="social-content"
+              style="display: none"
+            >
+              <div class="loading-text">加载黑名单中...</div>
+            </div>
+          </div>
+
+          <!-- 个人设置标签页 -->
+          <div id="tab-settings" class="tab-content">
+            <h3 class="section-title">
+              <i class="fas fa-cog"></i>
+              个人设置
+            </h3>
+
+            <form id="settingsForm">
+              <div class="form-group">
+                <label class="form-label" for="settingSlogan">
+                  <i class="fas fa-quote-right"></i>
+                  个人签名
+                </label>
+                <input
+                  type="text"
+                  id="settingSlogan"
+                  class="form-input"
+                  placeholder="输入您的个人签名..."
+                />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="settingIntroduction">
+                  <i class="fas fa-file-alt"></i>
+                  个人介绍
+                </label>
+                <textarea
+                  id="settingIntroduction"
+                  class="form-input form-textarea"
+                  placeholder="介绍一下自己吧..."
+                ></textarea>
+              </div>
+
+              <div class="btn-group">
+                <button
+                  type="button"
+                  onclick="saveSettings()"
+                  class="login-btn"
+                >
+                  <i class="fas fa-save"></i>
+                  保存设置
+                </button>
+                <button
+                  type="button"
+                  onclick="loadUserSettings()"
+                  class="btn-secondary"
+                >
+                  <i class="fas fa-undo"></i>
+                  重置
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-
-        <!-- 用户信息内容 -->
-        <div id="profileContent" class="profile-container" style="display: none;">
-            <!-- 用户信息卡片 -->
-            <div class="user-card">
-                <div class="user-avatar-section">
-                    <img id="userAvatarLarge" class="user-avatar-large" alt="用户头像">
-                    <h2 id="userNameLarge" class="user-name">用户名</h2>
-                    <p id="userUidLarge" class="user-uid">UID: 加载中...</p>
-                </div>
-
-                <div class="user-stats">
-                    <div class="stat-item">
-                        <p class="stat-value" id="userRating">--</p>
-                        <p class="stat-label">当前等级分</p>
-                    </div>
-                    <div class="stat-item">
-                        <p class="stat-value" id="userProblemCount">--</p>
-                        <p class="stat-label">通过题目</p>
-                    </div>
-                    <div class="stat-item">
-                        <p class="stat-value" id="userFollowingCount">--</p>
-                        <p class="stat-label">关注数</p>
-                    </div>
-                    <div class="stat-item">
-                        <p class="stat-value" id="userFollowerCount">--</p>
-                        <p class="stat-label">粉丝数</p>
-                    </div>
-                </div>
-
-                <!-- 操作按钮 -->
-                <div style="margin-top: 2rem; display: flex; gap: 1rem; flex-wrap: wrap;">
-                    <button onclick="refreshUserInfo()" class="login-btn">
-                        <i class="fas fa-sync-alt"></i>
-                        刷新信息
-                    </button>
-                    <button onclick="logout()" class="login-btn" style="background: var(--danger-color);">
-                        <i class="fas fa-sign-out-alt"></i>
-                        退出登录
-                    </button>
-                </div>
-            </div>
-
-            <!-- 标签页区域 -->
-            <div class="tab-container">
-                <div class="tab-nav">
-                    <button class="tab-btn active" onclick="switchTab('basic')">
-                        <i class="fas fa-info-circle"></i>
-                        基本信息
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('rating')">
-                        <i class="fas fa-chart-line"></i>
-                        等级分历史
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('social')">
-                        <i class="fas fa-users"></i>
-                        社交关系
-                    </button>
-                    <button class="tab-btn" onclick="switchTab('settings')">
-                        <i class="fas fa-cog"></i>
-                        个人设置
-                    </button>
-                </div>
-
-                <!-- 基本信息标签页 -->
-                <div id="tab-basic" class="tab-content active">
-                    <h3 class="section-title">
-                        <i class="fas fa-info-circle"></i>
-                        账户详情
-                    </h3>
-
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-user"></i>
-                                用户名
-                            </span>
-                            <span id="detailUsername" class="info-value">加载中...</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-id-card"></i>
-                                用户ID
-                            </span>
-                            <span id="detailUid" class="info-value">加载中...</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-calendar-alt"></i>
-                                登录时间
-                            </span>
-                            <span id="detailLoginTime" class="info-value">加载中...</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-shield-alt"></i>
-                                账户状态
-                            </span>
-                            <span id="detailAccountStatus" class="info-value">正常</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-quote-right"></i>
-                                个人签名
-                            </span>
-                            <span id="detailSlogan" class="info-value">暂无</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-file-alt"></i>
-                                个人介绍
-                            </span>
-                            <span id="detailIntroduction" class="info-value">暂无</span>
-                        </div>
-
-                        <div class="info-item">
-                            <span class="info-label">
-                                <i class="fas fa-sync-alt"></i>
-                                最后更新
-                            </span>
-                            <span id="lastUpdate" class="info-value">刚刚</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 等级分历史标签页 -->
-                <div id="tab-rating" class="tab-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-chart-line"></i>
-                        历史等级分
-                    </h3>
-                    <div id="ratingHistoryList" class="data-list">
-                        <div class="loading-inline">
-                            <div class="loading-spinner-small"></div>
-                            <p>加载等级分历史中...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 社交关系标签页 -->
-                <div id="tab-social" class="tab-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-users"></i>
-                        社交关系
-                    </h3>
-                    
-                    <div class="social-tabs">
-                        <button class="social-tab active" onclick="switchSocialTab('following')">
-                            <i class="fas fa-user-plus"></i>
-                            关注列表
-                        </button>
-                        <button class="social-tab" onclick="switchSocialTab('followers')">
-                            <i class="fas fa-user-friends"></i>
-                            粉丝列表
-                        </button>
-                        <button class="social-tab" onclick="switchSocialTab('blacklist')">
-                            <i class="fas fa-user-slash"></i>
-                            黑名单
-                        </button>
-                    </div>
-
-                    <div id="social-following" class="social-content" style="display: block;">
-                        <div class="loading-text">加载关注列表中...</div>
-                    </div>
-
-                    <div id="social-followers" class="social-content" style="display: none;">
-                        <div class="loading-text">加载粉丝列表中...</div>
-                    </div>
-
-                    <div id="social-blacklist" class="social-content" style="display: none;">
-                        <div class="loading-text">加载黑名单中...</div>
-                    </div>
-                </div>
-
-                <!-- 个人设置标签页 -->
-                <div id="tab-settings" class="tab-content">
-                    <h3 class="section-title">
-                        <i class="fas fa-cog"></i>
-                        个人设置
-                    </h3>
-                    
-                    <form id="settingsForm">
-                        <div class="form-group">
-                            <label class="form-label" for="settingSlogan">
-                                <i class="fas fa-quote-right"></i>
-                                个人签名
-                            </label>
-                            <input type="text" id="settingSlogan" class="form-input" placeholder="输入您的个人签名...">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="settingIntroduction">
-                                <i class="fas fa-file-alt"></i>
-                                个人介绍
-                            </label>
-                            <textarea id="settingIntroduction" class="form-input form-textarea" placeholder="介绍一下自己吧..."></textarea>
-                        </div>
-
-                        <div class="btn-group">
-                            <button type="button" onclick="saveSettings()" class="login-btn">
-                                <i class="fas fa-save"></i>
-                                保存设置
-                            </button>
-                            <button type="button" onclick="loadUserSettings()" class="btn-secondary">
-                                <i class="fas fa-undo"></i>
-                                重置
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
 
     <script>
-        // 洛谷API代理函数
-        async function proxyLuoguAPI(path, options = {}) {
-            const { method = 'GET', body, headers = {}, sessionId } = options;
-            
-            const requestData = {
-                path,
-                method,
-                headers,
-                sessionId: sessionId || localStorage.getItem('luogu_session_id')
-            };
-            
-            if (body) {
-                requestData.body = body;
-            }
-            
-            console.log('🔧 API调用调试信息:');
-            console.log('  - 路径:', path);
-            console.log('  - 方法:', method);
-            console.log('  - 请求头:', headers);
-            console.log('  - SessionID:', requestData.sessionId ? '已设置' : '未设置');
-            console.log('  - 完整请求数据:', requestData);
-            
-            try {
-                const response = await fetch('/.netlify/functions/luogu-proxy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(requestData)
-                });
-                
-                console.log('📡 代理响应状态:', response.status, response.statusText);
-                
-                return response;
-            } catch (error) {
-                console.error('❌ 代理请求失败:', error);
-                throw error;
-            }
+      // 洛谷API代理函数
+      async function proxyLuoguAPI(path, options = {}) {
+        const { method = "GET", body, headers = {}, sessionId } = options;
+
+        const requestData = {
+          path,
+          method,
+          headers,
+          sessionId: sessionId || localStorage.getItem("luogu_session_id"),
+        };
+
+        if (body) {
+          requestData.body = body;
         }
 
-        // 显示用户信息
-        function displayUserInfo(userInfo) {
-            console.log('显示用户信息:', userInfo);
-            
-            // 隐藏加载和未登录状态
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('notLoggedIn').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'grid';
+        console.log("🔧 API调用调试信息:");
+        console.log("  - 路径:", path);
+        console.log("  - 方法:", method);
+        console.log("  - 请求头:", headers);
+        console.log(
+          "  - SessionID:",
+          requestData.sessionId ? "已设置" : "未设置",
+        );
+        console.log("  - 完整请求数据:", requestData);
 
-            // 设置头像
-            const avatarLarge = document.getElementById('userAvatarLarge');
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjYwIiBmaWxsPSIjZjBmMGYwIi8+Cjxzdmcgd2lkdGg9IjcyIiBoZWlnaHQ9IjcyIiB2aWV3Qm94PSIwIDAgNzIgNzIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMjQiIHk9IjI0Ij4KPHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCA3MiA3MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTM2IDM2QzQyLjYyNzMgMzYgNDggMzAuNjI3MyA0OCAyNEM0OCAxNy4zNzI3IDQyLjYyNzMgMTIgMzYgMTJDMjkuMzcyNyAxMiAyNCAxNy4zNzI3IDI0IDI0QzI0IDMwLjYyNzMgMjkuMzcyNyAzNiAzNiAzNloiIGZpbGw9IiM5OTkiLz4KPHBhdGggZD0iTTM2IDQyQzI3Ljk5IDQxLjk3IDIxIDQ5LjA4IDIxIDU3LjI3VjYwSDUxVjU3LjI3QzUxIDQ5LjA4IDQ0LjAxIDQxLjk3IDM2IDQyWiIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4KPC9zdmc+Cjwvc3ZnPgo=';
-            
-            if (userInfo.uid) {
-                avatarLarge.src = `https://cdn.luogu.com.cn/upload/usericon/${userInfo.uid}.png`;
-                avatarLarge.onerror = function() {
-                    this.src = defaultAvatar;
-                    this.onerror = null;
-                };
-            } else {
-                avatarLarge.src = defaultAvatar;
-            }
+        try {
+          const response = await fetch("/.netlify/functions/luogu-proxy", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(requestData),
+          });
 
-            // 设置用户基本信息
-            document.getElementById('userNameLarge').textContent = userInfo.name || userInfo.username || '未知用户';
-            document.getElementById('userUidLarge').textContent = `UID: ${userInfo.uid || '未知'}`;
-            
-            // 设置登录时间
-            if (userInfo.loginTime) {
-                const loginDate = new Date(userInfo.loginTime);
-                const timeStr = loginDate.toLocaleString('zh-CN');
-                document.getElementById('detailLoginTime').textContent = timeStr;
-            }
+          console.log("📡 代理响应状态:", response.status, response.statusText);
 
-            // 设置详细信息
-            document.getElementById('detailUsername').textContent = userInfo.username || '未知';
-            document.getElementById('detailUid').textContent = userInfo.uid || '未知';
-            document.getElementById('detailAccountStatus').textContent = userInfo.locked ? '已锁定' : '正常';
-            
-            // 设置最后更新时间
-            document.getElementById('lastUpdate').textContent = new Date().toLocaleString('zh-CN');
+          return response;
+        } catch (error) {
+          console.error("❌ 代理请求失败:", error);
+          throw error;
+        }
+      }
+
+      // 显示用户信息
+      function displayUserInfo(userInfo) {
+        console.log("显示用户信息:", userInfo);
+
+        // 隐藏加载和未登录状态
+        document.getElementById("loadingSection").style.display = "none";
+        document.getElementById("notLoggedIn").style.display = "none";
+        document.getElementById("profileContent").style.display = "grid";
+
+        // 设置头像
+        const avatarLarge = document.getElementById("userAvatarLarge");
+        const defaultAvatar =
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTIwIiBoZWlnaHQ9IjEyMCIgdmlld0JveD0iMCAwIDEyMCAxMjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxjaXJjbGUgY3g9IjYwIiBjeT0iNjAiIHI9IjYwIiBmaWxsPSIjZjBmMGYwIi8+Cjxzdmcgd2lkdGg9IjcyIiBoZWlnaHQ9IjcyIiB2aWV3Qm94PSIwIDAgNzIgNzIiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeD0iMjQiIHk9IjI0Ij4KPHN2ZyB3aWR0aD0iNzIiIGhlaWdodD0iNzIiIHZpZXdCb3g9IjAgMCA3MiA3MiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTM2IDM2QzQyLjYyNzMgMzYgNDggMzAuNjI3MyA0OCAyNEM0OCAxNy4zNzI3IDQyLjYyNzMgMTIgMzYgMTJDMjkuMzcyNyAxMiAyNCAxNy4zNzI3IDI0IDI0QzI0IDMwLjYyNzMgMjkuMzcyNyAzNiAzNiAzNloiIGZpbGw9IiM5OTkiLz4KPHBhdGggZD0iTTM2IDQyQzI3Ljk5IDQxLjk3IDIxIDQ5LjA4IDIxIDU3LjI3VjYwSDUxVjU3LjI3QzUxIDQ5LjA4IDQ0LjAxIDQxLjk3IDM2IDQyWiIgZmlsbD0iIzk5OSIvPgo8L3N2Zz4KPC9zdmc+Cjwvc3ZnPgo=";
+
+        if (userInfo.uid) {
+          avatarLarge.src = `https://cdn.luogu.com.cn/upload/usericon/${userInfo.uid}.png`;
+          avatarLarge.onerror = function () {
+            this.src = defaultAvatar;
+            this.onerror = null;
+          };
+        } else {
+          avatarLarge.src = defaultAvatar;
         }
 
-        // 显示未登录状态
-        function showNotLoggedIn() {
-            document.getElementById('loadingSection').style.display = 'none';
-            document.getElementById('profileContent').style.display = 'none';
-            document.getElementById('notLoggedIn').style.display = 'block';
+        // 设置用户基本信息
+        document.getElementById("userNameLarge").textContent =
+          userInfo.name || userInfo.username || "未知用户";
+        document.getElementById("userUidLarge").textContent =
+          `UID: ${userInfo.uid || "未知"}`;
+
+        // 设置登录时间
+        if (userInfo.loginTime) {
+          const loginDate = new Date(userInfo.loginTime);
+          const timeStr = loginDate.toLocaleString("zh-CN");
+          document.getElementById("detailLoginTime").textContent = timeStr;
         }
 
-        // 刷新用户信息
-        async function refreshUserInfo() {
-            const refreshBtn = event.target;
-            const originalText = refreshBtn.innerHTML;
-            refreshBtn.disabled = true;
-            refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
+        // 设置详细信息
+        document.getElementById("detailUsername").textContent =
+          userInfo.username || "未知";
+        document.getElementById("detailUid").textContent =
+          userInfo.uid || "未知";
+        document.getElementById("detailAccountStatus").textContent =
+          userInfo.locked ? "已锁定" : "正常";
 
-            try {
-                await loadUserProfile();
-            } catch (error) {
-                console.error('刷新用户信息失败:', error);
-            } finally {
-                refreshBtn.disabled = false;
-                refreshBtn.innerHTML = originalText;
-            }
+        // 设置最后更新时间
+        document.getElementById("lastUpdate").textContent =
+          new Date().toLocaleString("zh-CN");
+      }
+
+      // 显示未登录状态
+      function showNotLoggedIn() {
+        document.getElementById("loadingSection").style.display = "none";
+        document.getElementById("profileContent").style.display = "none";
+        document.getElementById("notLoggedIn").style.display = "block";
+      }
+
+      // 刷新用户信息
+      async function refreshUserInfo() {
+        const refreshBtn = event.target;
+        const originalText = refreshBtn.innerHTML;
+        refreshBtn.disabled = true;
+        refreshBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> 刷新中...';
+
+        try {
+          await loadUserProfile();
+        } catch (error) {
+          console.error("刷新用户信息失败:", error);
+        } finally {
+          refreshBtn.disabled = false;
+          refreshBtn.innerHTML = originalText;
+        }
+      }
+
+      // 退出登录
+      async function logout() {
+        if (!confirm("确定要退出登录吗？")) {
+          return;
         }
 
-        // 退出登录
-        async function logout() {
-            if (!confirm('确定要退出登录吗？')) {
-                return;
-            }
+        try {
+          // 清除本地存储
+          localStorage.removeItem("luogu_user_info");
+          localStorage.removeItem("luogu_session_id");
 
-            try {
-                // 清除本地存储
-                localStorage.removeItem('luogu_user_info');
-                localStorage.removeItem('luogu_session_id');
-                
-                // 调用洛谷退出API
-                try {
-                    await proxyLuoguAPI('/api/auth/logout', { method: 'POST' });
-                } catch (e) {
-                    console.log('退出API调用失败，但本地清理已完成');
-                }
-                
-                // 跳转到首页
-                window.location.href = '/';
-            } catch (error) {
-                console.error('退出登录失败:', error);
-                alert('退出登录失败，请重试');
-            }
+          // 调用洛谷退出API
+          try {
+            await proxyLuoguAPI("/api/auth/logout", { method: "POST" });
+          } catch (e) {
+            console.log("退出API调用失败，但本地清理已完成");
+          }
+
+          // 跳转到首页
+          window.location.href = "/";
+        } catch (error) {
+          console.error("退出登录失败:", error);
+          alert("退出登录失败，请重试");
+        }
+      }
+
+      // 加载用户资料
+      async function loadUserProfile() {
+        console.log("🔍 开始加载用户资料...");
+
+        // 检查localStorage中的用户信息
+        const savedUserInfo = localStorage.getItem("luogu_user_info");
+        if (!savedUserInfo) {
+          console.log("❌ 未找到用户信息");
+          showNotLoggedIn();
+          return;
         }
 
-        // 加载用户资料
-        async function loadUserProfile() {
-            console.log('🔍 开始加载用户资料...');
-            
-            // 检查localStorage中的用户信息
-            const savedUserInfo = localStorage.getItem('luogu_user_info');
-            if (!savedUserInfo) {
-                console.log('❌ 未找到用户信息');
-                showNotLoggedIn();
-                return;
-            }
+        try {
+          const userInfo = JSON.parse(savedUserInfo);
+          console.log("✅ 找到用户信息:", userInfo);
 
-            try {
-                const userInfo = JSON.parse(savedUserInfo);
-                console.log('✅ 找到用户信息:', userInfo);
-                
-                // 检查登录时间是否过期（24小时）
-                const loginTime = new Date(userInfo.loginTime);
-                const now = new Date();
-                const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-                
-                if (hoursDiff >= 24) {
-                    console.log('⚠️ 用户信息已过期');
-                    localStorage.removeItem('luogu_user_info');
-                    showNotLoggedIn();
-                    return;
-                }
+          // 检查登录时间是否过期（24小时）
+          const loginTime = new Date(userInfo.loginTime);
+          const now = new Date();
+          const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
 
-                // 显示用户信息
-                displayUserInfo(userInfo);
-                
-            } catch (error) {
-                console.error('解析用户信息失败:', error);
-                localStorage.removeItem('luogu_user_info');
-                showNotLoggedIn();
-            }
+          if (hoursDiff >= 24) {
+            console.log("⚠️ 用户信息已过期");
+            localStorage.removeItem("luogu_user_info");
+            showNotLoggedIn();
+            return;
+          }
+
+          // 显示用户信息
+          displayUserInfo(userInfo);
+        } catch (error) {
+          console.error("解析用户信息失败:", error);
+          localStorage.removeItem("luogu_user_info");
+          showNotLoggedIn();
+        }
+      }
+
+      // 标签页切换功能
+      function switchTab(tabName) {
+        // 隐藏所有标签页内容
+        const tabContents = document.querySelectorAll(".tab-content");
+        tabContents.forEach((content) => {
+          content.classList.remove("active");
+        });
+
+        // 移除所有标签按钮的active状态
+        const tabBtns = document.querySelectorAll(".tab-btn");
+        tabBtns.forEach((btn) => {
+          btn.classList.remove("active");
+        });
+
+        // 显示选中的标签页内容
+        const selectedTab = document.getElementById(`tab-${tabName}`);
+        if (selectedTab) {
+          selectedTab.classList.add("active");
         }
 
-        // 标签页切换功能
-        function switchTab(tabName) {
-            // 隐藏所有标签页内容
-            const tabContents = document.querySelectorAll('.tab-content');
-            tabContents.forEach(content => {
-                content.classList.remove('active');
-            });
-            
-            // 移除所有标签按钮的active状态
-            const tabBtns = document.querySelectorAll('.tab-btn');
-            tabBtns.forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // 显示选中的标签页内容
-            const selectedTab = document.getElementById(`tab-${tabName}`);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-            }
-            
-            // 激活对应的标签按钮
-            const selectedBtn = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
-            if (selectedBtn) {
-                selectedBtn.classList.add('active');
-            }
-            
-            // 根据标签页加载对应数据
-            switch(tabName) {
-                case 'rating':
-                    loadRatingHistory();
-                    break;
-                case 'social':
-                    loadSocialData();
-                    break;
-                case 'settings':
-                    loadUserSettings();
-                    break;
-            }
+        // 激活对应的标签按钮
+        const selectedBtn = document.querySelector(
+          `[onclick="switchTab('${tabName}')"]`,
+        );
+        if (selectedBtn) {
+          selectedBtn.classList.add("active");
         }
 
-        // 社交关系子标签切换
-        function switchSocialTab(tabName) {
-            // 移除所有子标签的active状态
-            const socialTabs = document.querySelectorAll('.social-tab');
-            socialTabs.forEach(tab => {
-                tab.classList.remove('active');
-            });
-            
-            // 隐藏所有社交内容
-            const socialContents = document.querySelectorAll('.social-content');
-            socialContents.forEach(content => {
-                content.style.display = 'none';
-            });
-            
-            // 激活选中的子标签
-            const selectedTab = document.querySelector(`[onclick="switchSocialTab('${tabName}')"]`);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-            }
-            
-            // 显示对应的社交内容
-            const selectedContent = document.getElementById(`social-${tabName}`);
-            if (selectedContent) {
-                selectedContent.style.display = 'block';
-            }
-            
-            // 加载对应数据
-            switch(tabName) {
-                case 'following':
-                    loadFollowingList();
-                    break;
-                case 'followers':
-                    loadFollowersList();
-                    break;
-                case 'blacklist':
-                    loadBlacklist();
-                    break;
-            }
+        // 根据标签页加载对应数据
+        switch (tabName) {
+          case "rating":
+            loadRatingHistory();
+            break;
+          case "social":
+            loadSocialData();
+            break;
+          case "settings":
+            loadUserSettings();
+            break;
+        }
+      }
+
+      // 社交关系子标签切换
+      function switchSocialTab(tabName) {
+        // 移除所有子标签的active状态
+        const socialTabs = document.querySelectorAll(".social-tab");
+        socialTabs.forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // 隐藏所有社交内容
+        const socialContents = document.querySelectorAll(".social-content");
+        socialContents.forEach((content) => {
+          content.style.display = "none";
+        });
+
+        // 激活选中的子标签
+        const selectedTab = document.querySelector(
+          `[onclick="switchSocialTab('${tabName}')"]`,
+        );
+        if (selectedTab) {
+          selectedTab.classList.add("active");
         }
 
-        // 加载用户详细信息
-        async function loadUserDetails() {
-            const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-            if (!userInfo.uid) return;
-
-            try {
-                console.log('🔍 获取用户详细信息...');
-                const response = await proxyLuoguAPI(`/user/${userInfo.uid}`, {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
-
-                console.log('📊 用户详细信息响应状态:', response.status);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 用户详细信息:', data);
-                    
-                    if (data.currentData && data.currentData.user) {
-                        const user = data.currentData.user;
-                        
-                        // 更新统计信息
-                        document.getElementById('userRating').textContent = user.rating || '--';
-                        document.getElementById('userProblemCount').textContent = user.passedProblemCount || '--';
-                        document.getElementById('userFollowingCount').textContent = user.followingCount || '--';
-                        document.getElementById('userFollowerCount').textContent = user.followerCount || '--';
-                        
-                        // 更新详细信息
-                        document.getElementById('detailUsername').textContent = user.name || user.username || '未知';
-                        document.getElementById('detailUid').textContent = user.uid || '未知';
-                        document.getElementById('detailAccountStatus').textContent = user.isLocked ? '已锁定' : '正常';
-                        
-                        // 更新签名和介绍
-                        document.getElementById('detailSlogan').textContent = user.slogan || '暂无';
-                        document.getElementById('detailIntroduction').textContent = user.introduction || '暂无';
-                        
-                        // 保存更新的用户信息
-                        const updatedUserInfo = { ...userInfo, ...user };
-                        localStorage.setItem('luogu_user_info', JSON.stringify(updatedUserInfo));
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ 用户详细信息API响应错误:', response.status, errorText);
-                }
-            } catch (error) {
-                console.error('❌ 获取用户详细信息失败:', error);
-            }
+        // 显示对应的社交内容
+        const selectedContent = document.getElementById(`social-${tabName}`);
+        if (selectedContent) {
+          selectedContent.style.display = "block";
         }
 
-        // 加载等级分历史
-        async function loadRatingHistory() {
-            const ratingList = document.getElementById('ratingHistoryList');
-            if (!ratingList) return;
-            
-            const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-            if (!userInfo.uid) {
-                ratingList.innerHTML = '<div class="error-state">无法获取用户ID</div>';
-                return;
-            }
-            
-            ratingList.innerHTML = '<div class="loading-text">正在加载等级分历史...</div>';
-            
-            try {
-                console.log('🔍 获取等级分历史...', 'UID:', userInfo.uid);
-                const response = await proxyLuoguAPI(`/api/rating/elo?user=${userInfo.uid}`, {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
+        // 加载对应数据
+        switch (tabName) {
+          case "following":
+            loadFollowingList();
+            break;
+          case "followers":
+            loadFollowersList();
+            break;
+          case "blacklist":
+            loadBlacklist();
+            break;
+        }
+      }
 
-                console.log('📊 等级分历史响应状态:', response.status);
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 等级分历史:', data);
-                    
-                    if (data.records && data.records.result && data.records.result.length > 0) {
-                        const ratings = data.records.result;
-                        let html = '';
-                        
-                        ratings.slice(0, 10).forEach((rating, index) => {
-                            const date = new Date(rating.time * 1000).toLocaleDateString('zh-CN');
-                            const currentRating = rating.rating || 0;
-                            const prevRating = index < ratings.length - 1 ? (ratings[index + 1].rating || 0) : 0;
-                            const change = currentRating - prevRating;
-                            const changeClass = change > 0 ? 'rating-up' : (change < 0 ? 'rating-down' : 'rating-same');
-                            const changeText = change > 0 ? `+${change}` : change.toString();
-                            
-                            html += `
+      // 加载用户详细信息
+      async function loadUserDetails() {
+        const userInfo = JSON.parse(
+          localStorage.getItem("luogu_user_info") || "{}",
+        );
+        if (!userInfo.uid) return;
+
+        try {
+          console.log("🔍 获取用户详细信息...");
+          const response = await proxyLuoguAPI(`/user/${userInfo.uid}`, {
+            headers: {
+              "x-luogu-type": "content-only",
+            },
+          });
+
+          console.log("📊 用户详细信息响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 用户详细信息:", data);
+
+            if (data.currentData && data.currentData.user) {
+              const user = data.currentData.user;
+
+              // 更新统计信息
+              document.getElementById("userRating").textContent =
+                user.rating || "--";
+              document.getElementById("userProblemCount").textContent =
+                user.passedProblemCount || "--";
+              document.getElementById("userFollowingCount").textContent =
+                user.followingCount || "--";
+              document.getElementById("userFollowerCount").textContent =
+                user.followerCount || "--";
+
+              // 更新详细信息
+              document.getElementById("detailUsername").textContent =
+                user.name || user.username || "未知";
+              document.getElementById("detailUid").textContent =
+                user.uid || "未知";
+              document.getElementById("detailAccountStatus").textContent =
+                user.isLocked ? "已锁定" : "正常";
+
+              // 更新签名和介绍
+              document.getElementById("detailSlogan").textContent =
+                user.slogan || "暂无";
+              document.getElementById("detailIntroduction").textContent =
+                user.introduction || "暂无";
+
+              // 保存更新的用户信息
+              const updatedUserInfo = { ...userInfo, ...user };
+              localStorage.setItem(
+                "luogu_user_info",
+                JSON.stringify(updatedUserInfo),
+              );
+            }
+          } else {
+            const errorText = await response.text();
+            console.error(
+              "❌ 用户详细信息API响应错误:",
+              response.status,
+              errorText,
+            );
+          }
+        } catch (error) {
+          console.error("❌ 获取用户详细信息失败:", error);
+        }
+      }
+
+      // 加载等级分历史
+      async function loadRatingHistory() {
+        const ratingList = document.getElementById("ratingHistoryList");
+        if (!ratingList) return;
+
+        const userInfo = JSON.parse(
+          localStorage.getItem("luogu_user_info") || "{}",
+        );
+        if (!userInfo.uid) {
+          ratingList.innerHTML =
+            '<div class="error-state">无法获取用户ID</div>';
+          return;
+        }
+
+        ratingList.innerHTML =
+          '<div class="loading-text">正在加载等级分历史...</div>';
+
+        try {
+          console.log("🔍 获取等级分历史...", "UID:", userInfo.uid);
+          const response = await proxyLuoguAPI(
+            `/api/rating/elo?user=${userInfo.uid}`,
+            {
+              headers: {
+                "x-luogu-type": "content-only",
+              },
+            },
+          );
+
+          console.log("📊 等级分历史响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 等级分历史:", data);
+
+            if (
+              data.records &&
+              data.records.result &&
+              data.records.result.length > 0
+            ) {
+              const ratings = data.records.result;
+              let html = "";
+
+              ratings.slice(0, 10).forEach((rating, index) => {
+                const date = new Date(rating.time * 1000).toLocaleDateString(
+                  "zh-CN",
+                );
+                const currentRating = rating.rating || 0;
+                const prevRating =
+                  index < ratings.length - 1
+                    ? ratings[index + 1].rating || 0
+                    : 0;
+                const change = currentRating - prevRating;
+                const changeClass =
+                  change > 0
+                    ? "rating-up"
+                    : change < 0
+                      ? "rating-down"
+                      : "rating-same";
+                const changeText =
+                  change > 0 ? `+${change}` : change.toString();
+
+                html += `
                                 <div class="rating-item">
                                     <div class="rating-info">
-                                        <span class="rating-contest">${rating.contestName || '比赛记录'}</span>
+                                        <span class="rating-contest">${rating.contestName || "比赛记录"}</span>
                                         <span class="rating-date">${date}</span>
                                     </div>
                                     <div class="rating-change">
                                         <span class="rating-current">当前: ${currentRating}</span>
-                                        ${change !== 0 ? `<span class="rating-delta ${changeClass}">${changeText}</span>` : ''}
-                                        ${rating.latest ? '<span class="rating-latest">最新</span>' : ''}
+                                        ${change !== 0 ? `<span class="rating-delta ${changeClass}">${changeText}</span>` : ""}
+                                        ${rating.latest ? '<span class="rating-latest">最新</span>' : ""}
                                     </div>
                                 </div>
                             `;
-                        });
-                        
-                        ratingList.innerHTML = html;
-                    } else {
-                        ratingList.innerHTML = '<div class="empty-state">暂无等级分历史记录</div>';
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ 等级分历史API响应错误:', response.status, errorText);
-                    ratingList.innerHTML = '<div class="error-state">获取等级分历史失败，可能需要登录或权限不足</div>';
-                }
-            } catch (error) {
-                console.error('❌ 获取等级分历史失败:', error);
-                ratingList.innerHTML = '<div class="error-state">获取等级分历史失败，请重试</div>';
-            }
-        }
+              });
 
-        // 加载社交数据
-        async function loadSocialData() {
-            // 默认显示关注列表
-            switchSocialTab('following');
-        }
-
-        // 分页相关变量
-        let followingPage = 1;
-        let followersPage = 1;
-        let blacklistPage = 1;
-        const pageSize = 20; // 每页显示数量
-        
-        // 加载关注列表
-        async function loadFollowingList(page = 1, append = false) {
-            const followingList = document.getElementById('social-following');
-            if (!followingList) return;
-            
-            const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-            if (!userInfo.uid) {
-                followingList.innerHTML = '<div class="error-state">无法获取用户ID</div>';
-                return;
-            }
-            
-            if (!append) {
-                followingList.innerHTML = '<div class="loading-text">正在加载关注列表...</div>';
-                followingPage = page;
+              ratingList.innerHTML = html;
             } else {
-                // 添加加载更多指示器
-                const loadingMore = document.createElement('div');
-                loadingMore.className = 'loading-more';
-                loadingMore.innerHTML = '<div class="loading-text">正在加载更多...</div>';
-                followingList.appendChild(loadingMore);
+              ratingList.innerHTML =
+                '<div class="empty-state">暂无等级分历史记录</div>';
             }
-            
-            try {
-                console.log('🔍 获取关注列表...', 'UID:', userInfo.uid, 'Page:', page);
-                const response = await proxyLuoguAPI(`/api/user/followings?user=${userInfo.uid}&page=${page}`, {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
+          } else {
+            const errorText = await response.text();
+            console.error(
+              "❌ 等级分历史API响应错误:",
+              response.status,
+              errorText,
+            );
+            ratingList.innerHTML =
+              '<div class="error-state">获取等级分历史失败，可能需要登录或权限不足</div>';
+          }
+        } catch (error) {
+          console.error("❌ 获取等级分历史失败:", error);
+          ratingList.innerHTML =
+            '<div class="error-state">获取等级分历史失败，请重试</div>';
+        }
+      }
 
-                console.log('📊 关注列表响应状态:', response.status);
+      // 加载社交数据
+      async function loadSocialData() {
+        // 默认显示关注列表
+        switchSocialTab("following");
+      }
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 关注列表:', data);
-                    
-                    // 正确处理洛谷API返回的{"users": {"result": [...]}}
-                    let users = [];
-                    if (data.users && Array.isArray(data.users.result)) {
-                        users = data.users.result;
-                    } else if (Array.isArray(data.users)) {
-                        users = data.users;
-                    } else if (data.currentData && Array.isArray(data.currentData.users)) {
-                        users = data.currentData.users;
-                    }
+      // 分页相关变量
+      let followingPage = 1;
+      let followersPage = 1;
+      let blacklistPage = 1;
+      const pageSize = 20; // 每页显示数量
 
-                    if (users.length > 0) {
-                        let html = '';
-                        
-                        users.forEach(user => {
-                            html += `
+      // 加载关注列表
+      async function loadFollowingList(page = 1, append = false) {
+        const followingList = document.getElementById("social-following");
+        if (!followingList) return;
+
+        const userInfo = JSON.parse(
+          localStorage.getItem("luogu_user_info") || "{}",
+        );
+        if (!userInfo.uid) {
+          followingList.innerHTML =
+            '<div class="error-state">无法获取用户ID</div>';
+          return;
+        }
+
+        if (!append) {
+          followingList.innerHTML =
+            '<div class="loading-text">正在加载关注列表...</div>';
+          followingPage = page;
+        } else {
+          // 添加加载更多指示器
+          const loadingMore = document.createElement("div");
+          loadingMore.className = "loading-more";
+          loadingMore.innerHTML =
+            '<div class="loading-text">正在加载更多...</div>';
+          followingList.appendChild(loadingMore);
+        }
+
+        try {
+          console.log(
+            "🔍 获取关注列表...",
+            "UID:",
+            userInfo.uid,
+            "Page:",
+            page,
+          );
+          const response = await proxyLuoguAPI(
+            `/api/user/followings?user=${userInfo.uid}&page=${page}`,
+            {
+              headers: {
+                "x-luogu-type": "content-only",
+              },
+            },
+          );
+
+          console.log("📊 关注列表响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 关注列表:", data);
+
+            // 正确处理洛谷API返回的{"users": {"result": [...]}}
+            let users = [];
+            if (data.users && Array.isArray(data.users.result)) {
+              users = data.users.result;
+            } else if (Array.isArray(data.users)) {
+              users = data.users;
+            } else if (
+              data.currentData &&
+              Array.isArray(data.currentData.users)
+            ) {
+              users = data.currentData.users;
+            }
+
+            if (users.length > 0) {
+              let html = "";
+
+              users.forEach((user) => {
+                html += `
                                 <div class="user-item">
                                     <img src="${user.avatar || `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`}" 
                                          alt="${user.name}" class="user-item-avatar"
                                          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K'">
                                     <div class="user-item-info">
-                                        <div class="user-item-name" style="color: ${user.color === 'Gray' ? '#666' : user.color}">${user.name}</div>
+                                        <div class="user-item-name" style="color: ${user.color === "Gray" ? "#666" : user.color}">${user.name}</div>
                                         <div class="user-item-uid">UID: ${user.uid}</div>
-                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ''}
+                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ""}
                                     </div>
                                     <div class="user-item-stats">
-                                        <div class="user-item-rating">Rating: ${user.eloValue || '--'}</div>
-                                        <div class="user-item-problems">题目: ${user.passedProblemCount || '--'}</div>
-                                        <div class="user-item-followers">粉丝: ${user.followerCount || '--'}</div>
+                                        <div class="user-item-rating">Rating: ${user.eloValue || "--"}</div>
+                                        <div class="user-item-problems">题目: ${user.passedProblemCount || "--"}</div>
+                                        <div class="user-item-followers">粉丝: ${user.followerCount || "--"}</div>
                                     </div>
                                 </div>
                             `;
-                        });
-                        
-                        // 添加分页控制
-                        const hasMore = users.length === pageSize; // 如果返回的数量等于页面大小，可能还有更多
-                        html += `
+              });
+
+              // 添加分页控制
+              const hasMore = users.length === pageSize; // 如果返回的数量等于页面大小，可能还有更多
+              html += `
                             <div class="pagination-controls">
                                 <div class="pagination-info">
                                     第 ${page} 页，显示 ${users.length} 个用户
                                 </div>
                                 <div class="pagination-buttons">
-                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadFollowingList(${page - 1})">上一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination" onclick="loadFollowingList(${page + 1})">下一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadFollowingList(${page + 1}, true)">加载更多</button>` : ''}
+                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadFollowingList(${page - 1})">上一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination" onclick="loadFollowingList(${page + 1})">下一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadFollowingList(${page + 1}, true)">加载更多</button>` : ""}
                                 </div>
                             </div>
                         `;
-                        
-                        console.log('🔧 生成的HTML长度:', html.length);
-                        console.log('🔧 关注列表分页信息:', { page, count: users.length, hasMore });
-                        
-                        if (append) {
-                            // 移除加载更多指示器
-                            const loadingMore = followingList.querySelector('.loading-more');
-                            if (loadingMore) {
-                                loadingMore.remove();
-                            }
-                            
-                            // 移除旧的分页控制
-                            const oldPagination = followingList.querySelector('.pagination-controls');
-                            if (oldPagination) {
-                                oldPagination.remove();
-                            }
-                            
-                            // 添加新内容（不包括分页控制）
-                            const userItemsHtml = html.substring(0, html.lastIndexOf('<div class="pagination-controls">'));
-                            const paginationHtml = html.substring(html.lastIndexOf('<div class="pagination-controls">'));
-                            
-                            followingList.insertAdjacentHTML('beforeend', userItemsHtml);
-                            followingList.insertAdjacentHTML('beforeend', paginationHtml);
-                            
-                            followingPage = page;
-                        } else {
-                            followingList.innerHTML = html;
-                        }
-                        
-                        console.log('🔧 设置innerHTML后，容器子元素数量:', followingList.children.length);
-                    } else if (page === 1) {
-                        followingList.innerHTML = '<div class="empty-state">暂无关注用户</div>';
-                    } else {
-                        // 没有更多数据了
-                        const loadingMore = followingList.querySelector('.loading-more');
-                        if (loadingMore) {
-                            loadingMore.innerHTML = '<div class="no-more-data">没有更多数据了</div>';
-                        }
-                    }
-                } else {
-                    const errorText = await response.text();
-                    if (response.status === 403 || response.status === 401) {
-                        console.log('❌ 关注列表API权限不足:', response.status, errorText);
-                        followingList.innerHTML = `
+
+              console.log("🔧 生成的HTML长度:", html.length);
+              console.log("🔧 关注列表分页信息:", {
+                page,
+                count: users.length,
+                hasMore,
+              });
+
+              if (append) {
+                // 移除加载更多指示器
+                const loadingMore =
+                  followingList.querySelector(".loading-more");
+                if (loadingMore) {
+                  loadingMore.remove();
+                }
+
+                // 移除旧的分页控制
+                const oldPagination = followingList.querySelector(
+                  ".pagination-controls",
+                );
+                if (oldPagination) {
+                  oldPagination.remove();
+                }
+
+                // 添加新内容（不包括分页控制）
+                const userItemsHtml = html.substring(
+                  0,
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+                const paginationHtml = html.substring(
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+
+                followingList.insertAdjacentHTML("beforeend", userItemsHtml);
+                followingList.insertAdjacentHTML("beforeend", paginationHtml);
+
+                followingPage = page;
+              } else {
+                followingList.innerHTML = html;
+              }
+
+              console.log(
+                "🔧 设置innerHTML后，容器子元素数量:",
+                followingList.children.length,
+              );
+            } else if (page === 1) {
+              followingList.innerHTML =
+                '<div class="empty-state">暂无关注用户</div>';
+            } else {
+              // 没有更多数据了
+              const loadingMore = followingList.querySelector(".loading-more");
+              if (loadingMore) {
+                loadingMore.innerHTML =
+                  '<div class="no-more-data">没有更多数据了</div>';
+              }
+            }
+          } else {
+            const errorText = await response.text();
+            if (response.status === 403 || response.status === 401) {
+              console.log(
+                "❌ 关注列表API权限不足:",
+                response.status,
+                errorText,
+              );
+              followingList.innerHTML = `
                             <div class="error-state">
                                 <div class="error-message">权限不足或需要重新验证</div>
                                 <button class="retry-btn" onclick="loadFollowingList()" style="
@@ -1567,9 +1222,9 @@
                                 ">🔄 重试</button>
                             </div>
                         `;
-                    } else {
-                        console.log('❌ 关注列表API响应错误:', response.status);
-                        followingList.innerHTML = `
+            } else {
+              console.log("❌ 关注列表API响应错误:", response.status);
+              followingList.innerHTML = `
                             <div class="error-state">
                                 <div class="error-message">获取关注列表失败 (${response.status})</div>
                                 <button class="retry-btn" onclick="loadFollowingList()" style="
@@ -1583,11 +1238,11 @@
                                 ">🔄 重试</button>
                             </div>
                         `;
-                    }
-                }
-            } catch (error) {
-                console.error('❌ 获取关注列表失败:', error);
-                followingList.innerHTML = `<div class="error-state">
+            }
+          }
+        } catch (error) {
+          console.error("❌ 获取关注列表失败:", error);
+          followingList.innerHTML = `<div class="error-state">
                     获取关注列表失败，请重试
                     <button class="retry-btn" onclick="loadFollowingList()" style="
                         background: #4CAF50;
@@ -1600,121 +1255,149 @@
                         🔄 重试
                     </button>
                 </div>`;
-            }
+        }
+      }
+
+      // 加载粉丝列表
+      async function loadFollowersList(page = 1, append = false) {
+        const followersList = document.getElementById("social-followers");
+        if (!followersList) return;
+
+        const userInfo = JSON.parse(
+          localStorage.getItem("luogu_user_info") || "{}",
+        );
+        if (!userInfo.uid) {
+          followersList.innerHTML =
+            '<div class="error-state">无法获取用户ID</div>';
+          return;
         }
 
-        // 加载粉丝列表
-        async function loadFollowersList(page = 1, append = false) {
-            const followersList = document.getElementById('social-followers');
-            if (!followersList) return;
-            
-            const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-            if (!userInfo.uid) {
-                followersList.innerHTML = '<div class="error-state">无法获取用户ID</div>';
-                return;
-            }
-            
-            if (!append) {
-                followersList.innerHTML = '<div class="loading-text">正在加载粉丝列表...</div>';
-                followersPage = page;
-            } else {
-                // 添加加载更多指示器
-                const loadingMore = document.createElement('div');
-                loadingMore.className = 'loading-more';
-                loadingMore.innerHTML = '<div class="loading-text">正在加载更多...</div>';
-                followersList.appendChild(loadingMore);
-            }
-            
-            try {
-                console.log('🔍 获取粉丝列表...', 'UID:', userInfo.uid, 'Page:', page);
-                const response = await proxyLuoguAPI(`/api/user/followers?user=${userInfo.uid}&page=${page}`, {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
+        if (!append) {
+          followersList.innerHTML =
+            '<div class="loading-text">正在加载粉丝列表...</div>';
+          followersPage = page;
+        } else {
+          // 添加加载更多指示器
+          const loadingMore = document.createElement("div");
+          loadingMore.className = "loading-more";
+          loadingMore.innerHTML =
+            '<div class="loading-text">正在加载更多...</div>';
+          followersList.appendChild(loadingMore);
+        }
 
-                console.log('📊 粉丝列表响应状态:', response.status);
+        try {
+          console.log(
+            "🔍 获取粉丝列表...",
+            "UID:",
+            userInfo.uid,
+            "Page:",
+            page,
+          );
+          const response = await proxyLuoguAPI(
+            `/api/user/followers?user=${userInfo.uid}&page=${page}`,
+            {
+              headers: {
+                "x-luogu-type": "content-only",
+              },
+            },
+          );
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 粉丝列表:', data);
-                    
-                    if (data.users && data.users.result && data.users.result.length > 0) {
-                        const users = data.users.result;
-                        let html = '';
-                        
-                        users.forEach(user => {
-                            html += `
+          console.log("📊 粉丝列表响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 粉丝列表:", data);
+
+            if (
+              data.users &&
+              data.users.result &&
+              data.users.result.length > 0
+            ) {
+              const users = data.users.result;
+              let html = "";
+
+              users.forEach((user) => {
+                html += `
                                 <div class="user-item">
                                     <img src="${user.avatar || `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`}" 
                                          alt="${user.name}" class="user-item-avatar"
                                          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K'">
                                     <div class="user-item-info">
-                                        <div class="user-item-name" style="color: ${user.color === 'Gray' ? '#666' : user.color}">${user.name}</div>
+                                        <div class="user-item-name" style="color: ${user.color === "Gray" ? "#666" : user.color}">${user.name}</div>
                                         <div class="user-item-uid">UID: ${user.uid}</div>
-                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ''}
+                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ""}
                                     </div>
                                     <div class="user-item-stats">
-                                        <div class="user-item-rating">Rating: ${user.eloValue || '--'}</div>
-                                        <div class="user-item-problems">题目: ${user.passedProblemCount || '--'}</div>
-                                        <div class="user-item-followers">粉丝: ${user.followerCount || '--'}</div>
+                                        <div class="user-item-rating">Rating: ${user.eloValue || "--"}</div>
+                                        <div class="user-item-problems">题目: ${user.passedProblemCount || "--"}</div>
+                                        <div class="user-item-followers">粉丝: ${user.followerCount || "--"}</div>
                                     </div>
                                 </div>
                             `;
-                        });
-                        
-                        // 添加分页控制
-                        const hasMore = users.length === pageSize;
-                        html += `
+              });
+
+              // 添加分页控制
+              const hasMore = users.length === pageSize;
+              html += `
                             <div class="pagination-controls">
                                 <div class="pagination-info">
                                     第 ${page} 页，显示 ${users.length} 个粉丝
                                 </div>
                                 <div class="pagination-buttons">
-                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadFollowersList(${page - 1})">上一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination" onclick="loadFollowersList(${page + 1})">下一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadFollowersList(${page + 1}, true)">加载更多</button>` : ''}
+                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadFollowersList(${page - 1})">上一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination" onclick="loadFollowersList(${page + 1})">下一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadFollowersList(${page + 1}, true)">加载更多</button>` : ""}
                                 </div>
                             </div>
                         `;
-                        
-                        if (append) {
-                            // 移除加载更多指示器
-                            const loadingMore = followersList.querySelector('.loading-more');
-                            if (loadingMore) {
-                                loadingMore.remove();
-                            }
-                            
-                            // 移除旧的分页控制
-                            const oldPagination = followersList.querySelector('.pagination-controls');
-                            if (oldPagination) {
-                                oldPagination.remove();
-                            }
-                            
-                            // 添加新内容
-                            const userItemsHtml = html.substring(0, html.lastIndexOf('<div class="pagination-controls">'));
-                            const paginationHtml = html.substring(html.lastIndexOf('<div class="pagination-controls">'));
-                            
-                            followersList.insertAdjacentHTML('beforeend', userItemsHtml);
-                            followersList.insertAdjacentHTML('beforeend', paginationHtml);
-                            
-                            followersPage = page;
-                        } else {
-                            followersList.innerHTML = html;
-                        }
-                    } else if (page === 1) {
-                        followersList.innerHTML = '<div class="empty-state">暂无粉丝用户</div>';
-                    } else {
-                        // 没有更多数据了
-                        const loadingMore = followersList.querySelector('.loading-more');
-                        if (loadingMore) {
-                            loadingMore.innerHTML = '<div class="no-more-data">没有更多数据了</div>';
-                        }
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ 获取粉丝列表失败:', response.status, errorText);
-                    followersList.innerHTML = `
+
+              if (append) {
+                // 移除加载更多指示器
+                const loadingMore =
+                  followersList.querySelector(".loading-more");
+                if (loadingMore) {
+                  loadingMore.remove();
+                }
+
+                // 移除旧的分页控制
+                const oldPagination = followersList.querySelector(
+                  ".pagination-controls",
+                );
+                if (oldPagination) {
+                  oldPagination.remove();
+                }
+
+                // 添加新内容
+                const userItemsHtml = html.substring(
+                  0,
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+                const paginationHtml = html.substring(
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+
+                followersList.insertAdjacentHTML("beforeend", userItemsHtml);
+                followersList.insertAdjacentHTML("beforeend", paginationHtml);
+
+                followersPage = page;
+              } else {
+                followersList.innerHTML = html;
+              }
+            } else if (page === 1) {
+              followersList.innerHTML =
+                '<div class="empty-state">暂无粉丝用户</div>';
+            } else {
+              // 没有更多数据了
+              const loadingMore = followersList.querySelector(".loading-more");
+              if (loadingMore) {
+                loadingMore.innerHTML =
+                  '<div class="no-more-data">没有更多数据了</div>';
+              }
+            }
+          } else {
+            const errorText = await response.text();
+            console.error("❌ 获取粉丝列表失败:", response.status, errorText);
+            followersList.innerHTML = `
                         <div class="error-state">
                             <div class="error-message">获取粉丝列表失败 (${response.status})</div>
                             <button class="retry-btn" onclick="loadFollowersList()" style="
@@ -1728,10 +1411,10 @@
                             ">🔄 重试</button>
                         </div>
                     `;
-                }
-            } catch (error) {
-                console.error('❌ 获取粉丝列表失败:', error);
-                followersList.innerHTML = `
+          }
+        } catch (error) {
+          console.error("❌ 获取粉丝列表失败:", error);
+          followersList.innerHTML = `
                     <div class="error-state">
                         <div class="error-message">获取粉丝列表失败，请重试</div>
                         <button class="retry-btn" onclick="loadFollowersList()" style="
@@ -1745,121 +1428,140 @@
                         ">🔄 重试</button>
                     </div>
                 `;
-            }
+        }
+      }
+
+      // 加载黑名单
+      async function loadBlacklist(page = 1, append = false) {
+        const blacklist = document.getElementById("social-blacklist");
+        if (!blacklist) return;
+
+        const userInfo = JSON.parse(
+          localStorage.getItem("luogu_user_info") || "{}",
+        );
+        if (!userInfo.uid) {
+          blacklist.innerHTML = '<div class="error-state">无法获取用户ID</div>';
+          return;
         }
 
-        // 加载黑名单
-        async function loadBlacklist(page = 1, append = false) {
-            const blacklist = document.getElementById('social-blacklist');
-            if (!blacklist) return;
-            
-            const userInfo = JSON.parse(localStorage.getItem('luogu_user_info') || '{}');
-            if (!userInfo.uid) {
-                blacklist.innerHTML = '<div class="error-state">无法获取用户ID</div>';
-                return;
-            }
-            
-            if (!append) {
-                blacklist.innerHTML = '<div class="loading-text">正在加载黑名单...</div>';
-                blacklistPage = page;
-            } else {
-                // 添加加载更多指示器
-                const loadingMore = document.createElement('div');
-                loadingMore.className = 'loading-more';
-                loadingMore.innerHTML = '<div class="loading-text">正在加载更多...</div>';
-                blacklist.appendChild(loadingMore);
-            }
-            
-            try {
-                console.log('🔍 获取黑名单...', 'UID:', userInfo.uid, 'Page:', page);
-                const response = await proxyLuoguAPI(`/api/user/blacklist?user=${userInfo.uid}&page=${page}`, {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
+        if (!append) {
+          blacklist.innerHTML =
+            '<div class="loading-text">正在加载黑名单...</div>';
+          blacklistPage = page;
+        } else {
+          // 添加加载更多指示器
+          const loadingMore = document.createElement("div");
+          loadingMore.className = "loading-more";
+          loadingMore.innerHTML =
+            '<div class="loading-text">正在加载更多...</div>';
+          blacklist.appendChild(loadingMore);
+        }
 
-                console.log('📊 黑名单响应状态:', response.status);
+        try {
+          console.log("🔍 获取黑名单...", "UID:", userInfo.uid, "Page:", page);
+          const response = await proxyLuoguAPI(
+            `/api/user/blacklist?user=${userInfo.uid}&page=${page}`,
+            {
+              headers: {
+                "x-luogu-type": "content-only",
+              },
+            },
+          );
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 黑名单:', data);
-                    
-                    if (data.users && data.users.result && data.users.result.length > 0) {
-                        const users = data.users.result;
-                        let html = '';
-                        
-                        users.forEach(user => {
-                            html += `
+          console.log("📊 黑名单响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 黑名单:", data);
+
+            if (
+              data.users &&
+              data.users.result &&
+              data.users.result.length > 0
+            ) {
+              const users = data.users.result;
+              let html = "";
+
+              users.forEach((user) => {
+                html += `
                                 <div class="user-item">
                                     <img src="${user.avatar || `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`}" 
                                          alt="${user.name}" class="user-item-avatar"
                                          onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K'">
                                     <div class="user-item-info">
-                                        <div class="user-item-name" style="color: ${user.color === 'Gray' ? '#666' : user.color}">${user.name}</div>
+                                        <div class="user-item-name" style="color: ${user.color === "Gray" ? "#666" : user.color}">${user.name}</div>
                                         <div class="user-item-uid">UID: ${user.uid}</div>
-                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ''}
+                                        ${user.slogan ? `<div class="user-item-slogan">${user.slogan}</div>` : ""}
                                     </div>
                                     <div class="user-item-stats">
-                                        <div class="user-item-rating">Rating: ${user.eloValue || '--'}</div>
-                                        <div class="user-item-problems">题目: ${user.passedProblemCount || '--'}</div>
-                                        <div class="user-item-followers">粉丝: ${user.followerCount || '--'}</div>
+                                        <div class="user-item-rating">Rating: ${user.eloValue || "--"}</div>
+                                        <div class="user-item-problems">题目: ${user.passedProblemCount || "--"}</div>
+                                        <div class="user-item-followers">粉丝: ${user.followerCount || "--"}</div>
                                     </div>
                                 </div>
                             `;
-                        });
-                        
-                        // 添加分页控制
-                        const hasMore = users.length === pageSize;
-                        html += `
+              });
+
+              // 添加分页控制
+              const hasMore = users.length === pageSize;
+              html += `
                             <div class="pagination-controls">
                                 <div class="pagination-info">
                                     第 ${page} 页，显示 ${users.length} 个用户
                                 </div>
                                 <div class="pagination-buttons">
-                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadBlacklist(${page - 1})">上一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination" onclick="loadBlacklist(${page + 1})">下一页</button>` : ''}
-                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadBlacklist(${page + 1}, true)">加载更多</button>` : ''}
+                                    ${page > 1 ? `<button class="btn-pagination" onclick="loadBlacklist(${page - 1})">上一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination" onclick="loadBlacklist(${page + 1})">下一页</button>` : ""}
+                                    ${hasMore ? `<button class="btn-pagination btn-load-more" onclick="loadBlacklist(${page + 1}, true)">加载更多</button>` : ""}
                                 </div>
                             </div>
                         `;
-                        
-                        if (append) {
-                            // 移除加载更多指示器
-                            const loadingMore = blacklist.querySelector('.loading-more');
-                            if (loadingMore) {
-                                loadingMore.remove();
-                            }
-                            
-                            // 移除旧的分页控制
-                            const oldPagination = blacklist.querySelector('.pagination-controls');
-                            if (oldPagination) {
-                                oldPagination.remove();
-                            }
-                            
-                            // 添加新内容
-                            const userItemsHtml = html.substring(0, html.lastIndexOf('<div class="pagination-controls">'));
-                            const paginationHtml = html.substring(html.lastIndexOf('<div class="pagination-controls">'));
-                            
-                            blacklist.insertAdjacentHTML('beforeend', userItemsHtml);
-                            blacklist.insertAdjacentHTML('beforeend', paginationHtml);
-                            
-                            blacklistPage = page;
-                        } else {
-                            blacklist.innerHTML = html;
-                        }
-                    } else if (page === 1) {
-                        blacklist.innerHTML = '<div class="empty-state">黑名单为空</div>';
-                    } else {
-                        // 没有更多数据了
-                        const loadingMore = blacklist.querySelector('.loading-more');
-                        if (loadingMore) {
-                            loadingMore.innerHTML = '<div class="no-more-data">没有更多数据了</div>';
-                        }
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ 获取黑名单失败:', response.status, errorText);
-                    blacklist.innerHTML = `
+
+              if (append) {
+                // 移除加载更多指示器
+                const loadingMore = blacklist.querySelector(".loading-more");
+                if (loadingMore) {
+                  loadingMore.remove();
+                }
+
+                // 移除旧的分页控制
+                const oldPagination = blacklist.querySelector(
+                  ".pagination-controls",
+                );
+                if (oldPagination) {
+                  oldPagination.remove();
+                }
+
+                // 添加新内容
+                const userItemsHtml = html.substring(
+                  0,
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+                const paginationHtml = html.substring(
+                  html.lastIndexOf('<div class="pagination-controls">'),
+                );
+
+                blacklist.insertAdjacentHTML("beforeend", userItemsHtml);
+                blacklist.insertAdjacentHTML("beforeend", paginationHtml);
+
+                blacklistPage = page;
+              } else {
+                blacklist.innerHTML = html;
+              }
+            } else if (page === 1) {
+              blacklist.innerHTML = '<div class="empty-state">黑名单为空</div>';
+            } else {
+              // 没有更多数据了
+              const loadingMore = blacklist.querySelector(".loading-more");
+              if (loadingMore) {
+                loadingMore.innerHTML =
+                  '<div class="no-more-data">没有更多数据了</div>';
+              }
+            }
+          } else {
+            const errorText = await response.text();
+            console.error("❌ 获取黑名单失败:", response.status, errorText);
+            blacklist.innerHTML = `
                         <div class="error-state">
                             <div class="error-message">获取黑名单失败 (${response.status})</div>
                             <button class="retry-btn" onclick="loadBlacklist()" style="
@@ -1873,10 +1575,10 @@
                             ">🔄 重试</button>
                         </div>
                     `;
-                }
-            } catch (error) {
-                console.error('❌ 获取黑名单失败:', error);
-                blacklist.innerHTML = `
+          }
+        } catch (error) {
+          console.error("❌ 获取黑名单失败:", error);
+          blacklist.innerHTML = `
                     <div class="error-state">
                         <div class="error-message">获取黑名单失败，请重试</div>
                         <button class="retry-btn" onclick="loadBlacklist()" style="
@@ -1890,180 +1592,199 @@
                         ">🔄 重试</button>
                     </div>
                 `;
+        }
+      }
+
+      // 加载用户设置
+      async function loadUserSettings() {
+        try {
+          console.log("🔍 获取用户设置...");
+          const response = await proxyLuoguAPI("/user/setting", {
+            headers: {
+              "x-luogu-type": "content-only",
+            },
+          });
+
+          console.log("📊 用户设置响应状态:", response.status);
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 用户设置:", data);
+
+            if (data.currentData && data.currentData.user) {
+              const user = data.currentData.user;
+
+              // 填充设置表单
+              document.getElementById("settingSlogan").value =
+                user.slogan || "";
+              document.getElementById("settingIntroduction").value =
+                user.introduction || "";
             }
+          } else {
+            const errorText = await response.text();
+            console.error(
+              "❌ 用户设置API响应错误:",
+              response.status,
+              errorText,
+            );
+            console.log("⚠️ 用户设置获取失败，可能需要特殊权限");
+          }
+        } catch (error) {
+          console.error("❌ 获取用户设置失败:", error);
+          console.log("⚠️ 用户设置API调用异常");
+        }
+      }
+
+      // 保存用户设置
+      async function saveSettings() {
+        const saveBtn = event.target;
+        const originalText = saveBtn.innerHTML;
+        saveBtn.disabled = true;
+        saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+
+        try {
+          const slogan = document.getElementById("settingSlogan").value;
+          const introduction = document.getElementById(
+            "settingIntroduction",
+          ).value;
+
+          console.log("💾 保存用户设置...");
+          const response = await proxyLuoguAPI("/api/user/updateSetting", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "x-luogu-type": "content-only",
+            },
+            body: JSON.stringify({
+              slogan: slogan,
+              introduction: introduction,
+            }),
+          });
+
+          if (response.ok) {
+            const data = await response.json();
+            console.log("✅ 设置保存成功:", data);
+            alert("设置保存成功！");
+          } else {
+            throw new Error("保存设置失败");
+          }
+        } catch (error) {
+          console.error("❌ 保存用户设置失败:", error);
+          alert("保存设置失败，请重试");
+        } finally {
+          saveBtn.disabled = false;
+          saveBtn.innerHTML = originalText;
+        }
+      }
+
+      // 修改加载用户资料函数，添加详细信息加载
+      async function loadUserProfile() {
+        console.log("🔍 开始加载用户资料...");
+
+        // 检查localStorage中的用户信息
+        const savedUserInfo = localStorage.getItem("luogu_user_info");
+        if (!savedUserInfo) {
+          console.log("❌ 未找到用户信息");
+          showNotLoggedIn();
+          return;
         }
 
-        // 加载用户设置
-        async function loadUserSettings() {
-            try {
-                console.log('🔍 获取用户设置...');
-                const response = await proxyLuoguAPI('/user/setting', {
-                    headers: {
-                        'x-luogu-type': 'content-only'
-                    }
-                });
+        try {
+          const userInfo = JSON.parse(savedUserInfo);
+          console.log("✅ 找到用户信息:", userInfo);
 
-                console.log('📊 用户设置响应状态:', response.status);
+          // 检查登录时间是否过期（24小时）
+          const loginTime = new Date(userInfo.loginTime);
+          const now = new Date();
+          const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 用户设置:', data);
-                    
-                    if (data.currentData && data.currentData.user) {
-                        const user = data.currentData.user;
-                        
-                        // 填充设置表单
-                        document.getElementById('settingSlogan').value = user.slogan || '';
-                        document.getElementById('settingIntroduction').value = user.introduction || '';
-                    }
-                } else {
-                    const errorText = await response.text();
-                    console.error('❌ 用户设置API响应错误:', response.status, errorText);
-                    console.log('⚠️ 用户设置获取失败，可能需要特殊权限');
-                }
-            } catch (error) {
-                console.error('❌ 获取用户设置失败:', error);
-                console.log('⚠️ 用户设置API调用异常');
-            }
+          if (hoursDiff >= 24) {
+            console.log("⚠️ 用户信息已过期");
+            localStorage.removeItem("luogu_user_info");
+            showNotLoggedIn();
+            return;
+          }
+
+          // 显示用户信息
+          displayUserInfo(userInfo);
+
+          // 加载用户详细信息
+          await loadUserDetails();
+        } catch (error) {
+          console.error("解析用户信息失败:", error);
+          localStorage.removeItem("luogu_user_info");
+          showNotLoggedIn();
         }
+      }
 
-        // 保存用户设置
-        async function saveSettings() {
-            const saveBtn = event.target;
-            const originalText = saveBtn.innerHTML;
-            saveBtn.disabled = true;
-            saveBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 保存中...';
+      // 测试代理函数是否工作
+      async function testProxyFunction() {
+        console.log("🧪 测试代理函数是否工作...");
+        try {
+          // 先测试一个简单的请求
+          const testData = {
+            path: "/api/verify/captcha",
+            method: "GET",
+          };
 
-            try {
-                const slogan = document.getElementById('settingSlogan').value;
-                const introduction = document.getElementById('settingIntroduction').value;
-                
-                console.log('💾 保存用户设置...');
-                const response = await proxyLuoguAPI('/api/user/updateSetting', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'x-luogu-type': 'content-only'
-                    },
-                    body: JSON.stringify({
-                        slogan: slogan,
-                        introduction: introduction
-                    })
-                });
+          console.log("🧪 发送测试请求:", testData);
 
-                if (response.ok) {
-                    const data = await response.json();
-                    console.log('✅ 设置保存成功:', data);
-                    alert('设置保存成功！');
-                } else {
-                    throw new Error('保存设置失败');
-                }
-            } catch (error) {
-                console.error('❌ 保存用户设置失败:', error);
-                alert('保存设置失败，请重试');
-            } finally {
-                saveBtn.disabled = false;
-                saveBtn.innerHTML = originalText;
-            }
+          const response = await fetch("/.netlify/functions/luogu-proxy", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify(testData),
+          });
+
+          console.log(
+            "🧪 代理函数测试响应:",
+            response.status,
+            response.statusText,
+          );
+          console.log(
+            "🧪 响应头:",
+            Object.fromEntries(response.headers.entries()),
+          );
+
+          const text = await response.text();
+          console.log("🧪 代理函数响应内容长度:", text.length);
+          console.log("🧪 代理函数响应内容:", text.substring(0, 500));
+
+          if (response.status === 404) {
+            console.error("❌ 代理函数返回404，可能未正确部署或路径错误");
+
+            // 尝试测试根路径
+            console.log("🧪 尝试测试根路径...");
+            const rootResponse = await fetch(
+              "/.netlify/functions/luogu-proxy",
+              {
+                method: "GET",
+              },
+            );
+            console.log(
+              "🧪 根路径响应:",
+              rootResponse.status,
+              rootResponse.statusText,
+            );
+          } else if (response.status >= 200 && response.status < 300) {
+            console.log("✅ 代理函数工作正常");
+          } else {
+            console.log("⚠️ 代理函数返回非200状态:", response.status);
+          }
+        } catch (error) {
+          console.error("❌ 代理函数测试失败:", error);
+          alert("代理函数测试失败，网络连接可能有问题。");
         }
+      }
 
-        // 修改加载用户资料函数，添加详细信息加载
-        async function loadUserProfile() {
-            console.log('🔍 开始加载用户资料...');
-            
-            // 检查localStorage中的用户信息
-            const savedUserInfo = localStorage.getItem('luogu_user_info');
-            if (!savedUserInfo) {
-                console.log('❌ 未找到用户信息');
-                showNotLoggedIn();
-                return;
-            }
-
-            try {
-                const userInfo = JSON.parse(savedUserInfo);
-                console.log('✅ 找到用户信息:', userInfo);
-                
-                // 检查登录时间是否过期（24小时）
-                const loginTime = new Date(userInfo.loginTime);
-                const now = new Date();
-                const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-                
-                if (hoursDiff >= 24) {
-                    console.log('⚠️ 用户信息已过期');
-                    localStorage.removeItem('luogu_user_info');
-                    showNotLoggedIn();
-                    return;
-                }
-
-                // 显示用户信息
-                displayUserInfo(userInfo);
-                
-                // 加载用户详细信息
-                await loadUserDetails();
-                
-            } catch (error) {
-                console.error('解析用户信息失败:', error);
-                localStorage.removeItem('luogu_user_info');
-                showNotLoggedIn();
-            }
-        }
-
-        // 测试代理函数是否工作
-        async function testProxyFunction() {
-            console.log('🧪 测试代理函数是否工作...');
-            try {
-                // 先测试一个简单的请求
-                const testData = {
-                    path: '/api/verify/captcha',
-                    method: 'GET'
-                };
-                
-                console.log('🧪 发送测试请求:', testData);
-                
-                const response = await fetch('/.netlify/functions/luogu-proxy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(testData)
-                });
-                
-                console.log('🧪 代理函数测试响应:', response.status, response.statusText);
-                console.log('🧪 响应头:', Object.fromEntries(response.headers.entries()));
-                
-                const text = await response.text();
-                console.log('🧪 代理函数响应内容长度:', text.length);
-                console.log('🧪 代理函数响应内容:', text.substring(0, 500));
-                
-                if (response.status === 404) {
-                    console.error('❌ 代理函数返回404，可能未正确部署或路径错误');
-                    
-                    // 尝试测试根路径
-                    console.log('🧪 尝试测试根路径...');
-                    const rootResponse = await fetch('/.netlify/functions/luogu-proxy', {
-                        method: 'GET'
-                    });
-                    console.log('🧪 根路径响应:', rootResponse.status, rootResponse.statusText);
-                    
-                } else if (response.status >= 200 && response.status < 300) {
-                    console.log('✅ 代理函数工作正常');
-                } else {
-                    console.log('⚠️ 代理函数返回非200状态:', response.status);
-                }
-                
-            } catch (error) {
-                console.error('❌ 代理函数测试失败:', error);
-                alert('代理函数测试失败，网络连接可能有问题。');
-            }
-        }
-
-        // 页面加载时初始化
-        document.addEventListener('DOMContentLoaded', function() {
-            // 先测试代理函数
-            testProxyFunction();
-            // 然后加载用户资料
-            loadUserProfile();
-        });
+      // 页面加载时初始化
+      document.addEventListener("DOMContentLoaded", function () {
+        // 先测试代理函数
+        testProxyFunction();
+        // 然后加载用户资料
+        loadUserProfile();
+      });
     </script>
-</body>
+  </body>
 </html>

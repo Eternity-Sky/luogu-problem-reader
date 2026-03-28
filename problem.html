@@ -25,24 +25,27 @@
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"></script>
     <style>
       :root {
-        --primary-color: #3b82f6;
-        --secondary-color: #10b981;
-        --accent-color: #f59e0b;
-        --gray-50: #f9fafb;
-        --gray-100: #f3f4f6;
-        --gray-200: #e5e7eb;
-        --gray-300: #d1d5db;
-        --gray-400: #9ca3af;
-        --gray-500: #6b7280;
-        --gray-600: #4b5563;
-        --gray-700: #374151;
-        --gray-800: #1f2937;
-        --gray-900: #111827;
-        --shadow:
-          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        --shadow-lg:
-          0 10px 15px -3px rgba(0, 0, 0, 0.1),
-          0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-color: #3b82f6;
+        --accent-hover: #2563eb;
+        --border-color: #334155;
+        --card-bg: #1e293b;
+        --code-bg: #000000;
+        --radius: 4px;
+        --transition: all 0.2s ease;
+
+        /* 难度颜色 */
+        --diff-0: #94a3b8;
+        --diff-1: #10b981;
+        --diff-2: #3b82f6;
+        --diff-3: #f59e0b;
+        --diff-4: #ef4444;
+        --diff-5: #8b5cf6;
+        --diff-6: #ec4899;
+        --diff-7: #1e293b;
       }
 
       * {
@@ -57,26 +60,27 @@
           -apple-system,
           BlinkMacSystemFont,
           sans-serif;
-        background: white;
+        background: var(--bg-primary);
         min-height: 100vh;
-        color: var(--gray-800);
+        color: var(--text-primary);
+        line-height: 1.6;
       }
 
       .container {
-        max-width: 1200px;
+        max-width: 900px;
         margin: 0 auto;
-        padding: 0 1rem;
+        padding: 0 1.5rem;
       }
 
       /* Header */
-      .header {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        border-bottom: 1px solid var(--gray-200);
-        padding: 1rem 0;
+      header {
+        background-color: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 0;
         position: sticky;
         top: 0;
-        z-index: 100;
+        z-index: 1000;
       }
 
       .header-container {
@@ -86,335 +90,220 @@
       }
 
       .logo {
-        font-size: 1.5rem;
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
         font-weight: 700;
-        color: var(--primary-color);
+        color: var(--text-primary);
         text-decoration: none;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
+        letter-spacing: -0.025em;
       }
 
-      .back-btn {
-        display: flex;
+      .logo i {
+        margin-right: 0.5rem;
+        color: var(--accent-color);
+      }
+
+      .btn {
+        display: inline-flex;
         align-items: center;
         gap: 0.5rem;
-        background: var(--primary-color);
-        color: white;
-        padding: 0.75rem 1.5rem;
-        border-radius: 8px;
-        text-decoration: none;
+        background: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
         font-weight: 500;
-        transition: all 0.2s;
+        text-decoration: none;
+        cursor: pointer;
+        transition: var(--transition);
       }
 
-      .back-btn:hover {
-        background: var(--gray-700);
-        transform: translateY(-2px);
+      .btn:hover {
+        background: var(--bg-primary);
+        border-color: var(--text-secondary);
+      }
+
+      .btn-primary {
+        background: var(--accent-color);
+        border-color: transparent;
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background: var(--accent-hover);
       }
 
       /* Main Content */
       .main {
-        padding: 2rem 0;
-      }
-
-      .problem-container {
-        background: white;
-        padding: 2rem 0;
-        margin-bottom: 0;
+        padding: 2.5rem 0 5rem;
       }
 
       .problem-header {
-        background: linear-gradient(
-          135deg,
-          var(--primary-color),
-          var(--secondary-color)
-        );
-        color: white;
-        padding: 2rem;
+        margin-bottom: 3rem;
       }
 
       .problem-title {
-        font-size: 2rem;
-        font-weight: 700;
-        margin-bottom: 1rem;
+        font-size: 2.25rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
       }
 
       .problem-meta {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        display: flex;
+        flex-wrap: wrap;
         gap: 1rem;
-        margin-top: 1.5rem;
       }
 
       .meta-item {
         display: flex;
         align-items: center;
         gap: 0.5rem;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.75rem 1rem;
-        border-radius: 8px;
+        background: var(--bg-secondary);
+        padding: 0.4rem 0.75rem;
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        font-size: 0.8125rem;
       }
 
       .meta-label {
+        color: var(--text-secondary);
         font-weight: 500;
-        opacity: 0.9;
       }
 
       .meta-value {
         font-weight: 600;
       }
 
+      /* 精致难度标签 */
       .difficulty-tag {
-        display: inline-block;
-        padding: 0.25rem 0.75rem;
-        border-radius: 20px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        color: white;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.8125rem;
+        font-weight: 600;
       }
 
-      .difficulty-1 {
-        background: linear-gradient(135deg, #10b981, #059669);
-      }
-      .difficulty-2 {
-        background: linear-gradient(135deg, #f59e0b, #d97706);
-      }
-      .difficulty-3 {
-        background: linear-gradient(135deg, #3b82f6, #2563eb);
-      }
-      .difficulty-4 {
-        background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-      }
-      .difficulty-5 {
-        background: linear-gradient(135deg, #ef4444, #dc2626);
-      }
-      .difficulty-6 {
-        background: linear-gradient(135deg, #991b1b, #7f1d1d);
-      }
-      .difficulty-7 {
-        background: linear-gradient(135deg, #000000, #374151);
+      .difficulty-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
       }
 
+      /* Markdown Content */
       .problem-content {
-        padding: 2rem;
+        color: #e2e8f0; /* Slate 200 for better readability */
       }
 
       .section {
-        margin-bottom: 2rem;
+        margin-bottom: 2.5rem;
       }
 
       .section-title {
-        font-size: 1.25rem;
-        font-weight: 600;
-        color: var(--primary-color);
+        font-size: 0.875rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
         margin-bottom: 1rem;
         padding-bottom: 0.5rem;
-        border-bottom: 2px solid var(--gray-200);
+        border-bottom: 1px solid var(--border-color);
       }
 
       .problem-description {
-        line-height: 1.7;
-        color: var(--gray-700);
-      }
-
-      .problem-description h3 {
-        color: var(--gray-800);
-        margin: 1.5rem 0 1rem 0;
-        font-size: 1.1rem;
+        line-height: 1.75;
+        font-size: 1rem;
       }
 
       .problem-description p {
-        margin-bottom: 1rem;
+        margin-bottom: 1.25rem;
       }
 
-      .problem-description pre {
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        padding: 0;
-        overflow: hidden;
-        margin: 1rem 0;
-        font-family: "Courier New", monospace;
-        position: relative;
+      .problem-description h3 {
+        font-size: 1.25rem;
+        margin: 2rem 0 1rem;
+        color: var(--text-primary);
       }
 
+      /* 代码块优化 */
       .code-block {
-        position: relative;
-        background: var(--gray-50);
-        border-radius: 8px;
+        margin: 1.5rem 0;
+        border-radius: var(--radius);
         overflow: hidden;
+        border: 1px solid var(--border-color);
+        background: var(--code-bg);
       }
 
       .code-header {
-        background: var(--gray-100);
-        border-bottom: 1px solid var(--gray-200);
+        background: #111827;
         padding: 0.5rem 1rem;
         display: flex;
         justify-content: space-between;
         align-items: center;
-        font-size: 0.875rem;
-        color: var(--gray-600);
+        font-size: 0.75rem;
+        border-bottom: 1px solid var(--border-color);
       }
 
       .code-language {
-        font-weight: 500;
+        font-family: "JetBrains Mono", monospace;
+        color: var(--text-secondary);
+        text-transform: uppercase;
       }
 
       .copy-btn {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.25rem 0.75rem;
+        background: transparent;
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+        padding: 0.2rem 0.5rem;
         border-radius: 4px;
-        font-size: 0.75rem;
         cursor: pointer;
-        transition: all 0.2s;
-        display: flex;
-        align-items: center;
-        gap: 0.25rem;
+        transition: var(--transition);
       }
 
       .copy-btn:hover {
-        background: var(--gray-700);
-      }
-
-      .copy-btn.copied {
-        background: var(--secondary-color);
+        color: var(--text-primary);
+        border-color: var(--text-secondary);
       }
 
       .code-content {
-        padding: 1rem;
+        padding: 1.25rem;
         overflow-x: auto;
-        background: var(--gray-50);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
+        color: #f1f5f9;
       }
 
       .problem-description code {
-        background: var(--gray-100);
+        font-family: "JetBrains Mono", monospace;
+        background: var(--bg-secondary);
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
-        font-family: "Courier New", monospace;
-        font-size: 0.9em;
-      }
-
-      /* 行内代码不应用代码块样式 */
-      .problem-description p code,
-      .problem-description li code {
-        background: var(--gray-100);
-        padding: 0.2rem 0.4rem;
-        border-radius: 4px;
-        font-family: "Courier New", monospace;
-        font-size: 0.9em;
-      }
-
-      /* 图片响应式样式 */
-      .problem-description img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        margin: 1rem 0;
-        display: block;
-      }
-
-      /* 大图片居中显示 */
-      .problem-description img[width],
-      .problem-description img[style*="width"] {
-        max-width: 100% !important;
-        width: auto !important;
-        height: auto !important;
-      }
-
-      /* 图片容器 */
-      .problem-description p:has(img) {
-        text-align: center;
-      }
-
-      /* 确保所有媒体元素都响应式 */
-      .problem-description video,
-      .problem-description iframe,
-      .problem-description embed,
-      .problem-description object {
-        max-width: 100%;
-        height: auto;
+        font-size: 0.875em;
+        color: #f472b6; /* Pink 400 for inline code */
       }
 
       /* KaTeX数学公式样式 */
       .katex {
-        font-size: 1.1em;
+        font-size: 1.05em;
+        color: #93c5fd; /* Blue 300 for math */
       }
 
-      .katex-display {
-        margin: 1rem 0;
-        text-align: center;
-      }
-
-      /* Markdown渲染样式 */
-      .problem-description h1,
-      .problem-description h2,
-      .problem-description h3,
-      .problem-description h4 {
-        margin-top: 1.5rem;
-        margin-bottom: 1rem;
-        color: var(--primary-color);
-      }
-
-      .problem-description ul,
-      .problem-description ol {
-        margin: 1rem 0;
-        padding-left: 2rem;
-      }
-
-      .problem-description li {
-        margin: 0.5rem 0;
-      }
-
-      .problem-description blockquote {
-        border-left: 4px solid var(--primary-color);
-        margin: 1rem 0;
-        padding: 1rem;
-        background: var(--gray-50);
-        border-radius: 0 8px 8px 0;
-      }
-
-      .problem-description table {
-        width: 100%;
-        border-collapse: collapse;
-        margin: 1rem 0;
-      }
-
-      .problem-description th,
-      .problem-description td {
-        border: 1px solid var(--gray-300);
-        padding: 0.75rem;
-        text-align: left;
-      }
-
-      .problem-description th {
-        background: var(--gray-100);
-        font-weight: 600;
-      }
-
-      /* 代码提交区域样式 */
+      /* 提交区域 - IDE 风格 */
       .submit-section {
-        background: white;
-        padding: 2rem 0;
-        margin-top: 2rem;
-        border-top: 1px solid var(--gray-200);
+        margin-top: 4rem;
+        padding-top: 3rem;
+        border-top: 1px solid var(--border-color);
       }
 
-      .submit-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .submit-form {
-        max-width: 800px;
+      .submit-card {
+        background: var(--bg-secondary);
+        border-radius: var(--radius);
+        border: 1px solid var(--border-color);
+        padding: 1.5rem;
       }
 
       .form-group {
@@ -423,302 +312,95 @@
 
       .form-group label {
         display: block;
-        font-weight: 600;
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
         margin-bottom: 0.5rem;
-        color: var(--gray-700);
       }
 
       .form-control {
         width: 100%;
-        padding: 0.75rem;
-        border: 1px solid var(--gray-300);
-        border-radius: 6px;
-        font-size: 1rem;
-        transition: border-color 0.2s;
-      }
-
-      .form-control:focus {
+        background: var(--bg-primary);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.6rem 0.75rem;
+        border-radius: var(--radius);
+        font-size: 0.875rem;
         outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
       }
 
       .code-editor {
         width: 100%;
-        min-height: 300px;
+        min-height: 320px;
+        background: #000;
+        border: 1px solid var(--border-color);
+        color: #f8fafc;
         padding: 1rem;
-        border: 1px solid var(--gray-300);
-        border-radius: 6px;
-        font-family: "JetBrains Mono", "Consolas", "Monaco", monospace;
-        font-size: 14px;
-        line-height: 1.5;
+        border-radius: var(--radius);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.875rem;
+        line-height: 1.6;
         resize: vertical;
-        transition: border-color 0.2s;
+        outline: none;
       }
 
       .code-editor:focus {
-        outline: none;
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        border-color: var(--accent-color);
       }
 
-      .submit-actions {
-        display: flex;
+      /* 用户卡片 */
+      .user-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+        padding: 0.75rem 1rem;
+        margin-bottom: 2rem;
+        display: none;
         align-items: center;
         gap: 1rem;
       }
 
-      .btn-submit {
-        background: var(--primary-color);
-        color: white;
-        border: none;
-        padding: 0.75rem 1.5rem;
-        border-radius: 6px;
-        font-size: 1rem;
-        font-weight: 500;
-        cursor: pointer;
+      .user-card.show {
         display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        transition: background-color 0.2s;
-      }
-
-      .btn-submit:hover {
-        background: var(--gray-700);
-      }
-
-      .btn-submit:disabled {
-        background: var(--gray-400);
-        cursor: not-allowed;
-      }
-
-      .submit-status {
-        font-size: 0.875rem;
-        padding: 0.5rem 0;
-      }
-
-      .submit-status.success {
-        color: var(--success-color);
-      }
-
-      .submit-status.error {
-        color: var(--error-color);
-      }
-
-      .submit-status.loading {
-        color: var(--primary-color);
-      }
-
-      /* 评论区域样式 */
-      .comments-section {
-        background: white;
-        padding: 2rem 0;
-        margin-top: 2rem;
-        border-top: 1px solid var(--gray-200);
-      }
-
-      .comments-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        color: var(--primary-color);
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-      }
-
-      .loading {
-        text-align: center;
-        padding: 3rem;
-        color: var(--gray-600);
-      }
-
-      .loading i {
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        animation: spin 1s linear infinite;
-      }
-
-      @keyframes spin {
-        from {
-          transform: rotate(0deg);
-        }
-        to {
-          transform: rotate(360deg);
-        }
-      }
-
-      .error {
-        background: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-      }
-
-      .status {
-        padding: 1rem;
-        border-radius: 8px;
-        margin: 1rem 0;
-      }
-
-      .status.info {
-        background: #dbeafe;
-        border: 1px solid #93c5fd;
-        color: #1d4ed8;
-      }
-
-      .status.success {
-        background: #d1fae5;
-        border: 1px solid #86efac;
-        color: #059669;
-      }
-
-      .status.error {
-        background: #fee2e2;
-        border: 1px solid #fecaca;
-        color: #dc2626;
-      }
-
-      /* 用户信息样式 */
-      .user-info {
-        background: linear-gradient(
-          135deg,
-          var(--primary-color),
-          var(--secondary-color)
-        );
-        border-radius: 12px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        display: none;
-        color: white;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      }
-
-      .user-info.show {
-        display: flex;
-        align-items: center;
       }
 
       .user-avatar {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        margin-right: 1rem;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-      }
-
-      .user-details {
-        flex: 1;
+        width: 32px;
+        height: 32px;
+        border-radius: 4px;
+        border: 1px solid var(--border-color);
       }
 
       .user-name {
         font-weight: 600;
-        font-size: 1.1rem;
-        margin-bottom: 0.25rem;
-      }
-
-      .user-uid {
-        opacity: 0.8;
         font-size: 0.875rem;
       }
 
-      .login-prompt {
-        background: var(--gray-50);
-        border: 1px solid var(--gray-200);
-        border-radius: 8px;
-        padding: 1rem;
-        margin-bottom: 1.5rem;
-        text-align: center;
-        display: none;
-      }
-
-      .login-prompt.show {
-        display: block;
-      }
-
-      .login-btn {
-        background: var(--primary-color);
-        color: white;
-        padding: 0.5rem 1rem;
-        border: none;
-        border-radius: 6px;
-        text-decoration: none;
-        display: inline-block;
-        margin-top: 0.5rem;
-        transition: background-color 0.2s;
-      }
-
-      .login-btn:hover {
-        background: var(--gray-700);
-        color: white;
-        text-decoration: none;
+      .user-uid {
+        color: var(--text-secondary);
+        font-size: 0.75rem;
       }
 
       @media (max-width: 768px) {
         .problem-title {
-          font-size: 1.5rem;
-        }
-
-        .problem-meta {
-          grid-template-columns: 1fr;
-        }
-
-        .header-container {
-          flex-direction: column;
-          gap: 1rem;
-        }
-
-        .user-info {
-          padding: 0.75rem;
-        }
-
-        .user-avatar {
-          width: 40px;
-          height: 40px;
-        }
-
-        /* 移动端图片优化 */
-        .problem-description img {
-          margin: 0.5rem auto;
-          max-width: calc(100vw - 2rem);
-          border-radius: 6px;
-        }
-
-        /* 移动端代码块优化 */
-        .code-content {
-          padding: 0.75rem;
-          font-size: 0.875rem;
-        }
-
-        .code-header {
-          padding: 0.375rem 0.75rem;
-          font-size: 0.8rem;
-        }
-
-        /* 移动端容器优化 */
-        .container {
-          padding: 0 1rem;
-        }
-
-        .problem-container {
-          padding: 1rem;
+          font-size: 1.75rem;
         }
       }
     </style>
   </head>
   <body>
     <!-- Header -->
-    <header class="header">
+    <header>
       <div class="container header-container">
         <a href="/" class="logo">
           <i class="fas fa-book"></i>
           LGOJ
         </a>
-        <a href="/problems.html" class="back-btn">
+        <a href="/problems.html" class="btn">
           <i class="fas fa-arrow-left"></i>
-          返回题目列表
+          返回列表
         </a>
       </div>
     </header>
@@ -727,7 +409,7 @@
     <main class="main">
       <div class="container">
         <!-- 用户信息显示 -->
-        <div id="userInfo" class="user-info">
+        <div id="userInfo" class="user-card">
           <img id="userAvatar" class="user-avatar" src="" alt="用户头像" />
           <div class="user-details">
             <div id="userName" class="user-name"></div>
@@ -736,86 +418,63 @@
         </div>
 
         <!-- 登录提示 -->
-        <div id="loginPrompt" class="login-prompt">
+        <div id="loginPrompt" class="user-card" style="justify-content: center; text-align: center; padding: 1.5rem;">
           <div>
-            <i
-              class="fas fa-user-circle"
-              style="
-                font-size: 2rem;
-                color: var(--gray-400);
-                margin-bottom: 0.5rem;
-              "
-            ></i>
-            <p style="margin: 0.5rem 0; color: var(--gray-600)">
-              登录后可以提交代码、查看提交记录等更多功能
+            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+              登录后可以提交代码并同步洛谷记录
             </p>
-            <a href="/login.html" class="login-btn">
+            <a href="/login.html" class="btn btn-primary">
               <i class="fas fa-sign-in-alt"></i>
               立即登录
             </a>
           </div>
         </div>
 
-        <div id="loadingStatus" class="loading">
-          <i class="fas fa-spinner"></i>
+        <div id="loadingStatus" style="text-align: center; padding: 4rem; color: var(--text-secondary)">
+          <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem"></i>
           <div>正在加载题目详情...</div>
         </div>
 
-        <div
-          id="problemContainer"
-          class="problem-container"
-          style="display: none"
-        >
+        <div id="problemContainer" style="display: none">
           <!-- 题目内容将在这里动态加载 -->
         </div>
 
         <!-- 代码提交区域 -->
         <div id="submitSection" class="submit-section" style="display: none">
-          <h3><i class="fas fa-code"></i> 代码提交</h3>
+          <div class="section-title">代码提交</div>
+          <div class="submit-card">
+            <div class="form-group">
+              <label for="languageSelect">编程语言</label>
+              <select id="languageSelect" class="form-control">
+                <option value="0">C++14 (GCC 9)</option>
+                <option value="1">C++17 (GCC 9)</option>
+                <option value="2">C++20 (GCC 13)</option>
+                <option value="3">C (GCC 9)</option>
+                <option value="7">Python 3</option>
+                <option value="8">Java 8</option>
+                <option value="16">Node.js 12.18.4</option>
+                <option value="11">PyPy 3</option>
+              </select>
+            </div>
 
-          <div class="form-group">
-            <label for="languageSelect">编程语言:</label>
-            <select id="languageSelect" class="form-control">
-              <option value="0">C++14 (GCC 9)</option>
-              <option value="1">C++17 (GCC 9)</option>
-              <option value="2">C++20 (GCC 13)</option>
-              <option value="3">C (GCC 9)</option>
-              <option value="7">Python 3</option>
-              <option value="8">Java 8</option>
-              <option value="16">Node.js 12.18.4</option>
-              <option value="11">PyPy 3</option>
-            </select>
-          </div>
+            <div class="form-group">
+              <label for="codeEditor">源代码</label>
+              <textarea id="codeEditor" class="code-editor" placeholder="在此输入或粘贴您的代码..."></textarea>
+            </div>
 
-          <div class="form-group">
-            <label for="codeEditor">代码:</label>
-            <textarea
-              id="codeEditor"
-              class="code-editor"
-              placeholder="请输入您的代码..."
-            ></textarea>
-          </div>
-
-          <div class="submit-actions">
-            <button id="submitBtn" class="btn-submit" onclick="submitCode()">
-              <i class="fas fa-paper-plane"></i>
-              提交代码
-            </button>
-
-            <div id="submitStatus" class="submit-status"></div>
+            <div style="display: flex; align-items: center; gap: 1rem;">
+              <button id="submitBtn" class="btn btn-primary" onclick="submitCode()">
+                <i class="fas fa-paper-plane"></i>
+                提交评测
+              </button>
+              <div id="submitStatus" style="font-size: 0.875rem;"></div>
+            </div>
           </div>
         </div>
 
         <!-- 评论区域 -->
-        <div
-          id="commentsSection"
-          class="comments-section"
-          style="display: none"
-        >
-          <div class="comments-title">
-            <i class="fas fa-comments"></i>
-            讨论区
-          </div>
+        <div id="commentsSection" style="display: none; margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--border-color);">
+          <div class="section-title">讨论</div>
           <script
             src="https://giscus.app/client.js"
             data-repo="Eternity-Sky/luogu-problem-reader"
@@ -827,7 +486,7 @@
             data-reactions-enabled="1"
             data-emit-metadata="0"
             data-input-position="bottom"
-            data-theme="light"
+            data-theme="dark"
             data-lang="zh-CN"
             crossorigin="anonymous"
             async
@@ -837,167 +496,244 @@
     </main>
 
     <script>
-      // 用户会话管理
-      let sessionId =
-        localStorage.getItem("luogu_session_id") || "session_" + Date.now();
-      localStorage.setItem("luogu_session_id", sessionId);
+      // 核心渲染逻辑
+      function displayProblemDetail(apiResult) {
+        const container = document.getElementById("problemContainer");
+        const loadingStatus = document.getElementById("loadingStatus");
+        const commentsSection = document.getElementById("commentsSection");
+        
+        loadingStatus.style.display = "none";
+        container.style.display = "block";
+        commentsSection.style.display = "block";
 
-      // 检查登录状态并显示用户信息
+        const problem = apiResult.data.problem;
+        const difficultyText = getDifficultyText(problem.difficulty);
+        const difficultyColor = `var(--diff-${problem.difficulty || 0})`;
+
+        // 配置 marked
+        const renderer = new marked.Renderer();
+        renderer.code = function(code, language) {
+          const lang = language || 'text';
+          const id = 'code-' + Math.random().toString(36).substr(2, 9);
+          return `
+            <div class="code-block">
+              <div class="code-header">
+                <span class="code-language">${lang}</span>
+                <button class="copy-btn" onclick="copyToClipboard('${id}')">
+                  <i class="far fa-copy"></i> 复制
+                </button>
+              </div>
+              <div class="code-content" id="${id}">${escapeHtml(code)}</div>
+            </div>
+          `;
+        };
+
+        marked.setOptions({
+          renderer: renderer,
+          gfm: true,
+          breaks: true
+        });
+
+        container.innerHTML = `
+          <div class="problem-header">
+            <h1 class="problem-title">${problem.pid} ${problem.title}</h1>
+            <div class="problem-meta">
+              <div class="meta-item">
+                <div class="difficulty-tag">
+                  <span class="difficulty-dot" style="background-color: ${difficultyColor}"></span>
+                  <span style="color: ${difficultyColor}">${difficultyText}</span>
+                </div>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">通过</span>
+                <span class="meta-value">${problem.totalAccepted}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">提交</span>
+                <span class="meta-value">${problem.totalSubmit}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="problem-content">
+            ${renderSection("题目描述", problem.description)}
+            ${renderSection("输入格式", problem.inputFormat)}
+            ${renderSection("输出格式", problem.outputFormat)}
+            ${renderSamples(problem.samples)}
+            ${renderSection("提示", problem.hint)}
+          </div>
+        `;
+
+        // 渲染数学公式
+        renderMathInElement(container, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "$", right: "$", display: false}
+          ],
+          throwOnError: false
+        });
+      }
+
+      function renderSection(title, content) {
+        if (!content) return "";
+        return `
+          <div class="section">
+            <div class="section-title">${title}</div>
+            <div class="problem-description">${marked.parse(content)}</div>
+          </div>
+        `;
+      }
+
+      function renderSamples(samples) {
+        if (!samples || samples.length === 0) return "";
+        return samples.map((sample, index) => `
+          <div class="section">
+            <div class="section-title">输入输出样例 ${index + 1}</div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+              <div class="code-block">
+                <div class="code-header"><span class="code-language">输入</span></div>
+                <div class="code-content">${sample[0]}</div>
+              </div>
+              <div class="code-block">
+                <div class="code-header"><span class="code-language">输出</span></div>
+                <div class="code-content">${sample[1]}</div>
+              </div>
+            </div>
+          </div>
+        `).join('');
+      }
+
+      function copyToClipboard(id) {
+        const content = document.getElementById(id).innerText;
+        navigator.clipboard.writeText(content).then(() => {
+          const btn = event.currentTarget;
+          const original = btn.innerHTML;
+          btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
+          setTimeout(() => btn.innerHTML = original, 2000);
+        });
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // 其他逻辑保持不变...
+      async function proxyLuoguAPI(path, options = {}) {
+        const requestData = {
+          path: path,
+          method: options.method || "GET",
+          headers: {
+            "x-luogu-type": "content-only",
+            ...options.headers,
+          },
+          sessionId: localStorage.getItem("luogu_session_id") || "session_luogu_global_fixed_2025"
+        };
+
+        try {
+          const response = await fetch("/.netlify/functions/luogu-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData),
+          });
+          return await response.json();
+        } catch (error) {
+          return { error: error.message };
+        }
+      }
+
+      async function loadProblemDetail(pid) {
+        try {
+          const result = await proxyLuoguAPI(`/problem/${pid}`);
+          if (result.error) {
+            document.getElementById("loadingStatus").innerHTML = `<div style="color: #ef4444">加载失败: ${result.error}</div>`;
+            return;
+          }
+          displayProblemDetail(result);
+        } catch (error) {
+          document.getElementById("loadingStatus").innerHTML = `<div style="color: #ef4444">请求失败: ${error.message}</div>`;
+        }
+      }
+
+      function getDifficultyText(difficulty) {
+        const texts = { 0: "暂无评定", 1: "入门", 2: "普及-", 3: "普及/提高-", 4: "普及+/提高", 5: "提高+/省选-", 6: "省选/NOI-", 7: "NOI/NOI+/CTSC" };
+        return texts[difficulty] || "未知";
+      }
+
       function checkLoginStatus() {
         const userInfoStr = localStorage.getItem("luogu_user_info");
         const userInfoDiv = document.getElementById("userInfo");
         const loginPromptDiv = document.getElementById("loginPrompt");
         const submitSection = document.getElementById("submitSection");
 
-        console.log("🔍 检查登录状态...");
-
         if (userInfoStr) {
           try {
             const user = JSON.parse(userInfoStr);
             if (user && (user.uid || user.username)) {
-              document.getElementById("userName").textContent =
-                user.name || user.username;
-              document.getElementById("userUid").textContent = user.uid
-                ? `UID: ${user.uid}`
-                : `用户名: ${user.username}`;
-
+              document.getElementById("userName").textContent = user.name || user.username;
+              document.getElementById("userUid").textContent = user.uid ? `UID: ${user.uid}` : "";
               const avatarImg = document.getElementById("userAvatar");
-              if (user.avatar) {
-                avatarImg.src = user.avatar;
-              } else if (user.uid) {
-                avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
-              }
-
+              if (user.avatar) avatarImg.src = user.avatar;
+              else if (user.uid) avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
+              
               userInfoDiv.classList.add("show");
-              loginPromptDiv.classList.remove("show");
-              if (submitSection) submitSection.style.display = "block";
-              return true;
+              loginPromptDiv.style.display = "none";
+              submitSection.style.display = "block";
+              return;
             }
-          } catch (e) {
-            console.warn("解析用户信息失败:", e);
-          }
+          } catch (e) {}
         }
-
         userInfoDiv.classList.remove("show");
         loginPromptDiv.classList.add("show");
-        if (submitSection) submitSection.style.display = "none";
-        return false;
+        submitSection.style.display = "none";
       }
 
-      // 页面加载时初始化
-      document.addEventListener("DOMContentLoaded", () => {
-        checkLoginStatus();
-
-        // 获取题目ID并加载详情
+      async function submitCode() {
+        const btn = document.getElementById("submitBtn");
+        const status = document.getElementById("submitStatus");
+        const code = document.getElementById("codeEditor").value;
+        const lang = document.getElementById("languageSelect").value;
         const urlParams = new URLSearchParams(window.location.search);
-        const pid = urlParams.get("pid") || urlParams.get("id"); // 支持 pid 或 id 参数
-        if (pid) {
-          loadProblemDetail(pid);
-        } else {
-          showStatus("未指定题目ID，请从列表页进入", "warning");
-        }
-      });
+        const pid = urlParams.get("pid");
 
-      // 获取难度文本
-      function getDifficultyText(difficulty) {
-        const texts = {
-          0: "暂无评定",
-          1: "入门",
-          2: "普及-",
-          3: "普及/提高-",
-          4: "普及+/提高",
-          5: "提高+/省选-",
-          6: "省选/NOI-",
-          7: "NOI/NOI+/CTSC",
-        };
-        return texts[difficulty] || "未知";
-      }
-
-      // 代理函数 - 通过Netlify Functions调用洛谷API
-      async function proxyLuoguAPI(path, options = {}) {
-        const requestData = {
-          path: path,
-          method: options.method || "GET",
-          headers: {
-            "x-lentille-request": "content-only",
-            ...options.headers,
-          },
-          sessionId: "session_luogu_global_fixed_2025",
-          ...options,
-        };
-
-        // 从 localStorage 获取 Cookie 备份
-        const backupCookies = localStorage.getItem("luogu_backup_cookies");
-        if (backupCookies) {
-          requestData.backupCookies = backupCookies;
+        if (!code) {
+          status.innerHTML = '<span style="color: #ef4444">请输入代码</span>';
+          return;
         }
 
-        console.log("🔍 API请求:", requestData);
+        btn.disabled = true;
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在提交...';
 
         try {
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
+          const result = await proxyLuoguAPI(`/fe/api/problem/submit/${pid}`, {
             method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          });
-
-          const responseText = await response.text();
-          let result;
-          try {
-            result = JSON.parse(responseText);
-
-            // 处理响应中的 Cookie 备份
-            if (result._backupCookies) {
-              localStorage.setItem(
-                "luogu_backup_cookies",
-                result._backupCookies,
-              );
-            }
-          } catch (e) {
-            return {
-              error: "解析响应失败",
-              raw: responseText,
-            };
-          }
-          return result;
-        } catch (error) {
-          return { error: error.message };
-        }
-      }
-
-      // 显示状态消息
-      function showStatus(message, type = "info") {
-        const loadingDiv = document.getElementById("loadingStatus");
-        loadingDiv.innerHTML = `<div class="status ${type}">${message}</div>`;
-      }
-
-      // 加载题目详情
-      async function loadProblemDetail(pid) {
-        console.log("📋 加载题目详情:", pid);
-
-        try {
-          showStatus("正在获取题目详情...", "info");
-
-          const result = await proxyLuoguAPI(`/problem/${pid}`, {
-            headers: {
-              "x-lentille-request": "content-only",
-            },
+            body: JSON.stringify({ lang, code, enableO2: true })
           });
 
           if (result.error) {
-            showStatus(`加载失败: ${result.error}`, "error");
-            return;
+            status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.error}</span>`;
+          } else {
+            status.innerHTML = '<span style="color: #10b981">提交成功！正在跳转...</span>';
+            setTimeout(() => {
+              window.location.href = `https://www.luogu.com.cn/record/${result.rid}`;
+            }, 1500);
           }
-
-          console.log("✅ 题目详情加载成功:", result);
-          displayProblemDetail(result);
         } catch (error) {
-          showStatus(`请求失败: ${error.message}`, "error");
-          console.error("题目详情加载错误:", error);
+          status.innerHTML = `<span style="color: #ef4444">提交出错: ${error.message}</span>`;
+        } finally {
+          btn.disabled = false;
         }
       }
+
+      document.addEventListener("DOMContentLoaded", () => {
+        checkLoginStatus();
+        const urlParams = new URLSearchParams(window.location.search);
+        const pid = urlParams.get("pid");
+        if (pid) loadProblemDetail(pid);
+      });
+    </script>
+  </body>
 
       // 显示题目详情
       function displayProblemDetail(apiResult) {

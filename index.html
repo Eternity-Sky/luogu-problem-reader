@@ -1,785 +1,731 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>LGOJ - 题目浏览站</title>
-    <meta name="description" content="LGOJ 题目浏览站 - 洛谷题目收集与浏览平台，提供题目的静态浏览和查看功能。">
-    <meta name="keywords" content="LGOJ, 题目浏览, 洛谷题目, 算法题库, 题目查看">
-    <meta name="author" content="LGOJ Team">
-    
+    <meta
+      name="description"
+      content="LGOJ 题目浏览站 - 洛谷题目收集与浏览平台，提供题目的静态浏览和查看功能。"
+    />
+    <meta
+      name="keywords"
+      content="LGOJ, 题目浏览, 洛谷题目, 算法题库, 题目查看"
+    />
+    <meta name="author" content="LGOJ Team" />
+
     <!-- Favicon -->
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/1336/1336494.png" type="image/png">
-    
+    <link
+      rel="icon"
+      href="https://cdn-icons-png.flaticon.com/512/1336/1336494.png"
+      type="image/png"
+    />
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-    
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+
     <style>
-        :root {
-            --primary-color: #2563eb;
-            --primary-dark: #1d4ed8;
-            --secondary-color: #10b981;
-            --accent-color: #8b5cf6;
-            --danger-color: #ef4444;
-            --warning-color: #f59e0b;
-            --dark-color: #1f2937;
-            --light-color: #f9fafb;
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-            --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
-            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
-            --transition: all 0.2s ease-in-out;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--gray-50);
-            min-height: 100vh;
-            color: var(--gray-800);
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 0 1.5rem;
-        }
-        
-        /* Header Styles */
-        header {
-            background-color: #fff;
-            border-bottom: 1px solid var(--gray-200);
-            padding: 1rem 0;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-            box-shadow: var(--shadow-sm);
-        }
-        
-        .header-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        /* 用户登录状态样式 */
-        .user-section {
-            display: flex;
-            align-items: center;
-        }
-        
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 8px 16px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-        }
-        
-        .user-name {
-            color: white;
-            font-weight: 500;
-            font-size: 14px;
-        }
-        
-        .btn-logout {
-            background: rgba(239, 68, 68, 0.8);
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            cursor: pointer;
-            transition: var(--transition);
-        }
-        
-        .btn-logout:hover {
-            background: rgba(239, 68, 68, 1);
-            transform: translateY(-1px);
-        }
-        
-        .logo {
-            display: flex;
-            align-items: center;
-            font-size: 1.75rem;
-            font-weight: 800;
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-        
-        .logo i {
-            margin-right: 0.5rem;
-            font-size: 2rem;
-        }
-        
-        nav ul {
-            display: flex;
-            list-style: none;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        nav ul li a {
-            color: var(--gray-700);
-            text-decoration: none;
-            font-weight: 500;
-            transition: var(--transition);
-            padding: 0.5rem 1rem;
-            font-size: 0.95rem;
-            border-radius: 6px;
-        }
-        
-        nav ul li a:hover, nav ul li a.active {
-            color: var(--primary-color);
-            background-color: var(--gray-50);
-        }
-        
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0.75rem 1.5rem;
-            border-radius: 8px;
-            font-weight: 600;
-            text-align: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: none;
-            font-size: 0.95rem;
-            text-decoration: none;
-            gap: 0.5rem;
-        }
-        
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-            box-shadow: var(--shadow);
-        }
-        
-        .btn-primary:hover {
-            background-color: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .btn-outline {
-            background-color: transparent;
-            border: 2px solid var(--primary-color);
-            color: var(--primary-color);
-        }
-        
-        .btn-outline:hover {
-            background-color: var(--primary-color);
-            color: white;
-            transform: translateY(-1px);
-        }
-        
-        /* Hero Section */
-        .hero {
-            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
-            color: white;
-            padding: 6rem 0;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="20" cy="20" r="2" fill="white" opacity="0.1"/><circle cx="80" cy="40" r="1.5" fill="white" opacity="0.1"/><circle cx="40" cy="80" r="1" fill="white" opacity="0.1"/></svg>') repeat;
-            animation: float 20s infinite linear;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            100% { transform: translateY(-100px); }
-        }
-        
-        .hero-content {
-            position: relative;
-            z-index: 1;
-        }
-        
+      :root {
+        --bg-primary: #0f172a;
+        --bg-secondary: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --accent-color: #3b82f6;
+        --accent-hover: #2563eb;
+        --border-color: #334155;
+        --card-bg: #1e293b;
+        --shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        --transition: all 0.2s ease;
+        --radius: 6px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          "Inter",
+          -apple-system,
+          BlinkMacSystemFont,
+          sans-serif;
+        background: var(--bg-primary);
+        min-height: 100vh;
+        color: var(--text-primary);
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+      }
+
+      /* Header Styles */
+      header {
+        background-color: rgba(15, 23, 42, 0.8);
+        backdrop-filter: blur(8px);
+        border-bottom: 1px solid var(--border-color);
+        padding: 0.75rem 0;
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+      }
+
+      .header-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .logo {
+        display: flex;
+        align-items: center;
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        text-decoration: none;
+        letter-spacing: -0.025em;
+      }
+
+      .logo i {
+        margin-right: 0.5rem;
+        color: var(--accent-color);
+      }
+
+      nav ul {
+        display: flex;
+        list-style: none;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      nav ul li a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        font-weight: 500;
+        transition: var(--transition);
+        padding: 0.4rem 0.8rem;
+        font-size: 0.875rem;
+        border-radius: var(--radius);
+      }
+
+      nav ul li a:hover,
+      nav ul li a.active {
+        color: var(--text-primary);
+        background-color: var(--bg-secondary);
+      }
+
+      /* Buttons */
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.5rem 1rem;
+        border-radius: var(--radius);
+        font-weight: 500;
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.875rem;
+        gap: 0.5rem;
+        border: 1px solid transparent;
+        cursor: pointer;
+      }
+
+      .btn-primary {
+        background-color: var(--accent-color);
+        color: white;
+      }
+
+      .btn-primary:hover {
+        background-color: var(--accent-hover);
+      }
+
+      .btn-outline {
+        background-color: transparent;
+        border-color: var(--border-color);
+        color: var(--text-primary);
+      }
+
+      .btn-outline:hover {
+        background-color: var(--bg-secondary);
+        border-color: var(--text-secondary);
+      }
+
+      /* User Section */
+      .user-section {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .user-info {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.25rem 0.5rem;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius);
+      }
+
+      .user-avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 2px;
+      }
+
+      .user-name {
+        color: var(--text-primary);
+        font-size: 0.8125rem;
+        font-weight: 500;
+      }
+
+      .btn-logout {
+        background: transparent;
+        color: var(--text-secondary);
+        border: none;
+        padding: 2px 4px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        cursor: pointer;
+        transition: var(--transition);
+      }
+
+      .btn-logout:hover {
+        color: #ef4444;
+      }
+
+      /* Hero Section */
+      .hero {
+        padding: 8rem 0 4rem;
+        text-align: center;
+        position: relative;
+      }
+
+      .hero-content {
+        max-width: 800px;
+        margin: 0 auto;
+      }
+
+      .hero h1 {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        font-weight: 800;
+        letter-spacing: -0.04em;
+        color: var(--text-primary);
+        line-height: 1;
+      }
+
+      .hero p {
+        font-size: 1.125rem;
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
+        line-height: 1.5;
+      }
+
+      .hero-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+      }
+
+      /* Features Section */
+      .features {
+        padding: 4rem 0;
+      }
+
+      .features-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+      }
+
+      .feature-card {
+        background: var(--card-bg);
+        border-radius: var(--radius);
+        padding: 2rem;
+        border: 1px solid var(--border-color);
+        transition: var(--transition);
+      }
+
+      .feature-card:hover {
+        border-color: var(--text-secondary);
+      }
+
+      .feature-icon {
+        font-size: 1.5rem;
+        color: var(--accent-color);
+        margin-bottom: 1.25rem;
+      }
+
+      .feature-card h3 {
+        font-size: 1.125rem;
+        margin-bottom: 0.75rem;
+        color: var(--text-primary);
+        font-weight: 600;
+      }
+
+      .feature-card p {
+        color: var(--text-secondary);
+        font-size: 0.9375rem;
+        line-height: 1.6;
+      }
+
+      /* Footer */
+      footer {
+        border-top: 1px solid var(--border-color);
+        padding: 4rem 0 2rem;
+        margin-top: 4rem;
+      }
+
+      .footer-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        flex-wrap: wrap;
+        gap: 2rem;
+        margin-bottom: 3rem;
+      }
+
+      .footer-column {
+        flex: 1;
+        min-width: 200px;
+      }
+
+      .footer-column h3 {
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        margin-bottom: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      .footer-column p {
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+        max-width: 300px;
+      }
+
+      .footer-links {
+        list-style: none;
+      }
+
+      .footer-links li {
+        margin-bottom: 0.5rem;
+      }
+
+      .footer-links a {
+        color: var(--text-secondary);
+        text-decoration: none;
+        transition: var(--transition);
+        font-size: 0.875rem;
+      }
+
+      .footer-links a:hover {
+        color: var(--text-primary);
+      }
+
+      .footer-bottom {
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
         .hero h1 {
-            font-size: 3.5rem;
-            margin-bottom: 1.5rem;
-            font-weight: 800;
-            line-height: 1.1;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3), 0 4px 8px rgba(0, 0, 0, 0.2);
-            color: #ffffff;
+          font-size: 2.25rem;
         }
 
-        .hero p {
-            font-size: 1.25rem;
-            max-width: 700px;
-            margin: 0 auto 3rem;
-            line-height: 1.7;
-            opacity: 0.95;
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-            color: #ffffff;
-        }
-        
-        .hero-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-top: 2rem;
-            flex-wrap: wrap;
-        }
-        
-        /* Features Section */
-        .features {
-            padding: 6rem 0;
-            background-color: var(--gray-50);
-        }
-        
-        .section-title {
-            text-align: center;
-            margin-bottom: 4rem;
-        }
-        
-        .section-title h2 {
-            font-size: 2.5rem;
-            color: var(--gray-900);
-            margin-bottom: 1rem;
-            font-weight: 700;
-        }
-        
-        .section-title p {
-            color: var(--gray-600);
-            max-width: 700px;
-            margin: 0 auto;
-            font-size: 1.1rem;
-            line-height: 1.6;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 2rem;
-            margin-top: 3rem;
-        }
-        
-        .feature-card {
-            background: #fff;
-            border-radius: 12px;
-            padding: 2.5rem 2rem;
-            box-shadow: var(--shadow);
-            transition: var(--transition);
-            border: 1px solid var(--gray-200);
-            text-align: center;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-lg);
-        }
-        
-        .feature-icon {
-            font-size: 3rem;
-            color: var(--primary-color);
-            margin-bottom: 1.5rem;
-        }
-        
-        .feature-card h3 {
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-            color: var(--gray-900);
-            font-weight: 600;
-        }
-        
-        .feature-card p {
-            color: var(--gray-600);
-            line-height: 1.7;
-        }
-        
-        /* Stats Section */
-        .stats {
-            padding: 5rem 0;
-            background-color: #fff;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 2rem;
-            text-align: center;
-        }
-        
-        .stat-item h3 {
-            font-size: 3rem;
-            color: var(--primary-color);
-            font-weight: 800;
-            margin-bottom: 0.5rem;
-        }
-        
-        .stat-item p {
-            color: var(--gray-600);
-            font-size: 1.1rem;
-            font-weight: 500;
-        }
-        
-        /* Footer */
-        footer {
-            background-color: var(--gray-900);
-            color: #fff;
-            padding: 3rem 0 1.5rem;
-        }
-        
         .footer-content {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 2rem;
-            margin-bottom: 2rem;
+          flex-direction: column;
         }
-        
-        .footer-column h3 {
-            color: #fff;
-            font-size: 1.2rem;
-            margin-bottom: 1.5rem;
-            font-weight: 600;
-        }
-        
-        .footer-links {
-            list-style: none;
-        }
-        
-        .footer-links li {
-            margin-bottom: 0.8rem;
-        }
-        
-        .footer-links a {
-            color: var(--gray-400);
-            text-decoration: none;
-            transition: var(--transition);
-            font-size: 0.95rem;
-        }
-        
-        .footer-links a:hover {
-            color: #fff;
-        }
-        
-        .footer-bottom {
-            text-align: center;
-            padding-top: 2rem;
-            border-top: 1px solid var(--gray-800);
-            color: var(--gray-400);
-            font-size: 0.9rem;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            nav ul {
-                display: none;
-            }
-            
-            .hero h1 {
-                font-size: 2.5rem;
-            }
-            
-            .hero p {
-                font-size: 1.1rem;
-                padding: 0 1rem;
-            }
-            
-            .hero-buttons {
-                flex-direction: column;
-                align-items: center;
-            }
-            
-            .hero-buttons .btn {
-                width: 100%;
-                max-width: 280px;
-            }
-            
-            .features-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <!-- Header -->
     <header>
-        <div class="container header-container">
-            <a href="/" class="logo">
-                <i class="fas fa-book"></i>
-                LGOJ
+      <div class="container header-container">
+        <a href="/" class="logo">
+          <i class="fas fa-book"></i>
+          LGOJ
+        </a>
+        <nav>
+          <ul>
+            <li><a href="/" class="active">首页</a></li>
+            <li><a href="/problems.html">题库</a></li>
+          </ul>
+        </nav>
+
+        <!-- 用户登录状态 -->
+        <div class="user-section">
+          <div id="userInfo" class="user-info" style="display: none">
+            <img
+              id="userAvatar"
+              class="user-avatar"
+              src=""
+              alt="用户头像"
+              onclick="goToProfile()"
+              title="点击查看个人中心"
+              style="cursor: pointer"
+            />
+            <span id="userName" class="user-name"></span>
+            <button id="logoutBtn" class="btn-logout" onclick="logout()">
+              退出
+            </button>
+          </div>
+          <div id="loginSection" class="login-section">
+            <a href="/login.html" class="btn btn-primary">
+              <i class="fas fa-sign-in-alt"></i>
+              登录
             </a>
-            <nav>
-                <ul>
-                    <li><a href="/" class="active">首页</a></li>
-                    <li><a href="/problems.html">题库</a></li>
-                </ul>
-            </nav>
-            
-            <!-- 用户登录状态 -->
-            <div class="user-section">
-                <div id="userInfo" class="user-info" style="display: none;">
-                    <img id="userAvatar" class="user-avatar" src="" alt="用户头像" onclick="goToProfile()" title="点击查看个人中心" style="cursor: pointer;">
-                    <span id="userName" class="user-name"></span>
-                    <button id="logoutBtn" class="btn-logout" onclick="logout()">退出</button>
-                </div>
-                <div id="loginSection" class="login-section">
-                    <a href="/login.html" class="btn btn-primary">
-                        <i class="fas fa-sign-in-alt"></i>
-                        登录
-                    </a>
-                </div>
-            </div>
+          </div>
         </div>
+      </div>
     </header>
 
     <!-- Hero Section -->
     <section class="hero">
-        <div class="hero-content">
-            <div class="container">
-                <h1>LGOJ 题目浏览站</h1>
-                <p>洛谷题目收集与浏览平台，提供题目的静态浏览和查看功能。</p>
-                <div class="hero-buttons">
-                    <a href="/problems.html" class="btn btn-primary">
-                        <i class="fas fa-list"></i>
-                        浏览题目
-                    </a>
-                    <a href="/about" class="btn btn-outline">
-                        <i class="fas fa-info-circle"></i>
-                        了解更多
-                    </a>
-                </div>
-            </div>
+      <div class="hero-content">
+        <div class="container">
+          <h1>LGOJ 题目浏览站</h1>
+          <p>洛谷题目收集与浏览平台，提供题目的静态浏览和查看功能。</p>
+          <div class="hero-buttons">
+            <a href="/problems.html" class="btn btn-primary">
+              <i class="fas fa-list"></i>
+              浏览题目
+            </a>
+            <a href="/about" class="btn btn-outline">
+              <i class="fas fa-info-circle"></i>
+              了解更多
+            </a>
+          </div>
         </div>
+      </div>
     </section>
 
     <!-- Features Section -->
     <section class="features">
-        <div class="container">
-            <div class="section-title">
-                <h2>平台特色</h2>
-                <p>简单实用的题目浏览功能</p>
+      <div class="container">
+        <div class="features-grid">
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-book-open"></i>
             </div>
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-book-open"></i>
-                    </div>
-                    <h3>题目浏览</h3>
-                    <p>收录洛谷平台题目，提供清晰的题目内容展示和浏览功能。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-search"></i>
-                    </div>
-                    <h3>题目搜索</h3>
-                    <p>支持按题目编号和标题搜索，快速找到需要的题目。</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <i class="fas fa-code"></i>
-                    </div>
-                    <h3>代码高亮</h3>
-                    <p>支持代码语法高亮显示，提供更好的阅读体验。</p>
-                </div>
+            <h3>题目浏览</h3>
+            <p>收录洛谷平台题目，提供清晰的题目内容展示和浏览功能。</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-search"></i>
             </div>
+            <h3>题目搜索</h3>
+            <p>支持按题目编号和标题搜索，快速找到需要的题目。</p>
+          </div>
+          <div class="feature-card">
+            <div class="feature-icon">
+              <i class="fas fa-code"></i>
+            </div>
+            <h3>代码高亮</h3>
+            <p>支持代码语法高亮显示，提供更好的阅读体验。</p>
+          </div>
         </div>
-    </section>
-
-    <!-- Info Section -->
-    <section class="stats">
-        <div class="container">
-            <div class="section-title">
-                <h2>使用说明</h2>
-                <p>简单易用的题目浏览平台</p>
-            </div>
-            <div style="text-align: center; max-width: 600px; margin: 0 auto;">
-                <p style="font-size: 1.1rem; line-height: 1.8; color: var(--gray-600);">
-                    本站收录了洛谷平台的算法题目，提供静态浏览功能。您可以通过题库页面查看所有题目，
-                    使用搜索功能快速找到特定题目，所有题目内容支持代码高亮和数学公式渲染。
-                </p>
-            </div>
-        </div>
+      </div>
     </section>
 
     <!-- Footer -->
     <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-column">
-                    <h3>LGOJ 题目浏览站</h3>
-                    <p>洛谷题目收集与浏览平台，提供题目的静态浏览功能。</p>
-                </div>
-                <div class="footer-column">
-                    <h3>快速链接</h3>
-                    <ul>
-                        <li><a href="/">首页</a></li>
-                        <li><a href="/problems.html">题库</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 LGOJ 题目浏览站 | 洛谷题目静态浏览平台</p>
-            </div>
+      <div class="container">
+        <div class="footer-content">
+          <div class="footer-column">
+            <h3>LGOJ</h3>
+            <p>洛谷题目收集与浏览平台，提供极简的题目查看体验。</p>
+          </div>
+          <div class="footer-column">
+            <h3>快速链接</h3>
+            <ul class="footer-links">
+              <li><a href="/">首页</a></li>
+              <li><a href="/problems.html">题库</a></li>
+            </ul>
+          </div>
         </div>
+        <div class="footer-bottom">
+          <p>&copy; 2025 LGOJ | 洛谷题目静态浏览平台</p>
+          <p>Designed for efficiency</p>
+        </div>
+      </div>
     </footer>
 
     <script>
-        // 生成会话ID（用于在代理中识别用户会话）
-        let sessionId = localStorage.getItem('luogu_session_id');
-        if (!sessionId) {
-            sessionId = 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            localStorage.setItem('luogu_session_id', sessionId);
+      // 生成会话ID（用于在代理中识别用户会话）
+      let sessionId = localStorage.getItem("luogu_session_id");
+      if (!sessionId) {
+        sessionId =
+          "session_" +
+          Date.now() +
+          "_" +
+          Math.random().toString(36).substr(2, 9);
+        localStorage.setItem("luogu_session_id", sessionId);
+      }
+
+      // 代理函数 - 通过Netlify Functions调用洛谷API
+      async function proxyLuoguAPI(path, options = {}) {
+        const { method = "GET", body, headers = {} } = options;
+
+        try {
+          const response = await fetch("/.netlify/functions/luogu-proxy", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              path: path,
+              method: method,
+              body: body,
+              headers: headers,
+              sessionId: sessionId,
+            }),
+          });
+
+          // 400状态码可能是正常的业务逻辑响应
+          if (!response.ok && response.status !== 400) {
+            throw new Error(
+              `代理请求失败: ${response.status} ${response.statusText}`,
+            );
+          }
+
+          return response;
+        } catch (error) {
+          console.error("代理请求失败:", error);
+          throw error;
         }
+      }
 
-        // 代理函数 - 通过Netlify Functions调用洛谷API
-        async function proxyLuoguAPI(path, options = {}) {
-            const { method = 'GET', body, headers = {} } = options;
-            
-            try {
-                const response = await fetch('/.netlify/functions/luogu-proxy', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        path: path,
-                        method: method,
-                        body: body,
-                        headers: headers,
-                        sessionId: sessionId
-                    })
-                });
-                
-                // 400状态码可能是正常的业务逻辑响应
-                if (!response.ok && response.status !== 400) {
-                    throw new Error(`代理请求失败: ${response.status} ${response.statusText}`);
-                }
-                
-                return response;
-            } catch (error) {
-                console.error('代理请求失败:', error);
-                throw error;
-            }
-        }
+      // 检查登录状态
+      async function checkLoginStatus() {
+        console.log("🔍 开始检查登录状态...");
 
-        // 检查登录状态
-        async function checkLoginStatus() {
-            console.log('🔍 开始检查登录状态...');
-            
-            // 首先检查localStorage中是否有用户信息
-            const savedUserInfo = localStorage.getItem('luogu_user_info');
-            if (savedUserInfo) {
-                try {
-                    const userInfo = JSON.parse(savedUserInfo);
-                    console.log('✅ 从localStorage找到用户信息:', userInfo);
-                    
-                    // 检查登录时间是否过期（24小时）
-                    const loginTime = new Date(userInfo.loginTime);
-                    const now = new Date();
-                    const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
-                    
-                    if (hoursDiff < 24) {
-                        console.log(`✅ 用户信息有效（${hoursDiff.toFixed(1)}小时前登录）`);
-                        showUserInfo({
-                            name: userInfo.name || userInfo.username,
-                            uid: userInfo.uid,
-                            username: userInfo.username,
-                            avatar: userInfo.avatar
-                        });
-                        return true;
-                    } else {
-                        console.log('⚠️ 用户信息已过期，清除localStorage');
-                        localStorage.removeItem('luogu_user_info');
-                    }
-                } catch (error) {
-                    console.error('解析localStorage用户信息失败:', error);
-                    localStorage.removeItem('luogu_user_info');
-                }
-            }
-            
-            const sessionId = localStorage.getItem('luogu_session_id');
-            if (!sessionId) {
-                console.log('❌ 没有找到sessionId');
-                showLoginButton();
-                return false;
-            }
+        // 首先检查localStorage中是否有用户信息
+        const savedUserInfo = localStorage.getItem("luogu_user_info");
+        if (savedUserInfo) {
+          try {
+            const userInfo = JSON.parse(savedUserInfo);
+            console.log("✅ 从localStorage找到用户信息:", userInfo);
 
-            try {
-                const response = await proxyLuoguAPI('/_lfe/config', {
-                    method: 'GET'
-                });
+            // 检查登录时间是否过期（24小时）
+            const loginTime = new Date(userInfo.loginTime);
+            const now = new Date();
+            const hoursDiff = (now - loginTime) / (1000 * 60 * 60);
 
-                console.log('登录状态检查响应状态:', response.status);
-                console.log('登录状态检查响应头:', response.headers.get('content-type'));
-
-                if (response.status === 200) {
-                    const data = await response.json();
-                    console.log('登录状态检查完整响应:', data);
-                    
-                    // 检查是否有currentUser字段
-                    if (data.currentUser && data.currentUser.name) {
-                        console.log('✅ 找到用户信息:', data.currentUser);
-                        showUserInfo(data.currentUser);
-                        return true;
-                    } else {
-                        console.log('❌ 响应中没有currentUser字段');
-                        console.log('响应数据结构:', Object.keys(data));
-                        
-                        // 智能检测用户字段
-                        const possibleUserFields = ['user', 'loginUser', 'userInfo', 'me', 'profile'];
-                        console.log('可能的用户字段:', possibleUserFields.filter(field => data.hasOwnProperty(field)));
-                        
-                        // 查找包含用户相关信息的字段
-                        const userRelatedFields = Object.keys(data).filter(key => 
-                            key.toLowerCase().includes('user') || 
-                            key.toLowerCase().includes('login') || 
-                            key.toLowerCase().includes('auth')
-                        );
-                        console.log('用户相关的字段:', userRelatedFields);
-                        
-                        // 尝试找到可能的用户对象
-                        let foundUser = null;
-                        for (const field of possibleUserFields) {
-                            if (data[field] && typeof data[field] === 'object' && (data[field].name || data[field].username)) {
-                                console.log(`发现可能的用户字段 ${field}:`, data[field]);
-                                foundUser = data[field];
-                                break;
-                            }
-                        }
-                        
-                        if (foundUser) {
-                            console.log('✅ 找到用户信息:', foundUser);
-                            showUserInfo(foundUser);
-                            return true;
-                        } else {
-                            console.log('❌ 未找到用户信息，显示登录按钮');
-                            showLoginButton();
-                            return false;
-                        }
-                    }
-                } else if (response.status === 302) {
-                    console.log('⚠️ 收到302重定向，可能需要重新登录');
-                    showLoginButton();
-                    return false;
-                } else {
-                    console.log('❌ 登录状态检查请求失败:', response.status);
-                    showLoginButton();
-                    return false;
-                }
-            } catch (error) {
-                console.error('检查登录状态失败:', error);
-                showLoginButton();
-                return false;
-            }
-        }
-
-        // 显示用户信息
-        function showUserInfo(user) {
-            const userInfo = document.getElementById('userInfo');
-            const loginSection = document.getElementById('loginSection');
-            const userAvatar = document.getElementById('userAvatar');
-            const userName = document.getElementById('userName');
-            
-            // 设置用户头像
-            // 设置头像，优先使用真实头像，失败时回退到本地SVG
-            const defaultAvatar = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K';
-            
-            if (user.uid) {
-                // 有UID，尝试加载真实头像
-                userAvatar.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
-                userAvatar.onerror = function() {
-                    console.log('真实头像加载失败，使用默认头像');
-                    this.src = defaultAvatar;
-                    this.onerror = null; // 防止无限循环
-                };
+            if (hoursDiff < 24) {
+              console.log(
+                `✅ 用户信息有效（${hoursDiff.toFixed(1)}小时前登录）`,
+              );
+              showUserInfo({
+                name: userInfo.name || userInfo.username,
+                uid: userInfo.uid,
+                username: userInfo.username,
+                avatar: userInfo.avatar,
+              });
+              return true;
             } else {
-                // 没有UID，直接使用默认头像
-                userAvatar.src = defaultAvatar;
+              console.log("⚠️ 用户信息已过期，清除localStorage");
+              localStorage.removeItem("luogu_user_info");
             }
-            
-            // 设置用户名
-            userName.textContent = user.name || user.username || '用户';
-            
-            // 显示用户信息，隐藏登录按钮
-            userInfo.style.display = 'flex';
-            loginSection.style.display = 'none';
+          } catch (error) {
+            console.error("解析localStorage用户信息失败:", error);
+            localStorage.removeItem("luogu_user_info");
+          }
         }
 
-        // 显示登录按钮
-        function showLoginButton() {
-            const userInfo = document.getElementById('userInfo');
-            const loginSection = document.getElementById('loginSection');
-            
-            userInfo.style.display = 'none';
-            loginSection.style.display = 'block';
+        const sessionId = localStorage.getItem("luogu_session_id");
+        if (!sessionId) {
+          console.log("❌ 没有找到sessionId");
+          showLoginButton();
+          return false;
         }
 
-        // 退出登录
-        async function logout() {
-            try {
-                // 清除localStorage中的用户信息和会话ID
-                localStorage.removeItem('luogu_user_info');
-                localStorage.removeItem('luogu_session_id');
-                console.log('🚪 已清除用户信息和会话ID');
-                
-                showLoginButton();
-                
-                // 可选：调用洛谷退出API
-                try {
-                    await proxyLuoguAPI('/auth/logout', { method: 'POST' });
-                } catch (e) {
-                    // 忽略退出API错误
-                    console.log('退出API调用失败，但本地清理已完成');
+        try {
+          const response = await proxyLuoguAPI("/_lfe/config", {
+            method: "GET",
+          });
+
+          console.log("登录状态检查响应状态:", response.status);
+          console.log(
+            "登录状态检查响应头:",
+            response.headers.get("content-type"),
+          );
+
+          if (response.status === 200) {
+            const data = await response.json();
+            console.log("登录状态检查完整响应:", data);
+
+            // 检查是否有currentUser字段
+            if (data.currentUser && data.currentUser.name) {
+              console.log("✅ 找到用户信息:", data.currentUser);
+              showUserInfo(data.currentUser);
+              return true;
+            } else {
+              console.log("❌ 响应中没有currentUser字段");
+              console.log("响应数据结构:", Object.keys(data));
+
+              // 智能检测用户字段
+              const possibleUserFields = [
+                "user",
+                "loginUser",
+                "userInfo",
+                "me",
+                "profile",
+              ];
+              console.log(
+                "可能的用户字段:",
+                possibleUserFields.filter((field) =>
+                  data.hasOwnProperty(field),
+                ),
+              );
+
+              // 查找包含用户相关信息的字段
+              const userRelatedFields = Object.keys(data).filter(
+                (key) =>
+                  key.toLowerCase().includes("user") ||
+                  key.toLowerCase().includes("login") ||
+                  key.toLowerCase().includes("auth"),
+              );
+              console.log("用户相关的字段:", userRelatedFields);
+
+              // 尝试找到可能的用户对象
+              let foundUser = null;
+              for (const field of possibleUserFields) {
+                if (
+                  data[field] &&
+                  typeof data[field] === "object" &&
+                  (data[field].name || data[field].username)
+                ) {
+                  console.log(`发现可能的用户字段 ${field}:`, data[field]);
+                  foundUser = data[field];
+                  break;
                 }
-                
-                console.log('✅ 已成功退出登录');
-            } catch (error) {
-                console.error('退出登录失败:', error);
+              }
+
+              if (foundUser) {
+                console.log("✅ 找到用户信息:", foundUser);
+                showUserInfo(foundUser);
+                return true;
+              } else {
+                console.log("❌ 未找到用户信息，显示登录按钮");
+                showLoginButton();
+                return false;
+              }
             }
+          } else if (response.status === 302) {
+            console.log("⚠️ 收到302重定向，可能需要重新登录");
+            showLoginButton();
+            return false;
+          } else {
+            console.log("❌ 登录状态检查请求失败:", response.status);
+            showLoginButton();
+            return false;
+          }
+        } catch (error) {
+          console.error("检查登录状态失败:", error);
+          showLoginButton();
+          return false;
+        }
+      }
+
+      // 显示用户信息
+      function showUserInfo(user) {
+        const userInfo = document.getElementById("userInfo");
+        const loginSection = document.getElementById("loginSection");
+        const userAvatar = document.getElementById("userAvatar");
+        const userName = document.getElementById("userName");
+
+        // 设置用户头像
+        // 设置头像，优先使用真实头像，失败时回退到本地SVG
+        const defaultAvatar =
+          "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K";
+
+        if (user.uid) {
+          // 有UID，尝试加载真实头像
+          userAvatar.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
+          userAvatar.onerror = function () {
+            console.log("真实头像加载失败，使用默认头像");
+            this.src = defaultAvatar;
+            this.onerror = null; // 防止无限循环
+          };
+        } else {
+          // 没有UID，直接使用默认头像
+          userAvatar.src = defaultAvatar;
         }
 
-        // 跳转到个人中心
-        function goToProfile() {
-            window.location.href = '/profile.html';
-        }
+        // 设置用户名
+        userName.textContent = user.name || user.username || "用户";
 
-        // 页面加载时检查登录状态
-        document.addEventListener('DOMContentLoaded', function() {
-            checkLoginStatus();
-        });
+        // 显示用户信息，隐藏登录按钮
+        userInfo.style.display = "flex";
+        loginSection.style.display = "none";
+      }
+
+      // 显示登录按钮
+      function showLoginButton() {
+        const userInfo = document.getElementById("userInfo");
+        const loginSection = document.getElementById("loginSection");
+
+        userInfo.style.display = "none";
+        loginSection.style.display = "block";
+      }
+
+      // 退出登录
+      async function logout() {
+        try {
+          // 清除localStorage中的用户信息和会话ID
+          localStorage.removeItem("luogu_user_info");
+          localStorage.removeItem("luogu_session_id");
+          console.log("🚪 已清除用户信息和会话ID");
+
+          showLoginButton();
+
+          // 可选：调用洛谷退出API
+          try {
+            await proxyLuoguAPI("/auth/logout", { method: "POST" });
+          } catch (e) {
+            // 忽略退出API错误
+            console.log("退出API调用失败，但本地清理已完成");
+          }
+
+          console.log("✅ 已成功退出登录");
+        } catch (error) {
+          console.error("退出登录失败:", error);
+        }
+      }
+
+      // 跳转到个人中心
+      function goToProfile() {
+        window.location.href = "/profile.html";
+      }
+
+      // 页面加载时检查登录状态
+      document.addEventListener("DOMContentLoaded", function () {
+        checkLoginStatus();
+      });
     </script>
-</body>
+  </body>
 </html>
