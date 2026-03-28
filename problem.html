@@ -506,7 +506,13 @@
         container.style.display = "block";
         commentsSection.style.display = "block";
 
+        if (!apiResult.data || !apiResult.data.problem) {
+          container.innerHTML = `<div style="color: #ef4444; text-align: center; padding: 2rem;">未找到题目数据</div>`;
+          return;
+        }
+
         const problem = apiResult.data.problem;
+        const content = problem.content || {}; // 洛谷API中题目内容通常嵌套在content中
         const difficultyText = getDifficultyText(problem.difficulty);
         const difficultyColor = `var(--diff-${problem.difficulty || 0})`;
 
@@ -546,32 +552,34 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">通过</span>
-                <span class="meta-value">${problem.totalAccepted}</span>
+                <span class="meta-value">${problem.totalAccepted || 0}</span>
               </div>
               <div class="meta-item">
                 <span class="meta-label">提交</span>
-                <span class="meta-value">${problem.totalSubmit}</span>
+                <span class="meta-value">${problem.totalSubmit || 0}</span>
+              </div>
+              <div class="meta-item">
+                <span class="meta-label">通过率</span>
+                <span class="meta-value">${problem.totalSubmit > 0 ? ((problem.totalAccepted / problem.totalSubmit) * 100).toFixed(1) + '%' : 'N/A'}</span>
               </div>
             </div>
           </div>
 
           <div class="problem-content">
-            ${renderSection("题目描述", problem.description)}
-            ${renderSection("输入格式", problem.inputFormat)}
-            ${renderSection("输出格式", problem.outputFormat)}
+            ${renderSection("题目背景", content.background)}
+            ${renderSection("题目描述", content.description || "暂无题目描述")}
+            ${renderSection("输入格式", content.formatI)}
+            ${renderSection("输出格式", content.formatO)}
             ${renderSamples(problem.samples)}
-            ${renderSection("提示", problem.hint)}
+            ${renderSection("提示", content.hint)}
           </div>
         `;
 
         // 渲染数学公式
-        renderMathInElement(container, {
-          delimiters: [
-            {left: "$$", right: "$$", display: true},
-            {left: "$", right: "$", display: false}
-          ],
-          throwOnError: false
-        });
+        renderMath(container);
+        
+        // 更新页面标题
+        document.title = `${problem.pid} - ${problem.title} - LGOJ`;
       }
 
       function renderSection(title, content) {
@@ -592,19 +600,34 @@
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
               <div class="code-block">
                 <div class="code-header"><span class="code-language">输入</span></div>
-                <div class="code-content">${sample[0]}</div>
+                <div class="code-content"><pre><code>${sample[0]}</code></pre></div>
               </div>
               <div class="code-block">
                 <div class="code-header"><span class="code-language">输出</span></div>
-                <div class="code-content">${sample[1]}</div>
+                <div class="code-content"><pre><code>${sample[1]}</code></pre></div>
               </div>
             </div>
           </div>
         `).join('');
       }
 
+      function renderMath(element) {
+        if (typeof renderMathInElement !== "undefined") {
+          renderMathInElement(element, {
+            delimiters: [
+              {left: "$$", right: "$$", display: true},
+              {left: "$", right: "$", display: false},
+              {left: "\\(", right: "\\)", display: false},
+              {left: "\\[", right: "\\]", display: true}
+            ],
+            throwOnError: false
+          });
+        }
+      }
+
       function copyToClipboard(id) {
-        const content = document.getElementById(id).innerText;
+        const el = document.getElementById(id);
+        const content = el.innerText || el.textContent;
         navigator.clipboard.writeText(content).then(() => {
           const btn = event.currentTarget;
           const original = btn.innerHTML;
@@ -619,7 +642,36 @@
         return div.innerHTML;
       }
 
-      // 其他逻辑保持不变...
+      // 获取CSRF Token
+      async function getCSRFToken() {
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const pid = urlParams.get("pid");
+          
+          // 尝试获取题目页面的HTML来提取Token
+          const response = await fetch("/.netlify/functions/luogu-proxy", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              path: `/problem/${pid}`,
+              method: "GET",
+              requestType: "html"
+            }),
+          });
+          
+          const result = await response.json();
+          const html = result.data || "";
+          
+          const metaMatch = html.match(/<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
+                          html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i);
+          
+          return metaMatch ? metaMatch[1] : null;
+        } catch (error) {
+          console.error("获取 CSRF Token 失败:", error);
+          return null;
+        }
+      }
+
       async function proxyLuoguAPI(path, options = {}) {
         const requestData = {
           path: path,
@@ -630,6 +682,10 @@
           },
           sessionId: localStorage.getItem("luogu_session_id") || "session_luogu_global_fixed_2025"
         };
+
+        if (options.body) {
+          requestData.body = options.body;
+        }
 
         try {
           const response = await fetch("/.netlify/functions/luogu-proxy", {
@@ -703,21 +759,35 @@
         }
 
         btn.disabled = true;
-        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在提交...';
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在获取 CSRF Token...';
+
+        const csrfToken = await getCSRFToken();
+        if (!csrfToken) {
+          status.innerHTML = '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态</span>';
+          btn.disabled = false;
+          return;
+        }
+
+        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在提交评测...';
 
         try {
           const result = await proxyLuoguAPI(`/fe/api/problem/submit/${pid}`, {
             method: "POST",
+            headers: {
+              "x-csrf-token": csrfToken
+            },
             body: JSON.stringify({ lang, code, enableO2: true })
           });
 
-          if (result.error) {
-            status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.error}</span>`;
-          } else {
-            status.innerHTML = '<span style="color: #10b981">提交成功！正在跳转...</span>';
+          if (result.error || result.errorMessage) {
+            status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.errorMessage || result.error}</span>`;
+          } else if (result.rid) {
+            status.innerHTML = '<span style="color: #10b981">提交成功！正在跳转到评测详情...</span>';
             setTimeout(() => {
               window.location.href = `https://www.luogu.com.cn/record/${result.rid}`;
             }, 1500);
+          } else {
+            status.innerHTML = `<span style="color: #ef4444">提交失败，未返回记录ID</span>`;
           }
         } catch (error) {
           status.innerHTML = `<span style="color: #ef4444">提交出错: ${error.message}</span>`;
@@ -734,339 +804,7 @@
       });
     </script>
   </body>
-
-      // 显示题目详情
-      function displayProblemDetail(apiResult) {
-        const container = document.getElementById("problemContainer");
-        const loadingDiv = document.getElementById("loadingStatus");
-
-        console.log("🎨 开始解析题目详情数据:", apiResult);
-
-        // 根据实际API数据结构提取题目数据
-        let problem = null;
-
-        if (apiResult.data && apiResult.data.problem) {
-          problem = apiResult.data.problem;
-          console.log("✅ 使用data.problem数据结构");
-        } else {
-          showStatus("未找到题目数据", "error");
-          console.log("❌ 未找到题目数据，原始响应:", apiResult);
-          return;
-        }
-
-        const difficultyText = getDifficultyText(problem.difficulty);
-        const difficultyClass = `difficulty-${problem.difficulty || 0}`;
-
-        // 获取题目内容（优先使用content，fallback到contenu）
-        const content = problem.content || problem.contenu || {};
-
-        container.innerHTML = `
-                <div class="problem-header">
-                    <div class="problem-title">${problem.pid} - ${problem.title}</div>
-                    <div class="problem-meta">
-                        <div class="meta-item">
-                            <i class="fas fa-signal"></i>
-                            <span class="meta-label">难度:</span>
-                            <span class="difficulty-tag ${difficultyClass}">${difficultyText}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-check-circle"></i>
-                            <span class="meta-label">通过:</span>
-                            <span class="meta-value">${problem.totalAccepted || 0}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-paper-plane"></i>
-                            <span class="meta-label">提交:</span>
-                            <span class="meta-value">${problem.totalSubmit || 0}</span>
-                        </div>
-                        <div class="meta-item">
-                            <i class="fas fa-percentage"></i>
-                            <span class="meta-label">通过率:</span>
-                            <span class="meta-value">${problem.totalSubmit > 0 ? (((problem.totalAccepted || 0) / problem.totalSubmit) * 100).toFixed(1) + "%" : "N/A"}</span>
-                        </div>
-                    </div>
-                </div>
-                <div class="problem-content">
-                    ${
-                      content.background
-                        ? `
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-info-circle"></i>
-                            题目背景
-                        </div>
-                        <div class="problem-description">
-                            ${formatContent(content.background)}
-                        </div>
-                    </div>
-                    `
-                        : ""
-                    }
-                    
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-file-alt"></i>
-                            题目描述
-                        </div>
-                        <div class="problem-description">
-                            ${formatContent(content.description || "暂无题目描述")}
-                        </div>
-                    </div>
-                    
-                    ${
-                      content.formatI
-                        ? `
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-sign-in-alt"></i>
-                            输入格式
-                        </div>
-                        <div class="problem-description">
-                            ${formatContent(content.formatI)}
-                        </div>
-                    </div>
-                    `
-                        : ""
-                    }
-                    
-                    ${
-                      content.formatO
-                        ? `
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-sign-out-alt"></i>
-                            输出格式
-                        </div>
-                        <div class="problem-description">
-                            ${formatContent(content.formatO)}
-                        </div>
-                    </div>
-                    `
-                        : ""
-                    }
-                    
-                    ${
-                      problem.samples && problem.samples.length > 0
-                        ? `
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-code"></i>
-                            样例
-                        </div>
-                        ${problem.samples
-                          .map(
-                            (sample, index) => `
-                            <div style="margin-bottom: 1.5rem;">
-                                <h3>样例 ${index + 1}</h3>
-                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-                                    <div>
-                                        <strong>输入:</strong>
-                                        <pre>${sample[0] || ""}</pre>
-                                    </div>
-                                    <div>
-                                        <strong>输出:</strong>
-                                        <pre>${sample[1] || ""}</pre>
-                                    </div>
-                                </div>
-                            </div>
-                        `,
-                          )
-                          .join("")}
-                    </div>
-                    `
-                        : ""
-                    }
-                    
-                    ${
-                      content.hint
-                        ? `
-                    <div class="section">
-                        <div class="section-title">
-                            <i class="fas fa-lightbulb"></i>
-                            提示
-                        </div>
-                        <div class="problem-description">
-                            ${formatContent(content.hint)}
-                        </div>
-                    </div>
-                    `
-                        : ""
-                    }
-                </div>
-            `;
-
-        // 隐藏加载状态，显示题目内容
-        loadingDiv.style.display = "none";
-        container.style.display = "block";
-
-        // 显示评论区
-        document.getElementById("commentsSection").style.display = "block";
-
-        // 渲染数学公式
-        setTimeout(() => {
-          renderMath(container);
-        }, 500);
-
-        // 额外的数学公式渲染尝试（确保KaTeX库完全加载）
-        setTimeout(() => {
-          if (typeof renderMathInElement !== "undefined") {
-            renderMath(container);
-          } else {
-            console.warn("⚠️ KaTeX库仍未加载，尝试重新渲染");
-            // 再次尝试
-            setTimeout(() => renderMath(container), 1000);
-          }
-        }, 1500);
-
-        // 更新页面标题
-        document.title = `${problem.pid} - ${problem.title} - LGOJ 题目浏览站`;
-      }
-
-      // 格式化内容，处理Markdown和KaTeX数学公式
-      function formatContent(content) {
-        if (!content) return "";
-
-        try {
-          // 配置marked选项
-          marked.setOptions({
-            breaks: true,
-            gfm: true,
-            sanitize: false,
-            highlight: function (code, lang) {
-              return code; // 简单的代码高亮，可以后续扩展
-            },
-          });
-
-          // 使用marked渲染Markdown
-          let html = marked.parse(content);
-
-          // 处理代码块，添加复制功能
-          html = html.replace(
-            /<pre><code(?:\s+class="language-(\w+)")?>([\s\S]*?)<\/code><\/pre>/g,
-            function (match, lang, code) {
-              const language = lang || "text";
-              const codeId = "code-" + Math.random().toString(36).substr(2, 9);
-
-              return `
-                        <div class="code-block">
-                            <div class="code-header">
-                                <span class="code-language">${language}</span>
-                                <button class="copy-btn" onclick="copyCode('${codeId}')">
-                                    <i class="fas fa-copy"></i>
-                                    复制
-                                </button>
-                            </div>
-                            <div class="code-content">
-                                <pre id="${codeId}"><code>${code}</code></pre>
-                            </div>
-                        </div>
-                    `;
-            },
-          );
-
-          return html;
-        } catch (error) {
-          console.warn("Markdown渲染失败，使用简单格式化:", error);
-
-          // 降级处理：简单的文本格式化
-          content = content.replace(/\n/g, "<br>");
-          content = content.replace(
-            /\[([^\]]+)\]\(([^)]+)\)/g,
-            '<a href="$2" target="_blank">$1</a>',
-          );
-
-          // 处理代码块并添加复制功能
-          content = content.replace(
-            /```(\w+)?\n([\s\S]*?)```/g,
-            function (match, lang, code) {
-              const language = lang || "text";
-              const codeId = "code-" + Math.random().toString(36).substr(2, 9);
-
-              return `
-                        <div class="code-block">
-                            <div class="code-header">
-                                <span class="code-language">${language}</span>
-                                <button class="copy-btn" onclick="copyCode('${codeId}')">
-                                    <i class="fas fa-copy"></i>
-                                    复制
-                                </button>
-                            </div>
-                            <div class="code-content">
-                                <pre id="${codeId}"><code>${code}</code></pre>
-                            </div>
-                        </div>
-                    `;
-            },
-          );
-
-          content = content.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-
-          return content;
-        }
-      }
-
-      // 渲染KaTeX数学公式
-      function renderMath(element) {
-        if (typeof renderMathInElement !== "undefined") {
-          try {
-            console.log("🔢 开始渲染KaTeX数学公式");
-            renderMathInElement(element, {
-              delimiters: [
-                { left: "$$", right: "$$", display: true },
-                { left: "$", right: "$", display: false },
-                { left: "\\(", right: "\\)", display: false },
-                { left: "\\[", right: "\\]", display: true },
-              ],
-              throwOnError: false,
-              errorColor: "#cc0000",
-              strict: false,
-              trust: true,
-              macros: {
-                "\\def": "\\gdef",
-                "\\arraystretch": "\\def\\arraystretch{#1}",
-                "\\rm": "\\mathrm",
-                "\\mathclap": "\\mathrlap{\\phantom{#1}}\\mathllap{#1}",
-                "\\kern": "\\hspace",
-              },
-            });
-            console.log("✅ KaTeX数学公式渲染完成");
-          } catch (error) {
-            console.error("❌ KaTeX渲染失败:", error);
-          }
-        } else {
-          console.warn("⚠️ KaTeX库未加载");
-          // 尝试重新加载KaTeX
-          setTimeout(() => {
-            if (typeof renderMathInElement !== "undefined") {
-              renderMath(element);
-            }
-          }, 1000);
-        }
-      }
-
-      // 复制代码功能
-      function copyCode(codeId) {
-        const codeElement = document.getElementById(codeId);
-        const button = codeElement
-          .closest(".code-block")
-          .querySelector(".copy-btn");
-
-        if (!codeElement) {
-          console.error("代码元素未找到:", codeId);
-          return;
-        }
-
-        const codeText = codeElement.textContent || codeElement.innerText;
-
-        // 使用现代 Clipboard API
-        if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard
-            .writeText(codeText)
-            .then(() => {
-              showCopySuccess(button);
-            })
-            .catch((err) => {
-              console.error("复制失败:", err);
+</html>
               fallbackCopyTextToClipboard(codeText, button);
             });
         } else {
