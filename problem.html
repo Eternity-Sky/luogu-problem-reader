@@ -6,7 +6,7 @@
     <title>题目详情 - LGOJ 题目浏览站</title>
     <link
       rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
@@ -616,7 +616,7 @@
             <div class="code-block">
               <div class="code-header">
                 <span class="code-language">${lang}</span>
-                <button class="copy-btn" onclick="copyToClipboard('${id}')">
+                <button class="copy-btn" onclick="copyToClipboard(event, '${id}')">
                   <i class="far fa-copy"></i> 复制
                 </button>
               </div>
@@ -755,17 +755,29 @@
               typeof sample[1] === "string"
                 ? sample[1]
                 : JSON.stringify(sample[1]);
+            const inputId = `input-${index}`;
+            const outputId = `output-${index}`;
             return `
             <div class="section">
               <div class="section-title">输入输出样例 ${index + 1}</div>
               <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
                 <div class="code-block">
-                  <div class="code-header"><span class="code-language">输入</span></div>
-                  <div class="code-content"><pre><code>${escapeHtml(input)}</code></pre></div>
+                  <div class="code-header">
+                    <span class="code-language">输入</span>
+                    <button class="copy-btn" onclick="copyToClipboard(event, '${inputId}')">
+                      <i class="far fa-copy"></i> 复制
+                    </button>
+                  </div>
+                  <div class="code-content"><pre id="${inputId}"><code>${escapeHtml(input)}</code></pre></div>
                 </div>
                 <div class="code-block">
-                  <div class="code-header"><span class="code-language">输出</span></div>
-                  <div class="code-content"><pre><code>${escapeHtml(output)}</code></pre></div>
+                  <div class="code-header">
+                    <span class="code-language">输出</span>
+                    <button class="copy-btn" onclick="copyToClipboard(event, '${outputId}')">
+                      <i class="far fa-copy"></i> 复制
+                    </button>
+                  </div>
+                  <div class="code-content"><pre id="${outputId}"><code>${escapeHtml(output)}</code></pre></div>
                 </div>
               </div>
             </div>
@@ -810,11 +822,11 @@
         container.appendChild(script);
       }
 
-      function copyToClipboard(id) {
+      function copyToClipboard(event, id) {
         const el = document.getElementById(id);
         const content = el.innerText || el.textContent;
+        const btn = event.currentTarget;
         navigator.clipboard.writeText(content).then(() => {
-          const btn = event.currentTarget;
           const original = btn.innerHTML;
           btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
           setTimeout(() => (btn.innerHTML = original), 2000);
