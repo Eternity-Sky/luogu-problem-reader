@@ -896,6 +896,18 @@
       }
 
       async function proxyLuoguAPI(path, options = {}) {
+        const userInfoStr = localStorage.getItem("luogu_user_info");
+        let sessionId = "session_luogu_global_fixed_2025";
+
+        if (userInfoStr) {
+          try {
+            const user = JSON.parse(userInfoStr);
+            if (user && user.uid) {
+              sessionId = `session_uid_${user.uid}`;
+            }
+          } catch (e) {}
+        }
+
         const requestData = {
           path: path,
           method: options.method || "GET",
@@ -903,9 +915,7 @@
             "x-luogu-type": "content-only",
             ...options.headers,
           },
-          sessionId:
-            localStorage.getItem("luogu_session_id") ||
-            "session_luogu_global_fixed_2025",
+          sessionId: sessionId,
           requestType: options.requestType || "api",
         };
 
@@ -1024,6 +1034,22 @@
         submitSection.style.display = "none";
       }
 
+      async function verifyLogin() {
+        console.log("正在验证洛谷登录状态...");
+        try {
+          const result = await proxyLuoguAPI("/fe/api/user/current");
+          if (result && result.currentUser && result.currentUser.uid !== 0) {
+            console.log("✅ 洛谷登录验证成功:", result.currentUser.name);
+            return true;
+          }
+          console.warn("❌ 洛谷登录验证失败: 未登录或 Uid 为 0");
+          return false;
+        } catch (e) {
+          console.error("验证登录状态出错:", e);
+          return false;
+        }
+      }
+
       async function submitCode() {
         const btn = document.getElementById("submitBtn");
         const status = document.getElementById("submitStatus");
@@ -1041,6 +1067,22 @@
         }
 
         btn.disabled = true;
+
+        // 第一步：验证洛谷登录状态
+        status.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> 正在验证洛谷登录状态...';
+        const isLoggedIn = await verifyLogin();
+        if (!isLoggedIn) {
+          status.innerHTML =
+            '<span style="color: #ef4444">洛谷登录已过期或未登录，请重新登录</span>';
+          // 3秒后跳转到登录页
+          setTimeout(() => {
+            window.location.href = `/login.html?return=${encodeURIComponent(window.location.href)}`;
+          }, 3000);
+          btn.disabled = false;
+          return;
+        }
+
         status.innerHTML =
           '<i class="fas fa-spinner fa-spin"></i> 正在获取该题目的独立 CSRF Token...';
 

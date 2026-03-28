@@ -80,7 +80,7 @@ exports.handler = async (event, context) => {
     // 构建完整URL
     const url = `https://www.luogu.com.cn${path}`;
 
-    // 获取会话ID（使用客户端IP作为简单的会话标识）
+    // 获取会话ID
     const clientSessionId =
       sessionId || event.headers["x-forwarded-for"] || "default";
 
@@ -96,6 +96,23 @@ exports.handler = async (event, context) => {
       Origin: "https://www.luogu.com.cn",
       "X-Requested-With": "XMLHttpRequest",
     };
+
+    // 🎯 关键改进：如果 sessionId 是以 session_uid_ 开头的，尝试在全局缓存中寻找具有相同 uid 的其他会话
+    if (clientSessionId.startsWith("session_uid_")) {
+      const currentUid = clientSessionId.split("_")[2];
+      if (!globalCookies[clientSessionId]) {
+        const foundSession = Object.keys(globalCookies).find(
+          (key) =>
+            key.startsWith("session_uid_") && key.includes(`_${currentUid}`),
+        );
+        if (foundSession) {
+          console.log(
+            `🔍 [${clientSessionId}] 发现匹配的 uid 会话: ${foundSession}，同步 Cookie`,
+          );
+          globalCookies[clientSessionId] = globalCookies[foundSession];
+        }
+      }
+    }
 
     // 对于验证码请求，设置特定的Accept头
     if (path === "/lg4/captcha") {
@@ -281,50 +298,72 @@ exports.handler = async (event, context) => {
     }
 
     // 保存响应中的Cookie并实现Cookie回传机制
+    let currentCookies = globalCookies[clientSessionId] || "";
+
     if (response.headers["set-cookie"]) {
       const cookies = response.headers["set-cookie"];
       const cookieString = cookies
         .map((cookie) => cookie.split(";")[0])
         .join("; ");
-      globalCookies[clientSessionId] = cookieString;
-      console.log(`🍪 [${clientSessionId}] 保存Cookie:`, cookieString);
 
-      // 🎯 巧妙机制：将Cookie编码后返回给前端备份
-      const encodedCookies = btoa(unescape(encodeURIComponent(cookieString))); // 更鲁棒的 base64 编码
-      console.log(`📦 [${clientSessionId}] Cookie已编码准备返回前端备份`);
+      // 合并新旧 Cookie
+      if (currentCookies) {
+        const oldCookies = currentCookies.split("; ").reduce((acc, c) => {
+          const [k, v] = c.split("=");
+          acc[k] = v;
+          return acc;
+        }, {});
+        const newCookies = cookieString.split("; ").reduce((acc, c) => {
+          const [k, v] = c.split("=");
+          acc[k] = v;
+          return acc;
+        }, {});
 
-      // 尝试解析响应体并添加Cookie备份（针对所有JSON响应）
+        const merged = { ...oldCookies, ...newCookies };
+        currentCookies = Object.entries(merged)
+          .map(([k, v]) => `${k}=${v}`)
+          .join("; ");
+      } else {
+        currentCookies = cookieString;
+      }
+
+      globalCookies[clientSessionId] = currentCookies;
+      console.log(`🍪 [${clientSessionId}] 更新并合并Cookie:`, currentCookies);
+    }
+
+    // 🎯 始终尝试回传当前会话的 Cookie 备份给前端
+    if (currentCookies) {
       try {
+        const encodedCookies = btoa(
+          unescape(encodeURIComponent(currentCookies)),
+        );
+
         const contentType = response.headers["content-type"] || "";
         if (contentType.includes("application/json")) {
           let responseData;
           try {
             responseData = JSON.parse(response.body);
           } catch (e) {
-            // 如果 body 不是有效的 JSON，尝试提取 JSON
             const jsonMatch = response.body.match(/\{.*\}/s);
-            if (jsonMatch) {
-              responseData = JSON.parse(jsonMatch[0]);
-            }
+            if (jsonMatch) responseData = JSON.parse(jsonMatch[0]);
           }
 
           if (responseData && typeof responseData === "object") {
             responseData._backupCookies = encodedCookies;
-            // 同时附带一些调试信息
             responseData._proxyInfo = {
               sessionId: clientSessionId,
               timestamp: new Date().toISOString(),
-              cookieSource: cookieSource || "new",
+              cookieSource: cookieSource || "existing",
+              hasUid: currentCookies.includes("_uid"),
             };
             response.body = JSON.stringify(responseData);
-            console.log(`✅ [${clientSessionId}] Cookie备份已添加到JSON响应`);
+            console.log(
+              `✅ [${clientSessionId}] 始终回传Cookie备份 (包含_uid: ${currentCookies.includes("_uid")})`,
+            );
           }
         }
       } catch (e) {
-        console.log(
-          `ℹ️ [${clientSessionId}] 无法在响应中添加Cookie备份:`,
-          e.message,
-        );
+        console.log(`ℹ️ [${clientSessionId}] 无法回传Cookie备份:`, e.message);
       }
     }
 

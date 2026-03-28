@@ -768,16 +768,23 @@
               console.log("✅ 登录成功判断通过");
               showStatus("登录成功！", "success");
 
-              // 🎯 强制措施：使用固定全局sessionId，彻底解决时间差问题
-              const FIXED_GLOBAL_SESSION_ID = "session_luogu_global_fixed_2025";
-              localStorage.setItem("luogu_session_id", FIXED_GLOBAL_SESSION_ID);
-              console.log(
-                "🔒 强制使用固定全局sessionId:",
-                FIXED_GLOBAL_SESSION_ID,
-              );
-              console.log(
-                "🎯 强制措施：sessionId永不改变，Cookie与sessionId完美同步",
-              );
+              // 🎯 统一 Session ID 逻辑：登录成功后使用 UID 标识会话
+              // 先尝试从 syncToken 提取 UID 为 Session ID 做准备
+              let initialUid = null;
+              if (data.syncToken) {
+                const match = data.syncToken.match(/\+(\d+)$/);
+                if (match) initialUid = match[1];
+              }
+
+              if (initialUid) {
+                sessionId = `session_uid_${initialUid}`;
+                localStorage.setItem("luogu_session_id", sessionId);
+                console.log("🔒 登录成功，切换到 UID 绑定的 sessionId:", sessionId);
+              } else {
+                const FIXED_GLOBAL_SESSION_ID = "session_luogu_global_fixed_2025";
+                localStorage.setItem("luogu_session_id", FIXED_GLOBAL_SESSION_ID);
+                console.log("🔒 无法提取 UID，使用固定全局 sessionId:", FIXED_GLOBAL_SESSION_ID);
+              }
 
               // 登录成功后，尝试获取完整的用户信息（包括UID）
               console.log("🔍 登录成功，尝试获取完整用户信息...");
