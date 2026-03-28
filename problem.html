@@ -195,7 +195,7 @@
 
       /* Markdown Content */
       .problem-content {
-        color: #e2e8f0; /* Slate 200 for better readability */
+        color: #e2e8f0;
       }
 
       .section {
@@ -277,19 +277,23 @@
         color: #f1f5f9;
       }
 
+      .code-content pre {
+        margin: 0;
+      }
+
       .problem-description code {
         font-family: "JetBrains Mono", monospace;
         background: var(--bg-secondary);
         padding: 0.2rem 0.4rem;
         border-radius: 4px;
         font-size: 0.875em;
-        color: #f472b6; /* Pink 400 for inline code */
+        color: #f472b6;
       }
 
       /* KaTeX数学公式样式 */
       .katex {
         font-size: 1.05em;
-        color: #93c5fd; /* Blue 300 for math */
+        color: #93c5fd;
       }
 
       /* 提交区域 - IDE 风格 */
@@ -418,9 +422,19 @@
         </div>
 
         <!-- 登录提示 -->
-        <div id="loginPrompt" class="user-card" style="justify-content: center; text-align: center; padding: 1.5rem;">
+        <div
+          id="loginPrompt"
+          class="user-card"
+          style="justify-content: center; text-align: center; padding: 1.5rem"
+        >
           <div>
-            <p style="margin-bottom: 1rem; color: var(--text-secondary); font-size: 0.875rem;">
+            <p
+              style="
+                margin-bottom: 1rem;
+                color: var(--text-secondary);
+                font-size: 0.875rem;
+              "
+            >
               登录后可以提交代码并同步洛谷记录
             </p>
             <a href="/login.html" class="btn btn-primary">
@@ -430,8 +444,18 @@
           </div>
         </div>
 
-        <div id="loadingStatus" style="text-align: center; padding: 4rem; color: var(--text-secondary)">
-          <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; margin-bottom: 1rem"></i>
+        <div
+          id="loadingStatus"
+          style="
+            text-align: center;
+            padding: 4rem;
+            color: var(--text-secondary);
+          "
+        >
+          <i
+            class="fas fa-spinner fa-spin"
+            style="font-size: 1.5rem; margin-bottom: 1rem"
+          ></i>
           <div>正在加载题目详情...</div>
         </div>
 
@@ -459,38 +483,39 @@
 
             <div class="form-group">
               <label for="codeEditor">源代码</label>
-              <textarea id="codeEditor" class="code-editor" placeholder="在此输入或粘贴您的代码..."></textarea>
+              <textarea
+                id="codeEditor"
+                class="code-editor"
+                placeholder="在此输入或粘贴您的代码..."
+              ></textarea>
             </div>
 
-            <div style="display: flex; align-items: center; gap: 1rem;">
-              <button id="submitBtn" class="btn btn-primary" onclick="submitCode()">
+            <div style="display: flex; align-items: center; gap: 1rem">
+              <button
+                id="submitBtn"
+                class="btn btn-primary"
+                onclick="submitCode()"
+              >
                 <i class="fas fa-paper-plane"></i>
                 提交评测
               </button>
-              <div id="submitStatus" style="font-size: 0.875rem;"></div>
+              <div id="submitStatus" style="font-size: 0.875rem"></div>
             </div>
           </div>
         </div>
 
         <!-- 评论区域 -->
-        <div id="commentsSection" style="display: none; margin-top: 4rem; padding-top: 3rem; border-top: 1px solid var(--border-color);">
+        <div
+          id="commentsSection"
+          style="
+            display: none;
+            margin-top: 4rem;
+            padding-top: 3rem;
+            border-top: 1px solid var(--border-color);
+          "
+        >
           <div class="section-title">讨论</div>
-          <script
-            src="https://giscus.app/client.js"
-            data-repo="Eternity-Sky/luogu-problem-reader"
-            data-repo-id="R_kgDOPiP5uw"
-            data-category="Announcements"
-            data-category-id="DIC_kwDOPiP5u84CugHo"
-            data-mapping="url"
-            data-strict="0"
-            data-reactions-enabled="1"
-            data-emit-metadata="0"
-            data-input-position="bottom"
-            data-theme="dark"
-            data-lang="zh-CN"
-            crossorigin="anonymous"
-            async
-          ></script>
+          <div id="giscusContainer"></div>
         </div>
       </div>
     </main>
@@ -501,7 +526,7 @@
         const container = document.getElementById("problemContainer");
         const loadingStatus = document.getElementById("loadingStatus");
         const commentsSection = document.getElementById("commentsSection");
-        
+
         loadingStatus.style.display = "none";
         container.style.display = "block";
         commentsSection.style.display = "block";
@@ -512,15 +537,22 @@
         }
 
         const problem = apiResult.data.problem;
-        const content = problem.content || {}; // 洛谷API中题目内容通常嵌套在content中
+        const content = problem.content || {};
         const difficultyText = getDifficultyText(problem.difficulty);
         const difficultyColor = `var(--diff-${problem.difficulty || 0})`;
 
         // 配置 marked
         const renderer = new marked.Renderer();
-        renderer.code = function(code, language) {
-          const lang = language || 'text';
-          const id = 'code-' + Math.random().toString(36).substr(2, 9);
+        renderer.code = function (code, language) {
+          const lang = language || "text";
+          const id = "code-" + Math.random().toString(36).substr(2, 9);
+          // 确保 code 是字符串
+          const safeCode =
+            typeof code === "string"
+              ? code
+              : typeof code === "object"
+                ? JSON.stringify(code, null, 2)
+                : String(code);
           return `
             <div class="code-block">
               <div class="code-header">
@@ -529,7 +561,7 @@
                   <i class="far fa-copy"></i> 复制
                 </button>
               </div>
-              <div class="code-content" id="${id}">${escapeHtml(code)}</div>
+              <div class="code-content"><pre id="${id}"><code>${escapeHtml(safeCode)}</code></pre></div>
             </div>
           `;
         };
@@ -537,7 +569,7 @@
         marked.setOptions({
           renderer: renderer,
           gfm: true,
-          breaks: true
+          breaks: true,
         });
 
         container.innerHTML = `
@@ -560,7 +592,7 @@
               </div>
               <div class="meta-item">
                 <span class="meta-label">通过率</span>
-                <span class="meta-value">${problem.totalSubmit > 0 ? ((problem.totalAccepted / problem.totalSubmit) * 100).toFixed(1) + '%' : 'N/A'}</span>
+                <span class="meta-value">${problem.totalSubmit > 0 ? ((problem.totalAccepted / problem.totalSubmit) * 100).toFixed(1) + "%" : "N/A"}</span>
               </div>
             </div>
           </div>
@@ -577,52 +609,94 @@
 
         // 渲染数学公式
         renderMath(container);
-        
+
+        // 加载评论区
+        loadGiscus(problem.pid);
+
         // 更新页面标题
         document.title = `${problem.pid} - ${problem.title} - LGOJ`;
       }
 
       function renderSection(title, content) {
         if (!content) return "";
+        // 确保 content 是字符串，如果是对象则 stringify
+        const safeContent =
+          typeof content === "string"
+            ? content
+            : JSON.stringify(content, null, 2);
         return `
           <div class="section">
             <div class="section-title">${title}</div>
-            <div class="problem-description">${marked.parse(content)}</div>
+            <div class="problem-description">${marked.parse(safeContent)}</div>
           </div>
         `;
       }
 
       function renderSamples(samples) {
         if (!samples || samples.length === 0) return "";
-        return samples.map((sample, index) => `
-          <div class="section">
-            <div class="section-title">输入输出样例 ${index + 1}</div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
-              <div class="code-block">
-                <div class="code-header"><span class="code-language">输入</span></div>
-                <div class="code-content"><pre><code>${sample[0]}</code></pre></div>
-              </div>
-              <div class="code-block">
-                <div class="code-header"><span class="code-language">输出</span></div>
-                <div class="code-content"><pre><code>${sample[1]}</code></pre></div>
+        return samples
+          .map((sample, index) => {
+            const input =
+              typeof sample[0] === "string"
+                ? sample[0]
+                : JSON.stringify(sample[0]);
+            const output =
+              typeof sample[1] === "string"
+                ? sample[1]
+                : JSON.stringify(sample[1]);
+            return `
+            <div class="section">
+              <div class="section-title">输入输出样例 ${index + 1}</div>
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+                <div class="code-block">
+                  <div class="code-header"><span class="code-language">输入</span></div>
+                  <div class="code-content"><pre><code>${escapeHtml(input)}</code></pre></div>
+                </div>
+                <div class="code-block">
+                  <div class="code-header"><span class="code-language">输出</span></div>
+                  <div class="code-content"><pre><code>${escapeHtml(output)}</code></pre></div>
+                </div>
               </div>
             </div>
-          </div>
-        `).join('');
+          `;
+          })
+          .join("");
       }
 
       function renderMath(element) {
         if (typeof renderMathInElement !== "undefined") {
           renderMathInElement(element, {
             delimiters: [
-              {left: "$$", right: "$$", display: true},
-              {left: "$", right: "$", display: false},
-              {left: "\\(", right: "\\)", display: false},
-              {left: "\\[", right: "\\]", display: true}
+              { left: "$$", right: "$$", display: true },
+              { left: "$", right: "$", display: false },
+              { left: "\\(", right: "\\)", display: false },
+              { left: "\\[", right: "\\]", display: true },
             ],
-            throwOnError: false
+            throwOnError: false,
           });
         }
+      }
+
+      function loadGiscus(pid) {
+        const container = document.getElementById("giscusContainer");
+        container.innerHTML = "";
+        const script = document.createElement("script");
+        script.src = "https://giscus.app/client.js";
+        script.setAttribute("data-repo", "Eternity-Sky/luogu-problem-reader");
+        script.setAttribute("data-repo-id", "R_kgDOPiP5uw");
+        script.setAttribute("data-category", "Announcements");
+        script.setAttribute("data-category-id", "DIC_kwDOPiP5u84CugHo");
+        script.setAttribute("data-mapping", "specific");
+        script.setAttribute("data-term", pid);
+        script.setAttribute("data-strict", "0");
+        script.setAttribute("data-reactions-enabled", "1");
+        script.setAttribute("data-emit-metadata", "0");
+        script.setAttribute("data-input-position", "bottom");
+        script.setAttribute("data-theme", "dark");
+        script.setAttribute("data-lang", "zh-CN");
+        script.crossOrigin = "anonymous";
+        script.async = true;
+        container.appendChild(script);
       }
 
       function copyToClipboard(id) {
@@ -632,39 +706,38 @@
           const btn = event.currentTarget;
           const original = btn.innerHTML;
           btn.innerHTML = '<i class="fas fa-check"></i> 已复制';
-          setTimeout(() => btn.innerHTML = original, 2000);
+          setTimeout(() => (btn.innerHTML = original), 2000);
         });
       }
 
       function escapeHtml(text) {
-        const div = document.createElement('div');
+        const div = document.createElement("div");
         div.textContent = text;
         return div.innerHTML;
       }
 
-      // 获取CSRF Token
       async function getCSRFToken() {
         try {
           const urlParams = new URLSearchParams(window.location.search);
           const pid = urlParams.get("pid");
-          
-          // 尝试获取题目页面的HTML来提取Token
           const response = await fetch("/.netlify/functions/luogu-proxy", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               path: `/problem/${pid}`,
               method: "GET",
-              requestType: "html"
+              requestType: "html",
             }),
           });
-          
           const result = await response.json();
           const html = result.data || "";
-          
-          const metaMatch = html.match(/<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i) ||
-                          html.match(/<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i);
-          
+          const metaMatch =
+            html.match(
+              /<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i,
+            ) ||
+            html.match(
+              /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i,
+            );
           return metaMatch ? metaMatch[1] : null;
         } catch (error) {
           console.error("获取 CSRF Token 失败:", error);
@@ -680,13 +753,11 @@
             "x-luogu-type": "content-only",
             ...options.headers,
           },
-          sessionId: localStorage.getItem("luogu_session_id") || "session_luogu_global_fixed_2025"
+          sessionId:
+            localStorage.getItem("luogu_session_id") ||
+            "session_luogu_global_fixed_2025",
         };
-
-        if (options.body) {
-          requestData.body = options.body;
-        }
-
+        if (options.body) requestData.body = options.body;
         try {
           const response = await fetch("/.netlify/functions/luogu-proxy", {
             method: "POST",
@@ -703,17 +774,28 @@
         try {
           const result = await proxyLuoguAPI(`/problem/${pid}`);
           if (result.error) {
-            document.getElementById("loadingStatus").innerHTML = `<div style="color: #ef4444">加载失败: ${result.error}</div>`;
+            document.getElementById("loadingStatus").innerHTML =
+              `<div style="color: #ef4444">加载失败: ${result.error}</div>`;
             return;
           }
           displayProblemDetail(result);
         } catch (error) {
-          document.getElementById("loadingStatus").innerHTML = `<div style="color: #ef4444">请求失败: ${error.message}</div>`;
+          document.getElementById("loadingStatus").innerHTML =
+            `<div style="color: #ef4444">请求失败: ${error.message}</div>`;
         }
       }
 
       function getDifficultyText(difficulty) {
-        const texts = { 0: "暂无评定", 1: "入门", 2: "普及-", 3: "普及/提高-", 4: "普及+/提高", 5: "提高+/省选-", 6: "省选/NOI-", 7: "NOI/NOI+/CTSC" };
+        const texts = {
+          0: "暂无评定",
+          1: "入门",
+          2: "普及-",
+          3: "普及/提高-",
+          4: "普及+/提高",
+          5: "提高+/省选-",
+          6: "省选/NOI-",
+          7: "NOI/NOI+/CTSC",
+        };
         return texts[difficulty] || "未知";
       }
 
@@ -722,17 +804,19 @@
         const userInfoDiv = document.getElementById("userInfo");
         const loginPromptDiv = document.getElementById("loginPrompt");
         const submitSection = document.getElementById("submitSection");
-
         if (userInfoStr) {
           try {
             const user = JSON.parse(userInfoStr);
             if (user && (user.uid || user.username)) {
-              document.getElementById("userName").textContent = user.name || user.username;
-              document.getElementById("userUid").textContent = user.uid ? `UID: ${user.uid}` : "";
+              document.getElementById("userName").textContent =
+                user.name || user.username;
+              document.getElementById("userUid").textContent = user.uid
+                ? `UID: ${user.uid}`
+                : "";
               const avatarImg = document.getElementById("userAvatar");
               if (user.avatar) avatarImg.src = user.avatar;
-              else if (user.uid) avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
-              
+              else if (user.uid)
+                avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
               userInfoDiv.classList.add("show");
               loginPromptDiv.style.display = "none";
               submitSection.style.display = "block";
@@ -752,37 +836,33 @@
         const lang = document.getElementById("languageSelect").value;
         const urlParams = new URLSearchParams(window.location.search);
         const pid = urlParams.get("pid");
-
         if (!code) {
           status.innerHTML = '<span style="color: #ef4444">请输入代码</span>';
           return;
         }
-
         btn.disabled = true;
-        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在获取 CSRF Token...';
-
+        status.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> 正在获取 CSRF Token...';
         const csrfToken = await getCSRFToken();
         if (!csrfToken) {
-          status.innerHTML = '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态</span>';
+          status.innerHTML =
+            '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态</span>';
           btn.disabled = false;
           return;
         }
-
-        status.innerHTML = '<i class="fas fa-spinner fa-spin"></i> 正在提交评测...';
-
+        status.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> 正在提交评测...';
         try {
           const result = await proxyLuoguAPI(`/fe/api/problem/submit/${pid}`, {
             method: "POST",
-            headers: {
-              "x-csrf-token": csrfToken
-            },
-            body: JSON.stringify({ lang, code, enableO2: true })
+            headers: { "x-csrf-token": csrfToken },
+            body: JSON.stringify({ lang, code, enableO2: true }),
           });
-
           if (result.error || result.errorMessage) {
             status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.errorMessage || result.error}</span>`;
           } else if (result.rid) {
-            status.innerHTML = '<span style="color: #10b981">提交成功！正在跳转到评测详情...</span>';
+            status.innerHTML =
+              '<span style="color: #10b981">提交成功！正在跳转...</span>';
             setTimeout(() => {
               window.location.href = `https://www.luogu.com.cn/record/${result.rid}`;
             }, 1500);
@@ -801,970 +881,6 @@
         const urlParams = new URLSearchParams(window.location.search);
         const pid = urlParams.get("pid");
         if (pid) loadProblemDetail(pid);
-      });
-    </script>
-  </body>
-</html>
-              fallbackCopyTextToClipboard(codeText, button);
-            });
-        } else {
-          // 降级方案
-          fallbackCopyTextToClipboard(codeText, button);
-        }
-      }
-
-      // 降级复制方案
-      function fallbackCopyTextToClipboard(text, button) {
-        const textArea = document.createElement("textarea");
-        textArea.value = text;
-
-        // 避免滚动到底部
-        textArea.style.top = "0";
-        textArea.style.left = "0";
-        textArea.style.position = "fixed";
-        textArea.style.opacity = "0";
-
-        document.body.appendChild(textArea);
-        textArea.focus();
-        textArea.select();
-
-        try {
-          const successful = document.execCommand("copy");
-          if (successful) {
-            showCopySuccess(button);
-          } else {
-            showCopyError(button);
-          }
-        } catch (err) {
-          console.error("降级复制失败:", err);
-          showCopyError(button);
-        }
-
-        document.body.removeChild(textArea);
-      }
-
-      // 显示复制成功状态
-      function showCopySuccess(button) {
-        const originalContent = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-check"></i> 已复制';
-        button.classList.add("copied");
-
-        setTimeout(() => {
-          button.innerHTML = originalContent;
-          button.classList.remove("copied");
-        }, 2000);
-      }
-
-      // 显示复制错误状态
-      function showCopyError(button) {
-        const originalContent = button.innerHTML;
-        button.innerHTML = '<i class="fas fa-times"></i> 复制失败';
-        button.style.background = "#ef4444";
-
-        setTimeout(() => {
-          button.innerHTML = originalContent;
-          button.style.background = "";
-        }, 2000);
-      }
-
-      // 检查登录状态并显示用户信息
-      function checkLoginStatus() {
-        // 使用正确的localStorage key
-        const userInfoStr = localStorage.getItem("luogu_user_info");
-        const userInfoDiv = document.getElementById("userInfo");
-        const loginPromptDiv = document.getElementById("loginPrompt");
-
-        console.log("🔍 检查登录状态，localStorage中的用户信息:", userInfoStr);
-
-        if (userInfoStr) {
-          try {
-            const user = JSON.parse(userInfoStr);
-            console.log("📋 解析到的用户信息:", user);
-
-            if (user && (user.uid || user.username)) {
-              // 显示用户信息
-              const displayName =
-                user.name || user.username || `用户${user.uid}`;
-              document.getElementById("userName").textContent = displayName;
-
-              if (user.uid) {
-                document.getElementById("userUid").textContent =
-                  `UID: ${user.uid}`;
-              } else {
-                document.getElementById("userUid").textContent =
-                  `用户名: ${user.username}`;
-              }
-
-              // 设置头像
-              const avatarImg = document.getElementById("userAvatar");
-              if (user.avatar) {
-                avatarImg.src = user.avatar;
-              } else if (user.uid) {
-                avatarImg.src = `https://cdn.luogu.com.cn/upload/usericon/${user.uid}.png`;
-              } else {
-                // 使用默认头像
-                avatarImg.src =
-                  "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMjAiIGN5PSIyMCIgcj0iMjAiIGZpbGw9IiNmMGYwZjAiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI4IiB5PSI4Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHBhdGggZD0iTTEyIDEyQzE0LjIwOTEgMTIgMTYgMTAuMjA5MSAxNiA4QzE2IDUuNzkwODYgMTQuMjA5MSA0IDEyIDRDOS43OTA4NiA0IDggNS43OTA4NiA4IDhDOCAxMC4yMDkxIDkuNzkwODYgMTIgMTIgMTJaIiBmaWxsPSIjOTk5Ii8+CjxwYXRoIGQ9Ik0xMiAxNEM5LjMzIDEzLjk5IDcgMTYuMzYgNyAxOS4wOVYyMEgxN1YxOS4wOUMxNyAxNi4zNiAxNC42NyAxMy45OSAxMiAxNFoiIGZpbGw9IiM5OTkiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K";
-              }
-
-              userInfoDiv.classList.add("show");
-              loginPromptDiv.classList.remove("show");
-              console.log("✅ 登录状态检查成功，显示用户信息");
-              return true;
-            }
-          } catch (error) {
-            console.warn("❌ 解析用户信息失败:", error);
-          }
-        }
-
-        // 未登录状态
-        userInfoDiv.classList.remove("show");
-        loginPromptDiv.classList.add("show");
-        console.log("❌ 未检测到登录状态，显示登录提示");
-        return false;
-      }
-
-      // 代理API调用函数（复用登录页面的逻辑）
-      async function proxyLuoguAPI(path, options = {}) {
-        try {
-          const requestData = {
-            path: path,
-            method: options.method || "GET",
-            headers: {
-              "x-luogu-type": "content-only",
-              ...options.headers,
-            },
-            sessionId: "session_luogu_global_fixed_2025",
-            ...options,
-          };
-
-          // 从localStorage获取Cookie备份（使用正确的key）
-          const backupCookies =
-            localStorage.getItem("_backupCookies") ||
-            localStorage.getItem("luogu_backup_cookies");
-          if (backupCookies) {
-            requestData.backupCookies = backupCookies;
-            console.log("🍪 使用Cookie备份进行API调用");
-          }
-
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          });
-
-          const result = await response.json();
-
-          if (result.error) {
-            throw new Error(result.error);
-          }
-
-          return result;
-        } catch (error) {
-          console.error("API调用失败:", error);
-          throw error;
-        }
-      }
-
-      // 获取CSRF令牌
-      async function getCSRFToken(pid) {
-        try {
-          console.log(`🔑 获取题目 ${pid} 的CSRF令牌`);
-
-          // 首先尝试使用当前页面的CSRF令牌
-          const existingToken = document.querySelector(
-            'meta[name="csrf-token"]',
-          );
-          if (existingToken) {
-            const token = existingToken.getAttribute("content");
-            console.log(
-              "✅ 使用当前页面CSRF令牌:",
-              token.substring(0, 20) + "...",
-            );
-            return token;
-          }
-
-          // 如果当前页面没有CSRF令牌，尝试通过代理获取HTML页面
-          console.log("🌐 当前页面无CSRF令牌，尝试获取题目页面HTML...");
-
-          // 构造请求以获取HTML页面而不是API数据
-          const requestData = {
-            path: `/problem/${pid}`,
-            method: "GET",
-            headers: {
-              Accept:
-                "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-              "User-Agent":
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-            },
-            sessionId: "session_luogu_global_fixed_2025",
-            // 明确标记这是HTML请求
-            requestType: "html",
-          };
-
-          // 从localStorage获取Cookie备份
-          const backupCookies =
-            localStorage.getItem("_backupCookies") ||
-            localStorage.getItem("luogu_backup_cookies");
-          if (backupCookies) {
-            requestData.backupCookies = backupCookies;
-          }
-
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(requestData),
-          });
-
-          const result = await response.json();
-
-          if (result.error) {
-            throw new Error(result.error);
-          }
-
-          // 从HTML响应中提取CSRF令牌
-          let htmlContent = result.data || result.content || result;
-
-          if (
-            typeof htmlContent === "string" &&
-            htmlContent.includes("<meta")
-          ) {
-            console.log("📄 成功获取HTML内容，长度:", htmlContent.length);
-
-            // 提取CSRF令牌
-            const csrfMatch = htmlContent.match(
-              /<meta[^>]*name=['"]csrf-token['"][^>]*content=['"]([^'"]+)['"][^>]*>/i,
-            );
-            if (csrfMatch && csrfMatch[1]) {
-              const csrfToken = csrfMatch[1];
-              console.log(
-                "✅ 成功从HTML提取CSRF令牌:",
-                csrfToken.substring(0, 20) + "...",
-              );
-              return csrfToken;
-            }
-          }
-
-          throw new Error("无法从任何来源获取CSRF令牌");
-        } catch (error) {
-          console.error("❌ 获取CSRF令牌失败:", error);
-          throw error;
-        }
-      }
-
-      // 提交代码
-      async function submitCode() {
-        const submitBtn = document.getElementById("submitBtn");
-        const submitStatus = document.getElementById("submitStatus");
-        const languageSelect = document.getElementById("languageSelect");
-        const codeEditor = document.getElementById("codeEditor");
-
-        // 获取当前题目ID
-        const urlParams = new URLSearchParams(window.location.search);
-        const pid = urlParams.get("pid");
-
-        if (!pid) {
-          showSubmitStatus("错误：未找到题目ID", "error");
-          return;
-        }
-
-        // 检查登录状态
-        const userInfoStr = localStorage.getItem("luogu_user_info");
-        if (!userInfoStr) {
-          showSubmitStatus("请先登录后再提交代码", "error");
-          return;
-        }
-
-        // 获取表单数据
-        const language = parseInt(languageSelect.value);
-        const code = codeEditor.value.trim();
-
-        if (!code) {
-          showSubmitStatus("请输入代码", "error");
-          return;
-        }
-
-        // 禁用提交按钮
-        submitBtn.disabled = true;
-        submitBtn.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> 提交中...';
-        showSubmitStatus("正在获取CSRF令牌...", "loading");
-
-        try {
-          // 获取CSRF令牌
-          const csrfToken = await getCSRFToken(pid);
-
-          showSubmitStatus("正在提交代码...", "loading");
-
-          // 提交代码
-          const submitResult = await proxyLuoguAPI(
-            `/fe/api/problem/submit/${pid}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-csrf-token": csrfToken,
-                referer: `https://www.luogu.com.cn/problem/${pid}`,
-                origin: "https://www.luogu.com.cn",
-              },
-              body: {
-                lang: language,
-                code: code,
-                enableO2: 0,
-              },
-            },
-          );
-
-          console.log("📤 代码提交结果:", submitResult);
-
-          // 检查是否登录失败
-          if (submitResult.status === 403 || submitResult.errorCode === 403) {
-            console.log("❌ 登录状态失效，尝试智能获取Cookie");
-            showSubmitStatus("登录失败，正在智能重试...", "loading");
-
-            // 自动智能重试
-            await smartRetrySubmit(pid, language, code);
-            return;
-          }
-
-          if (submitResult.data && submitResult.data.rid) {
-            showSubmitStatus(
-              `提交成功！记录ID: ${submitResult.data.rid}`,
-              "success",
-            );
-
-            // 清空代码编辑器
-            codeEditor.value = "";
-
-            // 可以在这里添加跳转到提交记录页面的逻辑
-            setTimeout(() => {
-              if (confirm("提交成功！是否查看提交记录？")) {
-                window.open(
-                  `https://www.luogu.com.cn/record/${submitResult.data.rid}`,
-                  "_blank",
-                );
-              }
-            }, 1000);
-          } else {
-            const errorMsg =
-              submitResult.errorMessage ||
-              submitResult.data ||
-              submitResult.error ||
-              "提交失败，未返回记录ID";
-            throw new Error(errorMsg);
-          }
-        } catch (error) {
-          console.error("❌ 代码提交失败:", error);
-          showSubmitStatus(`提交失败: ${error.message}`, "error");
-        } finally {
-          // 恢复提交按钮
-          submitBtn.disabled = false;
-          submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> 提交代码';
-        }
-      }
-
-      // 显示提交状态
-      function showSubmitStatus(message, type) {
-        const statusDiv = document.getElementById("submitStatus");
-        statusDiv.textContent = message;
-        statusDiv.className = `submit-status ${type}`;
-      }
-
-      // 🚀 强硬措施：显示紧急登录模式
-      function showEmergencyLogin() {
-        const emergencyDiv = document.getElementById("emergencyLogin");
-        emergencyDiv.style.display = "block";
-
-        // 提供详细说明
-        showSubmitStatus(
-          "💡 请按F12打开开发者工具，在Application/Storage > Cookies中找到洛谷的Cookie",
-          "info",
-        );
-      }
-
-      // 🚀 强硬措施：保存手动输入的Cookie
-      function saveManualCookie() {
-        const manualCookie = document
-          .getElementById("manualCookie")
-          .value.trim();
-        if (!manualCookie) {
-          alert("请输入Cookie！");
-          return;
-        }
-
-        // 验证Cookie格式
-        if (
-          !manualCookie.includes("_uid=") ||
-          !manualCookie.includes("__client_id=")
-        ) {
-          alert("Cookie格式不正确！请确保包含_uid和__client_id字段。");
-          return;
-        }
-
-        // 保存到localStorage作为备份
-        const encodedCookie = btoa(manualCookie);
-        localStorage.setItem("manual_backup_cookies", encodedCookie);
-
-        console.log("🔧 手动保存Cookie:", manualCookie);
-        showSubmitStatus("✅ Cookie已保存，现在可以尝试提交代码", "success");
-      }
-
-      // 获取题目ID
-      function getProblemIdFromUrl() {
-        const urlParams = new URLSearchParams(window.location.search);
-        return urlParams.get("pid");
-      }
-
-      // 🧠 智能重试提交（自动获取Cookie并重试）
-      async function smartRetrySubmit(pid, language, code) {
-        try {
-          console.log("🧠 开始智能重试提交流程");
-
-          // 获取用户的真实uid
-          const userInfo = JSON.parse(
-            localStorage.getItem("luogu_user_info") || "{}",
-          );
-          const realUid = userInfo.uid;
-
-          if (!realUid) {
-            console.error("❌ 未找到用户ID");
-            showSubmitStatus("❌ 未找到用户ID，请先登录", "error");
-            return;
-          }
-
-          console.log("🔍 用户ID:", realUid);
-
-          // 第一步：获取有效的client_id
-          console.log("🍪 第一步：获取有效的client_id");
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              path: "/",
-              method: "GET",
-              sessionId: "smart_cookie_session",
-            }),
-          });
-
-          // 检查响应状态
-          if (!response.ok) {
-            console.error(
-              "❌ 代理请求失败:",
-              response.status,
-              response.statusText,
-            );
-            showSubmitStatus("❌ 智能重试失败: 网络错误", "error");
-            return;
-          }
-
-          // 获取响应文本
-          const responseText = await response.text();
-          console.log("🔍 代理原始响应长度:", responseText.length);
-
-          let newClientId;
-
-          // 检查是否是HTML响应（包含洛谷页面）
-          if (
-            responseText.includes("<!DOCTYPE html>") &&
-            responseText.includes("luogu.com")
-          ) {
-            console.log("🌐 检测到HTML响应，使用智能Cookie生成");
-
-            // 智能方法：生成一个临时的client_id，让洛谷服务器返回真实的
-            // 基于时间戳生成一个看起来真实的client_id
-            const timestamp = Date.now().toString(16);
-            const randomPart = Math.random().toString(16).substring(2, 10);
-            const fakeClientId = `${timestamp}${randomPart}`
-              .padEnd(40, "0")
-              .substring(0, 40);
-
-            console.log("🧠 生成临时client_id:", fakeClientId);
-
-            // 使用这个临时ID，洛谷会在提交时返回真实的client_id
-            newClientId = fakeClientId;
-          } else {
-            // 尝试JSON解析（备用方案）
-            try {
-              const result = JSON.parse(responseText);
-              console.log("🔍 代理解析结果:", result);
-
-              if (result._backupCookies) {
-                const cookieStr = atob(result._backupCookies);
-                console.log("🔍 解码Cookie:", cookieStr);
-
-                const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
-                if (clientIdMatch) {
-                  newClientId = clientIdMatch[1];
-                  console.log("✅ 从JSON获取到client_id:", newClientId);
-                }
-              }
-            } catch (parseError) {
-              console.error("❌ JSON解析失败:", parseError);
-              showSubmitStatus("❌ 智能重试失败: 响应格式错误", "error");
-              return;
-            }
-          }
-
-          if (!newClientId) {
-            console.error("❌ 无法获取client_id");
-            showSubmitStatus("❌ 智能重试失败: 无法获取client_id", "error");
-            return;
-          }
-
-          // 第二步：获取CSRF令牌
-          console.log("🔑 第二步：获取CSRF令牌");
-          const csrfToken = await getCSRFToken(pid);
-          console.log("✅ CSRF令牌:", csrfToken.substring(0, 30) + "...");
-
-          // 第三步：用智能Cookie重新提交
-          console.log("🚀 第三步：智能Cookie重新提交");
-
-          // 使用真实的client_id进行提交
-          const realClientId = "a9e1b3757101a53168ad86276774d1ac6fee7fe9";
-          const smartCookie = [
-            `_uid=${realUid}`,
-            `__client_id=${realClientId}`,
-            `login=${realUid}`,
-            `C3VK=130aa2`,
-          ].join("; ");
-
-          console.log("🧠 智能Cookie:", smartCookie);
-
-          const retryResult = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              path: `/fe/api/problem/submit/${pid}`,
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-csrf-token": csrfToken,
-                referer: `https://www.luogu.com.cn/problem/${pid}`,
-                origin: "https://www.luogu.com.cn",
-              },
-              body: {
-                lang: language,
-                code: code,
-                enableO2: 0,
-              },
-              backupCookies: btoa(smartCookie),
-              sessionId: "smart_submit_session",
-            }),
-          });
-
-          // 检查重试响应状态（允许403继续处理，因为可能包含真实client_id）
-          if (!retryResult.ok && retryResult.status !== 403) {
-            console.error(
-              "❌ 重试请求失败:",
-              retryResult.status,
-              retryResult.statusText,
-            );
-            showSubmitStatus("❌ 智能重试失败: 提交请求错误", "error");
-            return;
-          }
-
-          if (retryResult.status === 403) {
-            console.log("🔍 收到403响应，检查是否包含真实client_id");
-          }
-
-          // 获取重试响应文本并解析
-          const retryResponseText = await retryResult.text();
-          console.log("🔍 重试原始响应:", retryResponseText);
-
-          let smartResult;
-          try {
-            smartResult = JSON.parse(retryResponseText);
-          } catch (parseError) {
-            console.error("❌ 重试JSON解析失败:", parseError);
-            console.error("❌ 重试响应内容:", retryResponseText);
-            showSubmitStatus("❌ 智能重试失败: 提交响应格式错误", "error");
-            return;
-          }
-
-          console.log("🎯 智能重试结果:", smartResult);
-
-          if (smartResult.rid) {
-            console.log("🎉 智能重试成功！记录ID:", smartResult.rid);
-            showSubmitStatus(
-              "🎉 提交成功！记录ID: " + smartResult.rid,
-              "success",
-            );
-          } else if (smartResult._backupCookies && smartResult.status === 403) {
-            // 检查洛谷是否返回了新的client_id
-            const responseCookies = atob(smartResult._backupCookies);
-            console.log("🔍 洛谷返回的Cookie:", responseCookies);
-
-            const realClientIdMatch =
-              responseCookies.match(/__client_id=([^;]+)/);
-            if (realClientIdMatch && realClientIdMatch[1] !== newClientId) {
-              const realClientId = realClientIdMatch[1];
-              console.log("🔄 洛谷返回了新的client_id:", realClientId);
-              console.log("🚀 第四步：使用真实client_id二次提交");
-
-              // 构造使用真实client_id的Cookie
-              const realCookie = `_uid=${realUid}; __client_id=${realClientId}; login=${realUid}; C3VK=130aa2`;
-              console.log("🧠 真实Cookie:", realCookie);
-
-              const finalResult = await fetch(
-                "/.netlify/functions/luogu-proxy",
-                {
-                  method: "POST",
-                  headers: {
-                    "Content-Type": "application/json",
-                  },
-                  body: JSON.stringify({
-                    path: `/fe/api/problem/submit/${pid}`,
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      "x-csrf-token": csrfToken,
-                      referer: `https://www.luogu.com.cn/problem/${pid}`,
-                      origin: "https://www.luogu.com.cn",
-                    },
-                    body: {
-                      lang: language,
-                      code: code,
-                      enableO2: 0,
-                    },
-                    backupCookies: btoa(realCookie),
-                    sessionId: "final_submit_session",
-                  }),
-                },
-              );
-
-              if (finalResult.ok) {
-                const finalResponseText = await finalResult.text();
-                console.log("🔍 最终提交响应:", finalResponseText);
-
-                try {
-                  const finalData = JSON.parse(finalResponseText);
-                  if (finalData.rid) {
-                    console.log("🎉 二次提交成功！记录ID:", finalData.rid);
-                    showSubmitStatus(
-                      "🎉 提交成功！记录ID: " + finalData.rid,
-                      "success",
-                    );
-                    return;
-                  }
-                } catch (e) {
-                  console.error("❌ 最终响应解析失败:", e);
-                }
-              }
-            }
-
-            console.error("❌ 智能重试失败:", smartResult);
-            showSubmitStatus(
-              "❌ 智能重试失败: " + (smartResult.errorMessage || "未知错误"),
-              "error",
-            );
-          } else {
-            console.error("❌ 智能重试失败:", smartResult);
-            showSubmitStatus("❌ 智能重试失败", "error");
-          }
-        } catch (error) {
-          console.error("❌ 智能重试异常:", error);
-          showSubmitStatus("❌ 智能重试异常: " + error.message, "error");
-        }
-      }
-
-      // 🪄 智能获取有效Cookie
-      async function autoGetCookie() {
-        showSubmitStatus("🪄 正在智能获取Cookie...", "loading");
-
-        try {
-          // 获取用户的真实uid
-          const userInfo = JSON.parse(
-            localStorage.getItem("luogu_user_info") || "{}",
-          );
-          const realUid = userInfo.uid;
-
-          if (!realUid) {
-            showSubmitStatus("❌ 未找到用户ID，请先登录", "error");
-            return;
-          }
-
-          console.log("🔍 发现用户ID:", realUid);
-
-          // 第一步：向洛谷发送请求获取有效的client_id
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              path: "/",
-              method: "GET",
-              sessionId: "cookie_acquisition_session",
-            }),
-          });
-
-          const result = await response.json();
-          console.log("🍪 服务器响应:", result);
-
-          // 从响应中提取新的client_id
-          if (result._backupCookies) {
-            const cookieStr = atob(result._backupCookies);
-            console.log("🔍 解码Cookie:", cookieStr);
-
-            // 提取client_id
-            const clientIdMatch = cookieStr.match(/__client_id=([^;]+)/);
-            if (clientIdMatch) {
-              const newClientId = clientIdMatch[1];
-              console.log("✅ 获取到新的client_id:", newClientId);
-
-              // 构造完整的有效Cookie
-              const validCookie = `_uid=${realUid}; __client_id=${newClientId}`;
-              document.getElementById("manualCookie").value = validCookie;
-
-              showSubmitStatus("✅ 智能获取Cookie成功！已自动填入", "success");
-              return;
-            }
-          }
-
-          showSubmitStatus("❌ 无法提取client_id，请手动操作", "error");
-          showCookieInstructions();
-        } catch (error) {
-          console.error("智能获取Cookie失败:", error);
-          showSubmitStatus("❌ 智能获取失败，尝试其他方法...", "error");
-        }
-      }
-
-      // 🪄 传统方法获取Cookie（备用方案）
-      async function fallbackGetCookie() {
-        try {
-          // 方法1：尝试通过iframe获取Cookie（同源策略允许的情况下）
-          const iframe = document.createElement("iframe");
-          iframe.src = "https://www.luogu.com.cn/";
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
-
-          // 等待iframe加载
-          await new Promise((resolve, reject) => {
-            iframe.onload = resolve;
-            iframe.onerror = reject;
-            setTimeout(reject, 10000); // 10秒超时
-          });
-
-          // 尝试获取iframe中的Cookie
-          try {
-            const iframeCookies = iframe.contentDocument.cookie;
-            if (iframeCookies && iframeCookies.includes("_uid=")) {
-              document.getElementById("manualCookie").value = iframeCookies;
-              showSubmitStatus("✅ 自动获取Cookie成功！", "success");
-              document.body.removeChild(iframe);
-              return;
-            }
-          } catch (e) {
-            console.log("iframe方法失败，尝试其他方法:", e.message);
-          }
-
-          document.body.removeChild(iframe);
-
-          // 方法2：打开新窗口并引导用户
-          const luoguWindow = window.open(
-            "https://www.luogu.com.cn/",
-            "_blank",
-            "width=800,height=600",
-          );
-
-          showSubmitStatus(
-            "🌐 已打开洛谷官网，请确保已登录，然后点击下方按钮获取Cookie",
-            "info",
-          );
-
-          // 添加获取Cookie的按钮
-          const getCookieBtn = document.createElement("button");
-          getCookieBtn.innerHTML =
-            '<i class="fas fa-download"></i> 从打开的窗口获取Cookie';
-          getCookieBtn.className = "btn btn-primary btn-sm";
-          getCookieBtn.style.marginTop = "10px";
-          getCookieBtn.onclick = async () => {
-            try {
-              // 尝试从打开的窗口获取Cookie
-              if (luoguWindow && !luoguWindow.closed) {
-                const cookies = await getCookiesFromWindow(luoguWindow);
-                if (cookies) {
-                  document.getElementById("manualCookie").value = cookies;
-                  showSubmitStatus("✅ 成功获取Cookie！", "success");
-                  luoguWindow.close();
-                  getCookieBtn.remove();
-                  return;
-                }
-              }
-
-              // 如果无法自动获取，提供手动指导
-              showCookieInstructions();
-            } catch (error) {
-              console.error("获取Cookie失败:", error);
-              showCookieInstructions();
-            }
-          };
-
-          document.getElementById("emergencyLogin").appendChild(getCookieBtn);
-        } catch (error) {
-          console.error("自动获取Cookie失败:", error);
-          showSubmitStatus("❌ 自动获取失败，请手动操作", "error");
-          showCookieInstructions();
-        }
-      }
-
-      // 从窗口获取Cookie的辅助函数
-      async function getCookiesFromWindow(targetWindow) {
-        try {
-          // 检查窗口是否可访问
-          if (targetWindow.location.hostname === "www.luogu.com.cn") {
-            return targetWindow.document.cookie;
-          }
-        } catch (e) {
-          // 跨域限制，无法直接访问
-          console.log("跨域限制，无法直接获取Cookie");
-        }
-        return null;
-      }
-
-      // 显示Cookie获取指导
-      function showCookieInstructions() {
-        const instructions = document.createElement("div");
-        instructions.innerHTML = `
-                <div style="background: #e3f2fd; border: 1px solid #2196f3; border-radius: 5px; padding: 10px; margin-top: 10px;">
-                    <h5 style="color: #1976d2; margin: 0 0 10px 0;"><i class="fas fa-info-circle"></i> 获取Cookie指导</h5>
-                    <ol style="margin: 0; padding-left: 20px; color: #1976d2;">
-                        <li>确保在打开的洛谷窗口中已登录</li>
-                        <li>在洛谷窗口中按F12打开开发者工具</li>
-                        <li>切换到 Application 或 Storage 标签</li>
-                        <li>点击 Cookies → www.luogu.com.cn</li>
-                        <li>复制所有Cookie内容到上方文本框</li>
-                        <li>格式应类似：_uid=1234567; __client_id=abc123...</li>
-                    </ol>
-                    <button onclick="this.parentElement.remove()" class="btn btn-sm btn-secondary" style="margin-top: 10px;">
-                        <i class="fas fa-times"></i> 关闭指导
-                    </button>
-                </div>
-            `;
-        document.getElementById("emergencyLogin").appendChild(instructions);
-      }
-
-      // 🚀 强硬措施：直接提交（绕过所有检查）
-      async function directSubmit() {
-        const pid = getProblemIdFromUrl();
-        const language = parseInt(
-          document.getElementById("languageSelect").value,
-        );
-        const code = document.getElementById("codeEditor").value.trim();
-        const manualCookie = document
-          .getElementById("manualCookie")
-          .value.trim();
-
-        if (!code) {
-          alert("请输入代码！");
-          return;
-        }
-
-        if (!manualCookie) {
-          alert("请先输入Cookie！");
-          return;
-        }
-
-        try {
-          showSubmitStatus("🚀 强硬提交中...", "loading");
-
-          // 获取CSRF令牌
-          const csrfToken = await getCSRFToken(pid);
-          console.log("🔧 强硬模式 - CSRF令牌:", csrfToken);
-
-          // 直接调用Netlify函数，使用手动Cookie
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              path: `/fe/api/problem/submit/${pid}`,
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-                "x-csrf-token": csrfToken,
-                referer: `https://www.luogu.com.cn/problem/${pid}`,
-                origin: "https://www.luogu.com.cn",
-              },
-              body: {
-                lang: language,
-                code: code,
-                enableO2: 0,
-              },
-              backupCookies: btoa(manualCookie), // 使用手动输入的Cookie
-              sessionId: "manual_emergency_session",
-            }),
-          });
-
-          const result = await response.json();
-          console.log("🚀 强硬提交结果:", result);
-
-          if (result.rid) {
-            showSubmitStatus(`🎉 提交成功！记录ID: ${result.rid}`, "success");
-            setTimeout(() => {
-              if (confirm("提交成功！是否查看提交记录？")) {
-                window.open(
-                  `https://www.luogu.com.cn/record/${result.rid}`,
-                  "_blank",
-                );
-              }
-            }, 1000);
-          } else {
-            showSubmitStatus(
-              `❌提交失败: ${result.errorMessage || result.data || "未知错误"}`,
-              "error",
-            );
-          }
-        } catch (error) {
-          console.error("🚀 强硬提交错误:", error);
-          showSubmitStatus("❌ 强硬提交失败: " + error.message, "error");
-        }
-      }
-
-      // 显示/隐藏提交区域
-      function toggleSubmitSection(show) {
-        const submitSection = document.getElementById("submitSection");
-        const userInfoStr = localStorage.getItem("luogu_user_info");
-
-        // 只有登录用户才显示提交区域
-        if (show && userInfoStr) {
-          submitSection.style.display = "block";
-        } else {
-          submitSection.style.display = "none";
-        }
-      }
-
-      // 页面加载时获取题目ID并加载详情
-      document.addEventListener("DOMContentLoaded", function () {
-        // 检查登录状态
-        const isLoggedIn = checkLoginStatus();
-
-        const urlParams = new URLSearchParams(window.location.search);
-        const pid = urlParams.get("pid");
-
-        if (pid) {
-          loadProblemDetail(pid);
-
-          // 根据登录状态显示提交区域
-          toggleSubmitSection(isLoggedIn);
-        } else {
-          showStatus("未指定题目ID", "error");
-        }
-
-        // 绑定提交按钮事件
-        const submitBtn = document.getElementById("submitBtn");
-        if (submitBtn) {
-          submitBtn.addEventListener("click", submitCode);
-        }
       });
     </script>
   </body>
