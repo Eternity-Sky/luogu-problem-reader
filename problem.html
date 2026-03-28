@@ -678,29 +678,67 @@
 
       function renderSection(title, content) {
         if (!content) return "";
-        // 洛谷的 content 可能是字符串也可能是对象。如果为对象，尝试取其 description
-        let safeContent = "";
-        if (typeof content === "string") {
-          safeContent = content;
-        } else if (typeof content === "object") {
-          // 有些情况下可能嵌套在特定的 key 下，根据反馈，如果直接 stringify 就会显示为 JSON
-          // 优先取常用的内容字段，如果没有则回退到 stringify
-          safeContent =
-            content.description ||
-            content.content ||
-            content.background ||
-            content.formatI ||
-            content.formatO ||
-            content.hint ||
-            JSON.stringify(content, null, 2);
+
+        let markdown = "";
+
+        // 处理洛谷可能的多种数据格式
+        function processItem(item) {
+          if (typeof item === "string") {
+            return item;
+          } else if (typeof item === "object" && item !== null) {
+            // 处理数组项或单对象格式 {"type": "...", "raw": "..."}
+            if (item.type === "code") {
+              return (
+                item.raw ||
+                `\`\`\`${item.lang || ""}\n${item.text || ""}\n\`\`\``
+              );
+            } else if (item.type === "text") {
+              return item.raw || item.text || "";
+            } else if (item.type === "image") {
+              return `![image](${item.url || ""})`;
+            } else if (item.description || item.content) {
+              // 兼容旧格式
+              return item.description || item.content;
+            } else {
+              // 回退方案
+              return JSON.stringify(item, null, 2);
+            }
+          }
+          return String(item);
+        }
+
+        if (Array.isArray(content)) {
+          markdown = content.map(processItem).join("\n\n");
         } else {
-          safeContent = String(content);
+          // 如果是单对象，且包含特定的顶级 key (如 background, description 等)
+          // 这种情况通常是 apiResult.data.problem.content 传入的单项
+          if (typeof content === "object" && !content.type) {
+            // 尝试提取常见的嵌套 key
+            const possibleContent =
+              content.description ||
+              content.content ||
+              content.background ||
+              content.formatI ||
+              content.formatO ||
+              content.hint;
+            if (possibleContent) {
+              if (Array.isArray(possibleContent)) {
+                markdown = possibleContent.map(processItem).join("\n\n");
+              } else {
+                markdown = processItem(possibleContent);
+              }
+            } else {
+              markdown = processItem(content);
+            }
+          } else {
+            markdown = processItem(content);
+          }
         }
 
         return `
           <div class="section">
             <div class="section-title">${title}</div>
-            <div class="problem-description">${marked.parse(safeContent)}</div>
+            <div class="problem-description">${marked.parse(markdown)}</div>
           </div>
         `;
       }
