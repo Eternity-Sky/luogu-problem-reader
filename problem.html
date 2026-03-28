@@ -1042,10 +1042,11 @@
       async function verifyLogin() {
         console.log("正在验证洛谷登录状态...");
         try {
-          const result = await proxyLuoguAPI("/fe/api/user/current");
+          // 使用更稳定的路径检查登录状态
+          const result = await proxyLuoguAPI("/_lfe/config");
 
           if (result && result.error) {
-            console.error("代理请求返回错误:", result.error);
+            console.warn("⚠️ 登录预检请求失败:", result.error);
             return { success: false, error: result.error };
           }
 
@@ -1080,24 +1081,15 @@
 
         btn.disabled = true;
 
-        // 第一步：验证洛谷登录状态
+        // 第一步：尝试验证登录状态（非强制性阻塞）
         status.innerHTML =
-          '<i class="fas fa-spinner fa-spin"></i> 正在验证洛谷登录状态...';
+          '<i class="fas fa-spinner fa-spin"></i> 正在准备提交环境...';
         const loginCheck = await verifyLogin();
-        if (!loginCheck.success) {
-          status.innerHTML = `<span style="color: #ef4444">洛谷登录失效: ${loginCheck.error}。请重新登录洛谷。</span>`;
-          // 如果是因为没 Cookie，可以尝试提醒
-          if (!localStorage.getItem("luogu_backup_cookies")) {
-            status.innerHTML +=
-              '<br><small style="color: var(--text-secondary)">原因: 本地无 Cookie 备份</small>';
-          }
 
-          // 3秒后跳转到登录页
-          setTimeout(() => {
-            window.location.href = `/login.html?return=${encodeURIComponent(window.location.href)}`;
-          }, 3000);
-          btn.disabled = false;
-          return;
+        if (!loginCheck.success) {
+          console.warn(
+            "⚠️ 登录状态验证未通过，但将尝试继续提交以利用现有 Cookie...",
+          );
         }
 
         status.innerHTML =
@@ -1107,7 +1099,14 @@
         const csrfToken = await getCSRFToken();
         if (!csrfToken) {
           status.innerHTML =
-            '<span style="color: #ef4444">无法获取 CSRF Token，请检查登录状态或刷新页面</span>';
+            '<span style="color: #ef4444">无法获取 CSRF Token。请尝试重新登录 LGOJ。</span>';
+
+          // 如果确实没登录，才跳转
+          if (!loginCheck.success) {
+            setTimeout(() => {
+              window.location.href = `/login.html?return=${encodeURIComponent(window.location.href)}`;
+            }, 3000);
+          }
           btn.disabled = false;
           return;
         }
@@ -1136,7 +1135,17 @@
           });
 
           if (result.error || result.errorMessage) {
-            status.innerHTML = `<span style="color: #ef4444">提交失败: ${result.errorMessage || result.error}</span>`;
+            const errorMsg = result.errorMessage || result.error;
+            status.innerHTML = `<span style="color: #ef4444">提交失败: ${errorMsg}</span>`;
+
+            // 如果明确提示未登录
+            if (errorMsg.includes("登录") || errorMsg.includes("Login")) {
+              status.innerHTML +=
+                "<br><small>洛谷会话已过期，请重新登录</small>";
+              setTimeout(() => {
+                window.location.href = `/login.html?return=${encodeURIComponent(window.location.href)}`;
+              }, 3000);
+            }
           } else if (result.rid) {
             status.innerHTML =
               '<span style="color: #10b981">提交成功！正在跳转到评测记录...</span>';

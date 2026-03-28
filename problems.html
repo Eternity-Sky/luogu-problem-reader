@@ -517,6 +517,12 @@
           ...options,
         };
 
+        // 🎯 核心：注入备份 Cookie 确保登录态持久化
+        const backupCookies = localStorage.getItem("luogu_backup_cookies");
+        if (backupCookies) {
+          requestData.backupCookies = backupCookies;
+        }
+
         try {
           const response = await fetch("/.netlify/functions/luogu-proxy", {
             method: "POST",
@@ -531,6 +537,12 @@
           }
 
           const result = await response.json();
+          
+          // 🎯 核心：回传备份 Cookie 供后续使用
+          if (result && result._backupCookies) {
+            localStorage.setItem("luogu_backup_cookies", result._backupCookies);
+          }
+          
           return result;
         } catch (error) {
           console.error("❌ 网络请求失败:", error);

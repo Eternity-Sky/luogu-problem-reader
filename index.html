@@ -491,19 +491,37 @@
         const { method = "GET", body, headers = {} } = options;
 
         try {
+          const requestData = {
+            path: path,
+            method: method,
+            body: body,
+            headers: headers,
+            sessionId: sessionId,
+          };
+
+          // 🎯 注入备份 Cookie
+          const backupCookies = localStorage.getItem("luogu_backup_cookies");
+          if (backupCookies) {
+            requestData.backupCookies = backupCookies;
+          }
+
           const response = await fetch("/.netlify/functions/luogu-proxy", {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
             },
-            body: JSON.stringify({
-              path: path,
-              method: method,
-              body: body,
-              headers: headers,
-              sessionId: sessionId,
-            }),
+            body: JSON.stringify(requestData),
           });
+
+          // 🎯 回传备份 Cookie
+          if (response.ok) {
+            try {
+              const result = await response.clone().json();
+              if (result && result._backupCookies) {
+                localStorage.setItem("luogu_backup_cookies", result._backupCookies);
+              }
+            } catch (e) {}
+          }
 
           // 400状态码可能是正常的业务逻辑响应
           if (!response.ok && response.status !== 400) {
