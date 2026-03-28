@@ -557,16 +557,36 @@
               Accept:
                 "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
             },
+            requestType: "html", // 告诉代理函数这是一个HTML请求
           });
 
           if (response.status === 200) {
-            const html = await response.text();
-            console.log("登录页面HTML获取成功，长度:", html.length);
+            let html = "";
+            const contentType = response.headers.get("content-type") || "";
+
+            if (contentType.includes("application/json")) {
+              const jsonData = await response.json();
+              html = jsonData.data || "";
+              console.log("从 JSON 响应中提取到 HTML，长度:", html.length);
+            } else {
+              html = await response.text();
+              console.log("直接获取到 HTML，长度:", html.length);
+            }
+
+            if (!html) {
+              throw new Error("响应中没有 HTML 内容");
+            }
 
             // 1. 优先尝试从 meta 标签提取 (现代浏览器标准方式)
-            const metaMatch = html.match(
-              /<meta\s+name="csrf-token"\s+content="([^"]+)"/i,
-            );
+            // 使用更健壮的正则表达式，不依赖属性顺序
+            const metaCsrfRegex =
+              /<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i;
+            const metaContentCsrfRegex =
+              /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i;
+
+            const metaMatch =
+              html.match(metaCsrfRegex) || html.match(metaContentCsrfRegex);
+
             if (metaMatch && metaMatch[1]) {
               csrfToken = metaMatch[1];
               console.log(
@@ -576,7 +596,28 @@
               return csrfToken;
             }
 
-            // 2. 尝试从 window._feInjection 提取 (洛谷 React/Lentille 架构方式)
+            // 2. 尝试从 lentille-context 提取 (洛谷新版架构)
+            const lentilleMatch = html.match(
+              /<script id="lentille-context" type="application\/json">(.*?)<\/script>/s,
+            );
+            if (lentilleMatch && lentilleMatch[1]) {
+              try {
+                const context = JSON.parse(lentilleMatch[1]);
+                // 有些版本的 lentille-context 直接包含 csrfToken
+                if (context.csrfToken) {
+                  csrfToken = context.csrfToken;
+                  console.log(
+                    "✅ CSRF Token获取成功 (来自 lentille-context):",
+                    csrfToken.substring(0, 10) + "...",
+                  );
+                  return csrfToken;
+                }
+              } catch (e) {
+                console.warn("解析 lentille-context 失败:", e);
+              }
+            }
+
+            // 3. 尝试从 window._feInjection 提取 (洛谷 React/Lentille 架构方式)
             const feMatch = html.match(
               /window\._feInjection\s*=\s*JSON\.parse\("([^"]+)"\)/,
             );
@@ -600,7 +641,7 @@
               }
             }
 
-            // 3. 备用方案：查找表单 input
+            // 4. 备用方案：查找表单 input
             const inputMatch =
               html.match(/name="csrf-token"\s+value="([^"]+)"/i) ||
               html.match(/value="([^"]+)"\s+name="csrf-token"/i);
