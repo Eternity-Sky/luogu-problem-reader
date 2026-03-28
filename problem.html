@@ -896,16 +896,21 @@
       }
 
       async function proxyLuoguAPI(path, options = {}) {
-        const userInfoStr = localStorage.getItem("luogu_user_info");
-        let sessionId = "session_luogu_global_fixed_2025";
+        // 🎯 核心改进：统一使用 localStorage 中的 sessionId
+        let sessionId = localStorage.getItem("luogu_session_id");
 
-        if (userInfoStr) {
-          try {
-            const user = JSON.parse(userInfoStr);
-            if (user && user.uid) {
-              sessionId = `session_uid_${user.uid}`;
-            }
-          } catch (e) {}
+        if (!sessionId) {
+          const userInfoStr = localStorage.getItem("luogu_user_info");
+          sessionId = "session_luogu_global_fixed_2025";
+          if (userInfoStr) {
+            try {
+              const user = JSON.parse(userInfoStr);
+              if (user && user.uid) {
+                sessionId = `session_uid_${user.uid}`;
+                localStorage.setItem("luogu_session_id", sessionId);
+              }
+            } catch (e) {}
+          }
         }
 
         const requestData = {
@@ -1038,15 +1043,22 @@
         console.log("正在验证洛谷登录状态...");
         try {
           const result = await proxyLuoguAPI("/fe/api/user/current");
+
+          if (result && result.error) {
+            console.error("代理请求返回错误:", result.error);
+            return { success: false, error: result.error };
+          }
+
           if (result && result.currentUser && result.currentUser.uid !== 0) {
             console.log("✅ 洛谷登录验证成功:", result.currentUser.name);
-            return true;
+            return { success: true, user: result.currentUser };
           }
-          console.warn("❌ 洛谷登录验证失败: 未登录或 Uid 为 0");
-          return false;
+
+          console.warn("❌ 洛谷登录验证失败: 未登录或 Uid 为 0", result);
+          return { success: false, error: "未检测到洛谷登录状态" };
         } catch (e) {
-          console.error("验证登录状态出错:", e);
-          return false;
+          console.error("验证登录状态过程抛出异常:", e);
+          return { success: false, error: e.message };
         }
       }
 
@@ -1071,10 +1083,15 @@
         // 第一步：验证洛谷登录状态
         status.innerHTML =
           '<i class="fas fa-spinner fa-spin"></i> 正在验证洛谷登录状态...';
-        const isLoggedIn = await verifyLogin();
-        if (!isLoggedIn) {
-          status.innerHTML =
-            '<span style="color: #ef4444">洛谷登录已过期或未登录，请重新登录</span>';
+        const loginCheck = await verifyLogin();
+        if (!loginCheck.success) {
+          status.innerHTML = `<span style="color: #ef4444">洛谷登录失效: ${loginCheck.error}。请重新登录洛谷。</span>`;
+          // 如果是因为没 Cookie，可以尝试提醒
+          if (!localStorage.getItem("luogu_backup_cookies")) {
+            status.innerHTML +=
+              '<br><small style="color: var(--text-secondary)">原因: 本地无 Cookie 备份</small>';
+          }
+
           // 3秒后跳转到登录页
           setTimeout(() => {
             window.location.href = `/login.html?return=${encodeURIComponent(window.location.href)}`;

@@ -198,22 +198,33 @@ exports.handler = async (event, context) => {
 
     // 3. 使用找到的Cookie
     if (cookieToUse) {
-      requestHeaders["Cookie"] = cookieToUse;
+      // 🎯 规范化 Cookie：去重并确保格式正确
+      const cookieMap = cookieToUse.split("; ").reduce((acc, c) => {
+        const parts = c.split("=");
+        if (parts.length >= 2) {
+          const key = parts[0].trim();
+          const value = parts.slice(1).join("=").trim();
+          if (key) acc[key] = value;
+        }
+        return acc;
+      }, {});
+
+      const sanitizedCookie = Object.entries(cookieMap)
+        .map(([k, v]) => `${k}=${v}`)
+        .join("; ");
+
+      requestHeaders["Cookie"] = sanitizedCookie;
       console.log(
-        `🍪 [${clientSessionId}] 使用${cookieSource}Cookie:`,
-        cookieToUse,
+        `🍪 [${clientSessionId}] 使用${cookieSource}Cookie (已规范化):`,
+        sanitizedCookie,
       );
 
       // 特别针对代码提交请求，添加详细的Cookie调试信息
       if (path.includes("/fe/api/problem/submit/")) {
         console.log(`🔍 [${clientSessionId}] 代码提交请求Cookie详情:`);
         console.log(`  - Cookie来源: ${cookieSource}`);
-        console.log(`  - Cookie长度: ${cookieToUse.length}`);
-        console.log(`  - Cookie内容: ${cookieToUse}`);
-        console.log(`  - 包含_uid: ${cookieToUse.includes("_uid")}`);
-        console.log(
-          `  - 包含__client_id: ${cookieToUse.includes("__client_id")}`,
-        );
+        console.log(`  - 包含_uid: ${!!cookieMap["_uid"]}`);
+        console.log(`  - 包含__client_id: ${!!cookieMap["__client_id"]}`);
         console.log(
           `  - CSRF Token: ${csrfToken ? csrfToken.substring(0, 10) + "..." : "null"}`,
         );
