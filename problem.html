@@ -580,6 +580,36 @@
     </main>
 
     <script>
+      // 全局配置 marked
+      const renderer = new marked.Renderer();
+      renderer.code = function (code, language) {
+        const lang = language || "text";
+        const id = "code-" + Math.random().toString(36).substr(2, 9);
+        const safeCode =
+          typeof code === "string"
+            ? code
+            : typeof code === "object"
+              ? JSON.stringify(code, null, 2)
+              : String(code);
+        return `
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-language">${lang}</span>
+              <button class="copy-btn" onclick="copyToClipboard(event, '${id}')">
+                <i class="far fa-copy"></i> 复制
+              </button>
+            </div>
+            <div class="code-content"><pre id="${id}"><code>${escapeHtml(safeCode)}</code></pre></div>
+          </div>
+        `;
+      };
+
+      marked.setOptions({
+        renderer: renderer,
+        gfm: true,
+        breaks: true,
+      });
+
       // 核心渲染逻辑
       function displayProblemDetail(apiResult) {
         const container = document.getElementById("problemContainer");
@@ -599,37 +629,6 @@
         const content = problem.content || {};
         const difficultyText = getDifficultyText(problem.difficulty);
         const difficultyColor = `var(--diff-${problem.difficulty || 0})`;
-
-        // 配置 marked
-        const renderer = new marked.Renderer();
-        renderer.code = function (code, language) {
-          const lang = language || "text";
-          const id = "code-" + Math.random().toString(36).substr(2, 9);
-          // 确保 code 是字符串
-          const safeCode =
-            typeof code === "string"
-              ? code
-              : typeof code === "object"
-                ? JSON.stringify(code, null, 2)
-                : String(code);
-          return `
-            <div class="code-block">
-              <div class="code-header">
-                <span class="code-language">${lang}</span>
-                <button class="copy-btn" onclick="copyToClipboard(event, '${id}')">
-                  <i class="far fa-copy"></i> 复制
-                </button>
-              </div>
-              <div class="code-content"><pre id="${id}"><code>${escapeHtml(safeCode)}</code></pre></div>
-            </div>
-          `;
-        };
-
-        marked.setOptions({
-          renderer: renderer,
-          gfm: true,
-          breaks: true,
-        });
 
         container.innerHTML = `
           <div class="problem-header">
@@ -666,13 +665,8 @@
           </div>
         `;
 
-        // 渲染数学公式
         renderMath(container);
-
-        // 加载评论区
         loadGiscus(problem.pid);
-
-        // 更新页面标题
         document.title = `${problem.pid} - ${problem.title} - LGOJ`;
       }
 
@@ -680,59 +674,36 @@
         if (!content) return "";
 
         let markdown = "";
-
-        // 处理洛谷可能的多种数据格式
-        function processItem(item) {
-          if (typeof item === "string") {
-            return item;
-          } else if (typeof item === "object" && item !== null) {
-            // 处理数组项或单对象格式 {"type": "...", "raw": "..."}
-            if (item.type === "code") {
+        const processItem = (item) => {
+          if (typeof item === "string") return item;
+          if (item && typeof item === "object") {
+            if (item.type === "code")
               return (
                 item.raw ||
                 `\`\`\`${item.lang || ""}\n${item.text || ""}\n\`\`\``
               );
-            } else if (item.type === "text") {
-              return item.raw || item.text || "";
-            } else if (item.type === "image") {
-              return `![image](${item.url || ""})`;
-            } else if (item.description || item.content) {
-              // 兼容旧格式
-              return item.description || item.content;
-            } else {
-              // 回退方案
-              return JSON.stringify(item, null, 2);
-            }
+            if (item.type === "text") return item.raw || item.text || "";
+            if (item.type === "image") return `![image](${item.url || ""})`;
+            return item.description || item.content || "";
           }
           return String(item);
-        }
+        };
 
         if (Array.isArray(content)) {
           markdown = content.map(processItem).join("\n\n");
+        } else if (typeof content === "object") {
+          const inner =
+            content.description ||
+            content.content ||
+            content.background ||
+            content.formatI ||
+            content.formatO ||
+            content.hint;
+          markdown = Array.isArray(inner)
+            ? inner.map(processItem).join("\n\n")
+            : processItem(inner || content);
         } else {
-          // 如果是单对象，且包含特定的顶级 key (如 background, description 等)
-          // 这种情况通常是 apiResult.data.problem.content 传入的单项
-          if (typeof content === "object" && !content.type) {
-            // 尝试提取常见的嵌套 key
-            const possibleContent =
-              content.description ||
-              content.content ||
-              content.background ||
-              content.formatI ||
-              content.formatO ||
-              content.hint;
-            if (possibleContent) {
-              if (Array.isArray(possibleContent)) {
-                markdown = possibleContent.map(processItem).join("\n\n");
-              } else {
-                markdown = processItem(possibleContent);
-              }
-            } else {
-              markdown = processItem(content);
-            }
-          } else {
-            markdown = processItem(content);
-          }
+          markdown = String(content);
         }
 
         return `

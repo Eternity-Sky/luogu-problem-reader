@@ -1717,72 +1717,8 @@
         }
       }
 
-      // 测试代理函数是否工作
-      async function testProxyFunction() {
-        console.log("🧪 测试代理函数是否工作...");
-        try {
-          // 先测试一个简单的请求
-          const testData = {
-            path: "/api/verify/captcha",
-            method: "GET",
-          };
-
-          console.log("🧪 发送测试请求:", testData);
-
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify(testData),
-          });
-
-          console.log(
-            "🧪 代理函数测试响应:",
-            response.status,
-            response.statusText,
-          );
-          console.log(
-            "🧪 响应头:",
-            Object.fromEntries(response.headers.entries()),
-          );
-
-          const text = await response.text();
-          console.log("🧪 代理函数响应内容长度:", text.length);
-          console.log("🧪 代理函数响应内容:", text.substring(0, 500));
-
-          if (response.status === 404) {
-            console.error("❌ 代理函数返回404，可能未正确部署或路径错误");
-
-            // 尝试测试根路径
-            console.log("🧪 尝试测试根路径...");
-            const rootResponse = await fetch(
-              "/.netlify/functions/luogu-proxy",
-              {
-                method: "GET",
-              },
-            );
-            console.log(
-              "🧪 根路径响应:",
-              rootResponse.status,
-              rootResponse.statusText,
-            );
-          } else if (response.status >= 200 && response.status < 300) {
-            console.log("✅ 代理函数工作正常");
-          } else {
-            console.log("⚠️ 代理函数返回非200状态:", response.status);
-          }
-        } catch (error) {
-          console.error("❌ 代理函数测试失败:", error);
-          alert("代理函数测试失败，网络连接可能有问题。");
-        }
-      }
-
       // 页面加载时初始化
       document.addEventListener("DOMContentLoaded", function () {
-        // 先测试代理函数
-        testProxyFunction();
-        // 然后加载用户资料
         loadUserProfile();
       });
     </script>
