@@ -11,7 +11,8 @@ exports.handler = async (event, context) => {
       statusCode: 200,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type, x-luogu-type, x-csrf-token, x-lentille-request",
+        "Access-Control-Allow-Headers":
+          "Content-Type, x-luogu-type, x-csrf-token, x-lentille-request",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
       },
       body: "",
@@ -24,7 +25,8 @@ exports.handler = async (event, context) => {
       statusCode: 405,
       headers: {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Content-Type, x-luogu-type, x-csrf-token, x-lentille-request",
+        "Access-Control-Allow-Headers":
+          "Content-Type, x-luogu-type, x-csrf-token, x-lentille-request",
         "Access-Control-Allow-Methods": "POST, OPTIONS",
       },
       body: JSON.stringify({ error: "Method not allowed" }),
@@ -230,7 +232,20 @@ exports.handler = async (event, context) => {
     // 如果是POST请求，添加必要的头部
     if (method === "POST") {
       requestHeaders["Content-Type"] = "application/json";
-      requestHeaders["Referer"] = "https://www.luogu.com.cn/auth/login";
+
+      // 智能设置 Referer：如果是代码提交，使用题目详情页作为 Referer
+      if (path.includes("/fe/api/problem/submit/")) {
+        const pidMatch = path.match(/\/submit\/([A-Za-z0-9_]+)/);
+        if (pidMatch) {
+          requestHeaders["Referer"] =
+            `https://www.luogu.com.cn/problem/${pidMatch[1]}`;
+          console.log(
+            `🎯 [${clientSessionId}] 代码提交请求，设置 Referer 为题目页`,
+          );
+        }
+      } else {
+        requestHeaders["Referer"] = "https://www.luogu.com.cn/auth/login";
+      }
 
       if (csrfToken) {
         requestHeaders["x-csrf-token"] = csrfToken;

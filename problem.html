@@ -814,17 +814,25 @@
         try {
           const urlParams = new URLSearchParams(window.location.search);
           const pid = urlParams.get("pid");
-          const response = await fetch("/.netlify/functions/luogu-proxy", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              path: `/problem/${pid}`,
-              method: "GET",
-              requestType: "html",
-            }),
+
+          console.log(`正在获取题目 ${pid} 的独立 CSRF Token...`);
+
+          // 使用通用的代理函数获取页面 HTML
+          const result = await proxyLuoguAPI(`/problem/${pid}`, {
+            method: "GET",
+            requestType: "html",
+            headers: {
+              Accept:
+                "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+            },
           });
-          const result = await response.json();
+
           const html = result.data || "";
+          if (!html) {
+            console.warn("未能获取到页面 HTML 内容");
+            return null;
+          }
+
           const metaMatch =
             html.match(
               /<meta[^>]*name=["']csrf-token["'][^>]*content=["']([^"']+)["'][^>]*>/i,
@@ -832,7 +840,28 @@
             html.match(
               /<meta[^>]*content=["']([^"']+)["'][^>]*name=["']csrf-token["'][^>]*>/i,
             );
-          return metaMatch ? metaMatch[1] : null;
+
+          if (metaMatch && metaMatch[1]) {
+            console.log("✅ 成功提取 CSRF Token");
+            return metaMatch[1];
+          }
+
+          // 备选方案：从 lentille-context 提取
+          const scriptMatch = html.match(
+            /<script id="lentille-context" type="application\/json">(.*?)<\/script>/s,
+          );
+          if (scriptMatch) {
+            try {
+              const context = JSON.parse(scriptMatch[1]);
+              if (context.csrfToken) {
+                console.log("✅ 从 lentille-context 提取成功");
+                return context.csrfToken;
+              }
+            } catch (e) {}
+          }
+
+          console.error("❌ 页面中未找到 CSRF Token");
+          return null;
         } catch (error) {
           console.error("获取 CSRF Token 失败:", error);
           return null;
@@ -850,16 +879,47 @@
           sessionId:
             localStorage.getItem("luogu_session_id") ||
             "session_luogu_global_fixed_2025",
+          requestType: options.requestType || "api",
         };
-        if (options.body) requestData.body = options.body;
+
+        // 显式提取 CSRF Token 到顶级，方便代理函数处理
+        if (options.headers && options.headers["x-csrf-token"]) {
+          requestData.csrfToken = options.headers["x-csrf-token"];
+        }
+
+        // 自动注入备份 Cookie
+        const backupCookies = localStorage.getItem("luogu_backup_cookies");
+        if (backupCookies) {
+          requestData.backupCookies = backupCookies;
+        }
+
+        if (options.body) {
+          requestData.body =
+            typeof options.body === "string"
+              ? JSON.parse(options.body)
+              : options.body;
+        }
+
         try {
           const response = await fetch("/.netlify/functions/luogu-proxy", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(requestData),
           });
-          return await response.json();
+
+          if (!response.ok) {
+            throw new Error(`HTTP 错误! 状态码: ${response.status}`);
+          }
+
+          const result = await response.json();
+
+          if (result && result._backupCookies) {
+            localStorage.setItem("luogu_backup_cookies", result._backupCookies);
+          }
+
+          return result;
         } catch (error) {
+          console.error("代理请求异常:", error);
           return { error: error.message };
         }
       }
