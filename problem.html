@@ -908,6 +908,10 @@
               if (user && user.uid) {
                 sessionId = `session_uid_${user.uid}`;
                 localStorage.setItem("luogu_session_id", sessionId);
+              } else if (user && user.authType === "oauth") {
+                // 如果是 OAuth 登录，生成一个基于用户名的唯一 session
+                sessionId = `session_oauth_${user.username}`;
+                localStorage.setItem("luogu_session_id", sessionId);
               }
             } catch (e) {}
           }

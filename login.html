@@ -150,6 +150,41 @@
         background: var(--accent-hover);
       }
 
+      .btn-oauth {
+        background: #6366f1;
+        color: white;
+        margin-top: 1rem;
+        border: none;
+      }
+
+      .btn-oauth:hover:not(:disabled) {
+        background: #4f46e5;
+      }
+
+      .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        margin: 1.5rem 0;
+        color: var(--text-secondary);
+        font-size: 0.75rem;
+      }
+
+      .divider::before,
+      .divider::after {
+        content: "";
+        flex: 1;
+        border-bottom: 1px solid var(--border-color);
+      }
+
+      .divider:not(:empty)::before {
+        margin-right: 0.75rem;
+      }
+
+      .divider:not(:empty)::after {
+        margin-left: 0.75rem;
+      }
+
       .btn-secondary {
         background: transparent;
         border-color: var(--border-color);
@@ -322,6 +357,17 @@
         >
           登录
         </button>
+
+        <div class="divider">或者使用第三方登录</div>
+
+        <button
+          type="button"
+          class="btn btn-oauth"
+          id="oauthBtn"
+          onclick="loginWithOAuth()"
+        >
+          <i class="fas fa-id-card"></i> 使用 CP OAuth 登录
+        </button>
       </div>
 
       <!-- 双重验证表单 -->
@@ -411,6 +457,16 @@
       // 页面加载完成后初始化
       document.addEventListener("DOMContentLoaded", async () => {
         console.log("🚀 页面加载完成，初始化...");
+
+        // 检查是否有 OAuth 错误
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has("error")) {
+          showStatus(
+            "OAuth 登录失败: " + urlParams.get("error_description") ||
+              urlParams.get("error"),
+            "error",
+          );
+        }
 
         // 1. 尝试从 localStorage 加载已保存的用户信息
         const savedUser = localStorage.getItem("luogu_user_info");
@@ -779,11 +835,21 @@
               if (initialUid) {
                 sessionId = `session_uid_${initialUid}`;
                 localStorage.setItem("luogu_session_id", sessionId);
-                console.log("🔒 登录成功，切换到 UID 绑定的 sessionId:", sessionId);
+                console.log(
+                  "🔒 登录成功，切换到 UID 绑定的 sessionId:",
+                  sessionId,
+                );
               } else {
-                const FIXED_GLOBAL_SESSION_ID = "session_luogu_global_fixed_2025";
-                localStorage.setItem("luogu_session_id", FIXED_GLOBAL_SESSION_ID);
-                console.log("🔒 无法提取 UID，使用固定全局 sessionId:", FIXED_GLOBAL_SESSION_ID);
+                const FIXED_GLOBAL_SESSION_ID =
+                  "session_luogu_global_fixed_2025";
+                localStorage.setItem(
+                  "luogu_session_id",
+                  FIXED_GLOBAL_SESSION_ID,
+                );
+                console.log(
+                  "🔒 无法提取 UID，使用固定全局 sessionId:",
+                  FIXED_GLOBAL_SESSION_ID,
+                );
               }
 
               // 登录成功后，尝试获取完整的用户信息（包括UID）
@@ -1024,6 +1090,64 @@
           loginBtn.disabled = false;
           loginBtn.innerHTML = originalText;
         }
+      }
+
+      // OAuth 登录流程
+      async function loginWithOAuth() {
+        const oauthBtn = document.getElementById("oauthBtn");
+        const originalText = oauthBtn.innerHTML;
+        oauthBtn.disabled = true;
+        oauthBtn.innerHTML =
+          '<i class="fas fa-spinner fa-spin"></i> 正在跳转...';
+
+        try {
+          // 1. 生成 PKCE 相关的 Code Verifier 和 Code Challenge
+          const codeVerifier = generateRandomString(128);
+          localStorage.setItem("oauth_code_verifier", codeVerifier);
+
+          const codeChallenge = await generateCodeChallenge(codeVerifier);
+
+          // 2. 构造授权请求 URL
+          const clientId = "f6f6fc17-ff19-45c2-a662-b4096d9085b4";
+          const redirectUri = window.location.origin + "/oauth-callback.html";
+          const scope = "openid profile link:luogu";
+          const state = generateRandomString(16);
+          localStorage.setItem("oauth_state", state);
+
+          const authorizeUrl = `https://auth.luogu.me/oauth/authorize?response_type=code&client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri)}&scope=${encodeURIComponent(scope)}&state=${state}&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+
+          // 3. 跳转到授权页面
+          window.location.href = authorizeUrl;
+        } catch (error) {
+          console.error("OAuth 初始化失败:", error);
+          showStatus("OAuth 初始化失败: " + error.message, "error");
+          oauthBtn.disabled = false;
+          oauthBtn.innerHTML = originalText;
+        }
+      }
+
+      // 辅助函数：生成随机字符串
+      function generateRandomString(length) {
+        const charset =
+          "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~";
+        let result = "";
+        const values = new Uint8Array(length);
+        window.crypto.getRandomValues(values);
+        for (let i = 0; i < length; i++) {
+          result += charset[values[i] % charset.length];
+        }
+        return result;
+      }
+
+      // 辅助函数：生成 PKCE Code Challenge
+      async function generateCodeChallenge(codeVerifier) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(codeVerifier);
+        const digest = await window.crypto.subtle.digest("SHA-256", data);
+        return btoa(String.fromCharCode(...new Uint8Array(digest)))
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
       }
 
       // 检查登录状态
